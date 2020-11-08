@@ -2,8 +2,6 @@
 import { Dimensions } from "react-native";
 import FlappyBallGame from "../../..";
 import { NAVBAR_HEIGHT } from "../../world/constants";
-
-// import { PhysicalEntity, swapEntities } from "../../world/Entities";
 import { Entities } from "../../world/Entities";
 
 import window from "../dimensions";
@@ -58,7 +56,6 @@ export namespace Orientation {
       console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
       console.log("````````````````````````````````````````````````````````````");
       ////////////////////////////////////////////////////////////
-    // return { x: updatedX, y: updatedY };
     return [ updatedX, updatedY ];
   }
   

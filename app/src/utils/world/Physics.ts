@@ -2,8 +2,6 @@ import { Bodies } from "matter-js";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
 import { BODY, engine, world, ENGINE, EVENTS, COMPOSITE } from "./constants";
-
-// import { GameEntities, PhysicalEntity } from "./Entities";
 import { Entities } from './Entities';
 
 export namespace Physics {

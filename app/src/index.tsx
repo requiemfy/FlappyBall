@@ -1,23 +1,12 @@
-
 import * as React from 'react'
 import { AppState, Dimensions } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
-
-// import { addStateChangeListener, removeStateChangeListener } from './utils/helpers/events/gameState';
 import { GameAppState } from './utils/helpers/events/GameState';
-
 import { Orientation } from './utils/helpers/events/Orientation';
 import { COMPOSITE, NAVBAR_HEIGHT, world } from './utils/world/constants';
-
-// import { GameEntities, getEntities } from './utils/world/Entities';
 import { Entities } from './utils/world/Entities';
-
-// import { getBodies, getWall } from './utils/world/Matter';
 import { Matter } from './utils/world/Matter';
-
-
-// import { hasCollision, physics } from './utils/world/Physics';
 import { Physics } from './utils/world/Physics';
 
 interface EventType { type: string; }
@@ -56,10 +45,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
     Physics.collision(this); // game over
-
-    // Orientation.addChangeListener<FlappyBallGame>(this); // refactor
-    Orientation.addChangeListener(this); // refactor
-
+    Orientation.addChangeListener(this); 
     GameAppState.addChangeListener(this); // run|stop game engine
     console.log("--------------------------\n")
     ////////////////////////////////////////////////////////////
@@ -68,8 +54,6 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   componentWillUnmount() {
     console.log("componentWillUnmount!!")
     GameAppState.removeChangeListener();
-
-    // removeOrientationChangeListener();
     Orientation.removeChangeListener();
   }
 
@@ -80,12 +64,9 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     if (!this.over) {
       if (!this.paused) {
         console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======")
-        // this.paused = true;
         this.engine.stop();
-        // console.log();
       } else {
         console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
-        // this.paused = false;
         this.engine.start();
       }
     } else {
@@ -124,13 +105,9 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
     return (
-      <View style={{ 
-        flex: 1,
-      }}>
+      <View style={{ flex: 1, }}>
         
-        <TouchableWithoutFeedback
-          onPress={this.pauseOrResume}
-          >
+        <TouchableWithoutFeedback onPress={this.pauseOrResume}>
           <View style={{ 
             backgroundColor:"yellow",
             width: "100%",
@@ -141,15 +118,11 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
-          onPressIn={() => {
-            this.entities.gravity = -0.5;
-            }}
-          onPressOut={() => {
-            this.entities.gravity = 0.5;
-            }}>
-          <View style={{ flex: 1 }}> 
-          {/* this view is necessary, because GameEngine return many components
+          onPressIn={() => {this.entities.gravity = -0.5;}}
+          onPressOut={() => {this.entities.gravity = 0.5;}}>
+           {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
+          <View style={{ flex: 1 }}> 
             <GameEngine
               ref={ (ref) => { this.engine = ref; } }
               onEvent={ this.onEvent }
