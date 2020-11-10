@@ -7,16 +7,28 @@ import {
   WORLD 
 } from "./constants";
 import window from "../helpers/dimensions";
+import FlappyBallGame from "../..";
+import Box from "../../components/Box";
 
 export namespace Matter {
 
   type MatterProps = { [key: string]: any };
-  type DynamicBody = (x: number, y: number) => MatterProps;
-  type StaticBody = () => MatterProps;
-  type Bodies = (...args: number[][]) => MatterProps;
+  type DynamicBody = (x: number | null, y: number | null) => MatterProps;
+  type StaticBody = (x?: number | null, y?: number | null) => MatterProps;
+  type Bodies = (
+    // game: FlappyBallGame | null, 
+    bodies?: { 
+      player: number[] | null[],
+      walls: number[][] | null[],
+    }
+  ) => MatterProps;
   type Body = (matter: MatterProps) => MatterProps
   
   const createPlayer: DynamicBody = (x, y) => {
+    if (x === null) {
+      x = 20;
+      y = 100;
+    }
     const 
       { width, height, gameHeight } = window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -75,13 +87,15 @@ export namespace Matter {
     });
   }
   
-  const createWall: StaticBody = () => {
+  const createWall: StaticBody = (centerX, centerY) => {
     const 
       { width, height, gameHeight } = window(),
       wallWidth = width * 0.07, 
-      wallHeight = gameHeight * 0.4,
-      centerX = width / 2, 
-      centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+      wallHeight = gameHeight * 0.4;
+      if (centerX === null) {
+        centerX = width / 2, 
+        centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+      }
     return createBody ({
       x: centerX,
       y: centerY,
@@ -92,6 +106,32 @@ export namespace Matter {
       static: true,
     });
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   const createBody: Body = (prop) => {
     return {
@@ -104,9 +144,9 @@ export namespace Matter {
   }
   
   // except wall
-  export const get: Bodies = ([px, py]) => {
+  export const get: Bodies = (bodies = { player: [null, null], walls: [null] }) => {
     const matter = {
-      player: createPlayer(px, py),
+      player: createPlayer(bodies.player[0], bodies.player[1]),
       floor: createFloor(),
       roof: createRoof(),
     }
@@ -118,17 +158,4 @@ export namespace Matter {
     ////////////////////////////////////////////////////////////
     return matter;
   }
-  
-  // export function getWall(game: FlappyBallGame, nth: number) {
-  //   const wally = createWall();
-  //   game.entities["wall"+nth] = { 
-  //     body: wally.body, 
-  //     size: [wally.width, wally.height], 
-  //     borderRadius: wally.borderRadius,
-  //     color: wally.color, 
-  //     renderer: Box,
-  //   };
-  //   WORLD.add(world, wally.body);
-  // }
-
 }

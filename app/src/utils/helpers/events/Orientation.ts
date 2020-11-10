@@ -36,14 +36,33 @@ export namespace Orientation {
 
   // helper functions
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {
-    Entities.swap(game, [orientPlayerCoords(game)]);
+    const bodies = {
+      player: orientPlayerCoords(game), 
+      // walls: orientWallCoords(game),
+      walls: [null]
+    };
+    Entities.swap(game, bodies);
   }
   
+
+
   const orientPlayerCoords: OrientPlayer = (game) => {
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
     return orientEntityCoords(lastEntX, lastEntY);
   }
   
+  const orientWallCoords = (game: any) => {
+    let walls = [];
+    for (let i = 0; i < game.entities.nWall; i++) {
+      const { lastEntX, lastEntY } = lastEntityCoords(game.entities[i]);
+      walls.push([orientEntityCoords(lastEntX, lastEntY)]);
+    }
+    return walls;
+  }
+
+
+
+  // ------------------------- GENERAL -------------------------
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
     const 
       { width, height, gameHeight } = window(),

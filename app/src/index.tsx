@@ -20,7 +20,6 @@ interface Game {
 }
 
 export default class FlappyBallGame extends React.PureComponent implements Game{
-  playerCoords = [50, 200]; // temporary testing
 
   engine: any;
   entities: Entities.Game; // all entities (player, floor)
@@ -31,12 +30,10 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     super(props);
     this.paused = false; 
     this.over = false;
-    this.entities = Entities.get(Matter.get([...this.playerCoords]));
+    this.entities = Entities.get(Matter.get());
+    
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
-
-    // getWall(this, this.entities.nWall);
-    // this.entities.nWall++;
   }
 
   // all side effects here

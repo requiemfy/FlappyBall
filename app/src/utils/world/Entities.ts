@@ -10,7 +10,12 @@ export namespace Entities {
     world: typeof world ;
   }
   type Bodies = (matterBodies: { [key: string]: any }) => Game;
-  type Recreation = (game: FlappyBallGame, dynamicBodies: number[][]) => void;
+  // type Recreation = (game: FlappyBallGame, dynamicBodies: number[][]) => void;
+  type Recreation = (
+    game: FlappyBallGame, 
+    dynamicBodies: { player: number[], walls: number[][] | null[] },
+  ) => void;
+
 
   export type Physical = {
     body: Body;
@@ -21,6 +26,7 @@ export namespace Entities {
   }
 
   // used in index, physics
+  // initial entities
   export type Game = { 
     // indexable types
     [key: string]: Physical | Physics | number | String;
@@ -78,7 +84,6 @@ export namespace Entities {
     COMPOSITE.remove(world, game.entities.player.body);
     COMPOSITE.remove(world, game.entities.floor.body);
     COMPOSITE.remove(world, game.entities.roof.body);
-
     ////////////////////////////////////////////////////////////
     console.log("----------------------------------------------------");
     console.log("\t\tREMOVING BODIES...")
@@ -86,7 +91,33 @@ export namespace Entities {
     console.log("WORLD BODIES: " + world.bodies.length);
     console.log("----------------------------------------------------\n\n");
     ////////////////////////////////////////////////////////////
-    game.entities = get(Matter.get([...dynamic[0]]));
+    // game.entities = get(Matter.get([...dynamic[0]]));
+    game.entities = get(Matter.get(dynamic));
     game.engine.swap(game.entities);
   }
+
+  // const getWall = (game: FlappyBallGame) => {
+  //   createWall();
+  //   game.entities[game.entities.nWall] = ;
+  //   WORLD.add(world, );
+  // }
+
+
+// // remove export later
+// export const iterateWalls = (game: FlappyBallGame, walls: number[][] | null[]) => {
+//   game.entities.nWall++;
+//   for (let i = 0; i < game.entities.nWall; i++) {
+//     const wally = createWall(walls[i]);
+//     game.entities[i] = { 
+//       body: wally.body, 
+//       size: [ wally.width, wally.height ], 
+//       borderRadius: wally.borderRadius,
+//       color: wally.color, 
+//       renderer: Box,
+//     };
+//     WORLD.add(world, wally.body);
+//   }
+ 
+//   }
 }
+
