@@ -9,13 +9,25 @@ export namespace Entities {
     engine: typeof engine;
     world: typeof world ;
   }
-  type Bodies = (matterBodies: { [key: string]: any }) => Game;
-  // type Recreation = (game: FlappyBallGame, dynamicBodies: number[][]) => void;
-  type Recreation = (
+
+  // matterBodies: { [key: string]: any }
+  // type Bodies = () => Initial;
+  type Bodies = (
     game: FlappyBallGame, 
-    dynamicBodies: { player: number[], walls: number[][] | null[] },
+    coords?: { 
+      player: number[],
+      // walls: number[][] | null[] 
+    }
   ) => void;
 
+  // type Recreation = (game: FlappyBallGame, dynamic: number[][]) => void;
+  type Recreation = (
+    game: FlappyBallGame, 
+    dynamic: { 
+      player: number[], 
+      // walls: number[][] | null[] 
+    },
+  ) => void;
 
   export type Physical = {
     body: Body;
@@ -27,9 +39,9 @@ export namespace Entities {
 
   // used in index, physics
   // initial entities
-  export type Game = { 
+  export type Initial = { 
     // indexable types
-    [key: string]: Physical | Physics | number | String;
+    [key: string]: Physical | Physics | number | number[] | String;
     [key: number]: Physical; // special purpose for wall
     // mandatory properties
     physics: Physics;
@@ -37,12 +49,18 @@ export namespace Entities {
     floor: Physical;
     roof: Physical;
     gravity: number;
-    nWall: number;
-    counter: number;
+    wall: number[];
+    counter: number; // testing purpose
   }
 
-  export const get: Bodies = (matter) => {
-    const 
+
+
+
+
+
+  export const getInitial: Bodies = (game, dynamic) => {
+    const
+      matter = Matter.getInitial(dynamic),
       player = matter.player,
       floor = matter.floor,
       roof = matter.roof,
@@ -73,11 +91,44 @@ export namespace Entities {
           renderer: Box,
         },
         gravity: 0.1,
-        nWall: 0,
+        wall: [],
         counter: 0,
       }
-    return entities;
+    // return entities;
+    game.entities = entities;
   }
+
+
+
+
+  
+  export const getFollowing = (game: any) => {
+    getWalls(game);
+  }
+
+  const getWalls = (game: any) => {
+    const 
+      matter = Matter.getFollowing(),
+      wall = matter.wall,
+      entity = {
+        body: wall.body, 
+        size: [wall.width, wall.height], 
+        borderRadius: wall.borderRadius,
+        color: wall.color, 
+        renderer: Box,
+      };
+    let nOfWall = 0;
+    while (game.entities.wall.includes(nOfWall)) {
+      nOfWall++;
+    }
+    game.entities.wall.push(nOfWall);
+    game.entities[nOfWall] = entity;
+  }
+
+
+
+  
+
 
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {
@@ -91,33 +142,8 @@ export namespace Entities {
     console.log("WORLD BODIES: " + world.bodies.length);
     console.log("----------------------------------------------------\n\n");
     ////////////////////////////////////////////////////////////
-    // game.entities = get(Matter.get([...dynamic[0]]));
-    game.entities = get(Matter.get(dynamic));
+    getInitial(game, dynamic);
     game.engine.swap(game.entities);
   }
 
-  // const getWall = (game: FlappyBallGame) => {
-  //   createWall();
-  //   game.entities[game.entities.nWall] = ;
-  //   WORLD.add(world, );
-  // }
-
-
-// // remove export later
-// export const iterateWalls = (game: FlappyBallGame, walls: number[][] | null[]) => {
-//   game.entities.nWall++;
-//   for (let i = 0; i < game.entities.nWall; i++) {
-//     const wally = createWall(walls[i]);
-//     game.entities[i] = { 
-//       body: wally.body, 
-//       size: [ wally.width, wally.height ], 
-//       borderRadius: wally.borderRadius,
-//       color: wally.color, 
-//       renderer: Box,
-//     };
-//     WORLD.add(world, wally.body);
-//   }
- 
-//   }
 }
-

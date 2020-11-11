@@ -12,7 +12,7 @@ import { Physics } from './utils/world/Physics';
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
-  entities: Entities.Game;
+  entities: Entities.Initial;
   paused: boolean;
   over: boolean;
   pauseOrResume(): boolean; // toggle true/false and pass to paused
@@ -22,7 +22,7 @@ interface Game {
 export default class FlappyBallGame extends React.PureComponent implements Game{
 
   engine: any;
-  entities: Entities.Game; // all entities (player, floor)
+  entities: any; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
 
@@ -30,7 +30,11 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     super(props);
     this.paused = false; 
     this.over = false;
-    this.entities = Entities.get(Matter.get());
+    
+    // this.entities = Entities.getInitial();
+    Entities.getInitial(this);
+    // Entities.getFollowing(this);
+    
     
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
@@ -104,7 +108,14 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     return (
       <View style={{ flex: 1, }}>
         
-        <TouchableWithoutFeedback onPress={this.pauseOrResume}>
+        <TouchableWithoutFeedback onPress={
+          // this.pauseOrResume
+          () => {
+            Entities.getFollowing(this);
+  
+          }
+          
+          }>
           <View style={{ 
             backgroundColor:"yellow",
             width: "100%",

@@ -6,7 +6,7 @@ import { Entities } from './Entities';
 
 export namespace Physics {
 
-  type Physics = (entities: Entities.Game, { time }: any) => Entities.Game;
+  type Physics = (entities: Entities.Initial, { time }: any) => Entities.Initial;
   type Event = (game: FlappyBallGame) => void;
   
   // this GameEngine system is called every ticks
@@ -15,17 +15,44 @@ export namespace Physics {
   export const system: Physics = (entities, { time }) => {
     const { engine } = entities.physics;
     engine.world.gravity.y = entities.gravity;
-    // wallRelativity(entities);
-    ////////////////////////////////////////////////////////////
+    wallRelativity(entities); // impressive
+    // //////////////////////////////////////////////////////////
     // entities.counter+=1; // this is on the entities script
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     // console.log("physics.tsx: COUNTER " + entities.counter);
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    ////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////
     ENGINE.update(engine, time.delta);
     return entities;
   };
-  
+
+  // special relativity
+  const wallRelativity = (entities: Entities.Initial) => {
+    for(let i = 0; i < entities.wall.length; i++) {
+      const
+        wallIndex = entities.wall[i],
+        wall = entities[wallIndex];
+      BODY.translate( wall.body, {x: -1, y: 0} );
+      if (isWallOutOfVision(entities, wallIndex)) {
+        entities.wall.splice(i, 1);
+        i--;
+      }
+    }
+  }
+
+  // sadly, i need to pass whole entities obj for the sake of pass by reference
+  // so that i can delete an entity of it
+  const isWallOutOfVision = (entities: Entities.Initial, wallIndex:number) => {
+    const wall = entities[wallIndex];
+    // console.log("LAST WALL X: " + (wall.body.position.x + (wall.size[0] / 2)));
+    if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
+      COMPOSITE.remove(world, wall.body);
+      delete entities[wallIndex]; // this is necessary
+      return true;
+    }
+    return false;
+  }
+
   // this is called in componentDidMount() 
   export const collision: Event = (game) => {
     EVENTS.on(engine, 'collisionStart', (event) => {
@@ -52,24 +79,5 @@ export namespace Physics {
     });
   }
   
-  // // special relativity
-  // const wallRelativity = (entities: Entities.Game) => {
-  //   for(let i = 0; i < entities.nWall; i++) {
-  //     const wall = entities[i];
-  //     BODY.translate( wall.body, {x: -1, y: 0} );
-  //     isWallOutOfVision(entities, i);
-  //   }
-  // }
-  
-  // // sadly, i need to pass whole entities obj for the sake of pass by reference
-  // // so that i can delete an entity of it
-  // const isWallOutOfVision = (entities: Entities.Game, i:number) => {
-  //   const wall = entities[i];
-  //   console.log("LAST WALL X: " + (wall.body.position.x + (wall.size[0] / 2)));
-  //   if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
-  //     entities.nWall--;
-  //     COMPOSITE.remove(world, wall.body);
-  //     delete entities[i]; // this is necessary
-  //   }
-  // }
+ 
 }

@@ -16,10 +16,8 @@ export namespace Matter {
   type DynamicBody = (x: number | null, y: number | null) => MatterProps;
   type StaticBody = (x?: number | null, y?: number | null) => MatterProps;
   type Bodies = (
-    // game: FlappyBallGame | null, 
     bodies?: { 
       player: number[] | null[],
-      walls: number[][] | null[],
     }
   ) => MatterProps;
   type Body = (matter: MatterProps) => MatterProps
@@ -39,7 +37,7 @@ export namespace Matter {
       height: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      static: false,
+      static: true,
     });
   }
   
@@ -107,32 +105,6 @@ export namespace Matter {
     });
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
   const createBody: Body = (prop) => {
     return {
       width: prop.width,
@@ -144,7 +116,7 @@ export namespace Matter {
   }
   
   // except wall
-  export const get: Bodies = (bodies = { player: [null, null], walls: [null] }) => {
+  export const getInitial: Bodies = (bodies = { player: [null, null] }) => {
     const matter = {
       player: createPlayer(bodies.player[0], bodies.player[1]),
       floor: createFloor(),
@@ -158,4 +130,14 @@ export namespace Matter {
     ////////////////////////////////////////////////////////////
     return matter;
   }
+
+  // used in entities
+  export const getFollowing = (bodies = { wall: [null, null] }) => {
+    const matter = {
+      wall: createWall(bodies.wall[0], bodies.wall[1]),
+    };
+    WORLD.add(world, matter.wall.body);
+    return matter;
+  }
 }
+

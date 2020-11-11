@@ -39,7 +39,7 @@ export namespace Orientation {
     const bodies = {
       player: orientPlayerCoords(game), 
       // walls: orientWallCoords(game),
-      walls: [null]
+      // walls: [null]
     };
     Entities.swap(game, bodies);
   }
@@ -53,7 +53,7 @@ export namespace Orientation {
   
   const orientWallCoords = (game: any) => {
     let walls = [];
-    for (let i = 0; i < game.entities.nWall; i++) {
+    for (let i = 0; i < game.entities.wall.length; i++) {
       const { lastEntX, lastEntY } = lastEntityCoords(game.entities[i]);
       walls.push([orientEntityCoords(lastEntX, lastEntY)]);
     }
