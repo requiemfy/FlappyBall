@@ -15,6 +15,7 @@ interface Game {
   entities: Entities.Initial;
   paused: boolean;
   over: boolean;
+  
   pauseOrResume(): boolean; // toggle true/false and pass to paused
   onEvent(e: EventType): void;
 }
@@ -26,15 +27,16 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
 
+
   constructor(props: object) {
     super(props);
     this.paused = false; 
     this.over = false;
     
+    
     // this.entities = Entities.getInitial();
     Entities.getInitial(this);
     // Entities.getFollowing(this);
-    
     
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
@@ -64,11 +66,12 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
       if (!this.paused) {
-        console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======")
+        console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
         this.engine.stop();
       } else {
         console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
         this.engine.start();
+
       }
     } else {
       console.log("GAME OVER")
@@ -112,9 +115,8 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           // this.pauseOrResume
           () => {
             Entities.getFollowing(this);
-  
+            console.log(this.entities.wall);
           }
-          
           }>
           <View style={{ 
             backgroundColor:"yellow",

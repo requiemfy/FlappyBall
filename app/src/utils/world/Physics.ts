@@ -15,11 +15,13 @@ export namespace Physics {
   export const system: Physics = (entities, { time }) => {
     const { engine } = entities.physics;
     engine.world.gravity.y = entities.gravity;
-    wallRelativity(entities); // impressive
+
+    wallRelativity(entities);
+
     // //////////////////////////////////////////////////////////
-    // entities.counter+=1; // this is on the entities script
+    // entities.distance+=1; // this is on the entities script
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    // console.log("physics.tsx: COUNTER " + entities.counter);
+    // console.log("physics.tsx: distance " + entities.distance);
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     // //////////////////////////////////////////////////////////
     ENGINE.update(engine, time.delta);
@@ -27,17 +29,57 @@ export namespace Physics {
   };
 
   // special relativity
+  // const wallRelativity = async (entities: Entities.Initial) => {
   const wallRelativity = (entities: Entities.Initial) => {
-    for(let i = 0; i < entities.wall.length; i++) {
-      const
-        wallIndex = entities.wall[i],
+
+    // for(let i = 0; i < entities.wall.length; i++) {
+    //   const
+    //     wallIndex = entities.wall[i],
+    //     wall = entities[wallIndex];
+
+    //   //  BODY.translate( wall.body, {x: -1, y: 0} );
+    //   // setTimeout(() => BODY.translate( wall.body, {x: -1, y: 0} ), 0);
+    //   (async () => BODY.translate( wall.body, {x: -1, y: 0} ))();
+    // }
+
+    // if (entities.wall.length>0) {
+    //   var len = entities.wall.length;
+    //   var wallIndex = entities.wall[len-1]
+    //   var wall = entities[wallIndex];
+    //   const recursive = async () => {
+    //     if (len>0) {
+    //       BODY.translate( wall.body, {x: -1, y: 0} );
+    //       len--;
+    //       wallIndex = entities.wall[len-1];
+    //       wall = entities[wallIndex];
+    //       recursive();
+    //     }
+    //   }
+    //   recursive();
+    // }
+
+    var len = entities.wall.length, wallIndex, wall;
+    const recursive = async () => {
+      if (len > 0) {
+        wallIndex = entities.wall[len-1];
         wall = entities[wallIndex];
-      BODY.translate( wall.body, {x: -1, y: 0} );
-      if (isWallOutOfVision(entities, wallIndex)) {
-        entities.wall.splice(i, 1);
-        i--;
+        len--;
+        BODY.translate( wall.body, {x: -1, y: 0} );
+        recursive();
       }
     }
+    recursive();
+
+    if ( entities.wall.length>0 && isWallOutOfVision(entities, entities.wall[0])) {
+      entities.wall.splice(0, 1); // remove wall id
+    }
+
+    entities.distance++;
+    if (entities.distance === 100) {
+      Entities.getFollowing(entities)
+      entities.distance = 0;
+    }
+
   }
 
   // sadly, i need to pass whole entities obj for the sake of pass by reference
@@ -79,5 +121,4 @@ export namespace Physics {
     });
   }
   
- 
 }

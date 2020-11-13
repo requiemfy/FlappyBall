@@ -41,7 +41,7 @@ export namespace Entities {
   // initial entities
   export type Initial = { 
     // indexable types
-    [key: string]: Physical | Physics | number | number[] | String;
+    [key: string]: any;
     [key: number]: Physical; // special purpose for wall
     // mandatory properties
     physics: Physics;
@@ -90,23 +90,32 @@ export namespace Entities {
           color: roof.color, 
           renderer: Box,
         },
-        gravity: 0.1,
-        wall: [],
-        counter: 0,
+        gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
+        wall: [], // same reason in gravity
+        distance: 0, // testing purpose
       }
-    // return entities;
     game.entities = entities;
   }
 
 
 
 
-  
-  export const getFollowing = (game: any) => {
-    getWalls(game);
+
+
+
+
+
+
+  // export const getFollowing = (game: any) => {
+  //   showWalls(game);    
+  // }
+  export const getFollowing = (entities: any) => {
+    showWalls(entities);    
   }
 
-  const getWalls = (game: any) => {
+  // const showWalls = (game: any) => {
+  const showWalls = (entities: any) => {
+
     const 
       matter = Matter.getFollowing(),
       wall = matter.wall,
@@ -117,13 +126,27 @@ export namespace Entities {
         color: wall.color, 
         renderer: Box,
       };
-    let nOfWall = 0;
-    while (game.entities.wall.includes(nOfWall)) {
-      nOfWall++;
-    }
-    game.entities.wall.push(nOfWall);
-    game.entities[nOfWall] = entity;
+
+    // choosing unique wall id here
+    let wallId = 0;
+    // while (game.entities.wall.includes(wallId)) {wallId++;}
+    // game.entities.wall.push(wallId);
+    // game.entities[wallId] = entity;
+
+    while (entities.wall.includes(wallId)) {wallId++;}
+    entities.wall.push(wallId);
+    entities[wallId] = entity;
+    
   }
+
+  
+
+
+
+
+
+
+
 
 
 
