@@ -29,71 +29,51 @@ export namespace Physics {
   };
 
   // special relativity
-  // const wallRelativity = async (entities: Entities.Initial) => {
   const wallRelativity = (entities: Entities.Initial) => {
-
-    // for(let i = 0; i < entities.wall.length; i++) {
-    //   const
-    //     wallIndex = entities.wall[i],
-    //     wall = entities[wallIndex];
-
-    //   //  BODY.translate( wall.body, {x: -1, y: 0} );
-    //   // setTimeout(() => BODY.translate( wall.body, {x: -1, y: 0} ), 0);
-    //   (async () => BODY.translate( wall.body, {x: -1, y: 0} ))();
-    // }
-
-    // if (entities.wall.length>0) {
-    //   var len = entities.wall.length;
-    //   var wallIndex = entities.wall[len-1]
-    //   var wall = entities[wallIndex];
-    //   const recursive = async () => {
-    //     if (len>0) {
-    //       BODY.translate( wall.body, {x: -1, y: 0} );
-    //       len--;
-    //       wallIndex = entities.wall[len-1];
-    //       wall = entities[wallIndex];
-    //       recursive();
-    //     }
-    //   }
-    //   recursive();
-    // }
+    // sadly, i need to pass whole entities obj for the sake of pass by reference
+    // so that i can delete an entity of it
+    const isWallOutOfVision = () => {
+      const wallIndex = entities.wall[0], wall = entities[wallIndex];
+      // console.log("LAST WALL X: " + (wall.body.position.x + (wall.size[0] / 2)));
+      if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
+        COMPOSITE.remove(world, wall.body);
+        delete entities[wallIndex]; // this is necessary
+        return true;
+      }
+      return false;
+    }
 
     var len = entities.wall.length, wallIndex, wall;
-    const recursive = async () => {
+    const moveWalls = async () => {
       if (len > 0) {
         wallIndex = entities.wall[len-1];
         wall = entities[wallIndex];
         len--;
         BODY.translate( wall.body, {x: -1, y: 0} );
-        recursive();
+        moveWalls();
       }
     }
-    recursive();
 
-    if ( entities.wall.length>0 && isWallOutOfVision(entities, entities.wall[0])) {
-      entities.wall.splice(0, 1); // remove wall id
+    const removeWall = () => {
+      if ( entities.wall.length > 0 && isWallOutOfVision()) {
+        entities.wall.splice(0, 1); // remove wall id
+      }
     }
 
-    entities.distance++;
-    if (entities.distance === 100) {
-      Entities.getFollowing(entities)
-      entities.distance = 0;
+    const showWall = () => {
+      entities.distance++;
+      if (entities.distance === 100) {
+        Entities.getFollowing(entities)
+        entities.distance = 0;
+      }
     }
 
+    moveWalls();
+    removeWall();
+    // showWall();
   }
 
-  // sadly, i need to pass whole entities obj for the sake of pass by reference
-  // so that i can delete an entity of it
-  const isWallOutOfVision = (entities: Entities.Initial, wallIndex:number) => {
-    const wall = entities[wallIndex];
-    // console.log("LAST WALL X: " + (wall.body.position.x + (wall.size[0] / 2)));
-    if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
-      COMPOSITE.remove(world, wall.body);
-      delete entities[wallIndex]; // this is necessary
-      return true;
-    }
-    return false;
-  }
+
 
   // this is called in componentDidMount() 
   export const collision: Event = (game) => {

@@ -9,8 +9,9 @@ import window from "../dimensions";
 export namespace Orientation {
   type Event = (event: object) => void;
   type OrientGame = (game: FlappyBallGame) => void;
-  type OrientPlayer = (game: FlappyBallGame) => number[];
-  type OrientEntity = (x: number, y: number) => number[];
+  type Coordinates = { center: { x: number, y: number} };
+  type OrientPlayer = (game: FlappyBallGame) => Coordinates;
+  type OrientEntity = (x: number, y: number) => Coordinates;
   type EntityCoords = (entity: Entities.Physical) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
@@ -75,7 +76,8 @@ export namespace Orientation {
       console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
       console.log("````````````````````````````````````````````````````````````");
       ////////////////////////////////////////////////////////////
-    return [ updatedX, updatedY ];
+    // return [ updatedX, updatedY ];
+    return { center: { x: updatedX, y: updatedY } };
   }
   
   const lastEntityCoords: EntityCoords = (entity) => {

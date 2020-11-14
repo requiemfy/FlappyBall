@@ -24,10 +24,25 @@ refactor interfaces [DONE]
 cleaning [DONE]
 orientation game:FlappyBallGame [DONE]
 
-namespaces
+namespaces [DONE]
 
 add wall [TARGET]
 
+refactor default values, cohesion
+
+
+
+what am i changing:
+createWall
+
+Matter.getFollowing
+Matter.getInitial
+type Bodies
+
+type StaticBody
+Entities showWall
+type Dynamic
+createPlayer
 
 
 

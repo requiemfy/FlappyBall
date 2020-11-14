@@ -12,21 +12,21 @@ export namespace Entities {
 
   // matterBodies: { [key: string]: any }
   // type Bodies = () => Initial;
+  type InitialParams = { player: { center: Coordinates } | any }
+  
   type Bodies = (
     game: FlappyBallGame, 
-    coords?: { 
-      player: number[],
-      // walls: number[][] | null[] 
-    }
+    coords?: InitialParams,
   ) => void;
 
   // type Recreation = (game: FlappyBallGame, dynamic: number[][]) => void;
   type Recreation = (
     game: FlappyBallGame, 
-    dynamic: { 
-      player: number[], 
-      // walls: number[][] | null[] 
-    },
+    dynamic: InitialParams,
+    // { 
+    //   player: number[], 
+    //   // walls: number[][] | null[] 
+    // },
   ) => void;
 
   export type Physical = {
@@ -53,12 +53,7 @@ export namespace Entities {
     counter: number; // testing purpose
   }
 
-
-
-
-
-
-  export const getInitial: Bodies = (game, dynamic) => {
+  export const getInitial: Bodies = (game, dynamic = { player: {} }) => { // default params rescue
     const
       matter = Matter.getInitial(dynamic),
       player = matter.player,
@@ -76,20 +71,20 @@ export namespace Entities {
           color: player.color, 
           renderer: Box,
         },
-        floor: { 
-          body: floor.body, 
-          size: [floor.width, floor.height], 
-          borderRadius: floor.borderRadius,
-          color: floor.color, 
-          renderer: Box,
-        },
-        roof: { 
-          body: roof.body, 
-          size: [roof.width, roof.height], 
-          borderRadius: roof.borderRadius,
-          color: roof.color, 
-          renderer: Box,
-        },
+        // floor: { 
+        //   body: floor.body, 
+        //   size: [floor.width, floor.height], 
+        //   borderRadius: floor.borderRadius,
+        //   color: floor.color, 
+        //   renderer: Box,
+        // },
+        // roof: { 
+        //   body: roof.body, 
+        //   size: [roof.width, roof.height], 
+        //   borderRadius: roof.borderRadius,
+        //   color: roof.color, 
+        //   renderer: Box,
+        // },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity
         distance: 0, // testing purpose
@@ -97,61 +92,46 @@ export namespace Entities {
     game.entities = entities;
   }
 
-
-
-
-
-
-
-
-
-
-  // export const getFollowing = (game: any) => {
-  //   showWalls(game);    
-  // }
+  // soon i may add more following entities
   export const getFollowing = (entities: any) => {
-    showWalls(entities);    
+    showWall(entities);    
   }
 
-  // const showWalls = (game: any) => {
-  const showWalls = (entities: any) => {
+  let wallPosition = "down";
+  const showWall = (entities: any) => {
+    const extractWall = () => {
+      // const matter = Matter.getFollowing({ wall: [undefined, undefined, wallPosition] }),
+      const 
+        matter = Matter.getFollowing({ 
+          wall: {
+            // center: { x: undefined, y: undefined},
+            position: wallPosition,
+          } 
+        }),
 
-    const 
-      matter = Matter.getFollowing(),
-      wall = matter.wall,
-      entity = {
-        body: wall.body, 
-        size: [wall.width, wall.height], 
-        borderRadius: wall.borderRadius,
-        color: wall.color, 
-        renderer: Box,
-      };
+        wall = matter.wall,
+        entity = {
+          body: wall.body, 
+          size: [wall.width, wall.height], 
+          borderRadius: wall.borderRadius,
+          color: wall.color, 
+          renderer: Box,
+        };
 
-    // choosing unique wall id here
-    let wallId = 0;
-    // while (game.entities.wall.includes(wallId)) {wallId++;}
-    // game.entities.wall.push(wallId);
-    // game.entities[wallId] = entity;
-
-    while (entities.wall.includes(wallId)) {wallId++;}
-    entities.wall.push(wallId);
-    entities[wallId] = entity;
-    
+      let wallId = 0;
+      while (entities.wall.includes(wallId)) {wallId++;}
+      entities.wall.push(wallId);
+      entities[wallId] = entity;
+      if (wallPosition === "down") {wallPosition = "up";} 
+      else {wallPosition = "down";}
+    };
+    const getWall = () => {
+      let wallEachTime = [1, 2],
+          numOfwall = wallEachTime[Math.floor(Math.random()*2)];
+      while (numOfwall--) {extractWall();}
+    }
+    getWall();
   }
-
-  
-
-
-
-
-
-
-
-
-
-
-  
-
 
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {

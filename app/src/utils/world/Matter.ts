@@ -4,29 +4,40 @@ import {
   FLOOR_HEIGHT, 
   ROOF_HEIGHT, 
   world, 
-  WORLD 
+  WORLD, 
+  NAVBAR_HEIGHT
 } from "./constants";
 import window from "../helpers/dimensions";
 import FlappyBallGame from "../..";
 import Box from "../../components/Box";
 
 export namespace Matter {
-
+  type Coordinates = {x: number, y:number};
   type MatterProps = { [key: string]: any };
-  type DynamicBody = (x: number | null, y: number | null) => MatterProps;
-  type StaticBody = (x?: number | null, y?: number | null) => MatterProps;
+
+  type DynamicBody = (center?: Coordinates) => MatterProps;
+  // type DynamicBody = (x: number | null, y: number | null) => MatterProps;
+
+  type StaticBody = (center?: Coordinates, position?: string) => MatterProps;
   type Bodies = (
-    bodies?: { 
-      player: number[] | null[],
-    }
+    bodies: InitialParams
   ) => MatterProps;
   type Body = (matter: MatterProps) => MatterProps
   
-  const createPlayer: DynamicBody = (x, y) => {
-    if (x === null) {
+
+  // ================================ Matter entities ================================
+  const createPlayer: DynamicBody = (center) => {
+    let x, y;
+    if (center === undefined) {
       x = 20;
       y = 100;
+    } else {
+      x = center.x;
+      y = center.y;
     }
+
+
+
     const 
       { width, height, gameHeight } = window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -37,7 +48,7 @@ export namespace Matter {
       height: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      static: false,
+      static: true,
     });
   }
   
@@ -85,15 +96,35 @@ export namespace Matter {
     });
   }
   
-  const createWall: StaticBody = (centerX, centerY) => {
+  // const createWall: StaticBody = (centerX, centerY, pos = "down") => {
+  const createWall: StaticBody = (center, pos = "down") => {
+    let centerX, centerY;
     const 
       { width, height, gameHeight } = window(),
       wallWidth = width * 0.07, 
       wallHeight = gameHeight * 0.4;
-      if (centerX === null) {
-        centerX = width / 2, 
-        centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+
+      // if (centerX === undefined) {
+      //   centerX = width / 2;
+      //   if (pos === "down") {
+      //     centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+      //   } else if (pos === "up") {
+      //     centerY = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
+      //   }
+      // }
+
+      if (center === undefined) {
+        centerX = width / 2;
+        if (pos === "down") {
+          centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+        } else if (pos === "up") {
+          centerY = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
+        }
+      } else {
+        centerX = center.x;
+        centerY = center.y;
       }
+
     return createBody ({
       x: centerX,
       y: centerY,
@@ -104,7 +135,9 @@ export namespace Matter {
       static: true,
     });
   }
+  // ================================ Matter Entities ================================
 
+  // ======================= Matter General Functions/Getters =======================
   const createBody: Body = (prop) => {
     return {
       width: prop.width,
@@ -115,10 +148,30 @@ export namespace Matter {
     }
   }
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // except wall
-  export const getInitial: Bodies = (bodies = { player: [null, null] }) => {
+  type InitialParams = { player: { center: Coordinates } | any }
+  export const getInitial: Bodies = (bodies: InitialParams) => { // required params
+    const player = bodies.player;
     const matter = {
-      player: createPlayer(bodies.player[0], bodies.player[1]),
+      player: createPlayer(player.center),
       floor: createFloor(),
       roof: createRoof(),
     }
@@ -131,13 +184,32 @@ export namespace Matter {
     return matter;
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
   // used in entities
-  export const getFollowing = (bodies = { wall: [null, null] }) => {
+  // export const getFollowing = (bodies = { wall: [undefined, undefined, "up"] }) => {
+  type FollowingParams = { wall: { center: Coordinates, position: string } | any };
+  export const getFollowing = (bodies: FollowingParams) => {
+    const wall = bodies.wall;
     const matter = {
-      wall: createWall(bodies.wall[0], bodies.wall[1]),
+      // wall: createWall(bodies.wall[0], bodies.wall[1], bodies.wall[2]), // you go expect 3 values
+      wall: createWall(wall.center, wall.position),
     };
+    
     WORLD.add(world, matter.wall.body);
     return matter;
   }
+  // ======================= Matter General Functions/Getters =======================
+
 }
 

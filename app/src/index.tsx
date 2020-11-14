@@ -114,7 +114,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
         <TouchableWithoutFeedback onPress={
           // this.pauseOrResume
           () => {
-            Entities.getFollowing(this);
+            Entities.getFollowing(this.entities);
             console.log(this.entities.wall);
           }
           }>
