@@ -44,8 +44,6 @@ export namespace Orientation {
     };
     Entities.swap(game, bodies);
   }
-  
-
 
   const orientPlayerCoords: OrientPlayer = (game) => {
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
@@ -60,8 +58,6 @@ export namespace Orientation {
     }
     return walls;
   }
-
-
 
   // ------------------------- GENERAL -------------------------
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {

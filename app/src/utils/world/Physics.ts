@@ -62,7 +62,7 @@ export namespace Physics {
 
     const showWall = () => {
       entities.distance++;
-      if (entities.distance === 100) {
+      if (entities.distance === 200) {
         Entities.getFollowing(entities)
         entities.distance = 0;
       }

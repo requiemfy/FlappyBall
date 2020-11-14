@@ -10,18 +10,18 @@ export namespace Entities {
     world: typeof world ;
   }
 
-  // matterBodies: { [key: string]: any }
-  // type Bodies = () => Initial;
+  type Bodies = (
+    game: FlappyBallGame, 
+    dynamic?: InitialParams,
+  ) => void;
 
-  // type Recreation = (game: FlappyBallGame, dynamic: number[][]) => void;
   type Recreation = (
     game: FlappyBallGame, 
-    dynamic: InitialParams,
-    // { 
-    //   player: number[], 
-    //   // walls: number[][] | null[] 
-    // },
+    dynamic: InitialParams, // yea, NOT optional
   ) => void;
+
+  type Coordinates = { x: number, y: number };
+  type InitialParams = { player: Coordinates };
 
   export type Physical = {
     body: Body;
@@ -32,7 +32,6 @@ export namespace Entities {
   }
 
   // used in index, physics
-  // initial entities
   export type Initial = { 
     // indexable types
     [key: string]: any;
@@ -46,16 +45,6 @@ export namespace Entities {
     wall: number[];
     counter: number; // testing purpose
   }
-
-
-
-  type Coordinates = { x: number, y: number };
-  type InitialParams = { player: Coordinates };
-  
-  type Bodies = (
-    game: FlappyBallGame, 
-    dynamic?: InitialParams,
-  ) => void;
 
   export const getInitial: Bodies = (game, dynamic) => {
     const
@@ -104,11 +93,9 @@ export namespace Entities {
   let wallPosition = "down";
   const showWall = (entities: any) => {
     const extractWall = () => {
-      // const matter = Matter.getFollowing({ wall: [undefined, undefined, wallPosition] }),
       const 
         matter = Matter.getFollowing({ 
           wall: {
-            // center: { x: undefined, y: undefined},
             position: wallPosition,
           } 
         }),
@@ -129,6 +116,7 @@ export namespace Entities {
       if (wallPosition === "down") {wallPosition = "up";} 
       else {wallPosition = "down";}
     };
+
     const getWall = () => {
       let wallEachTime = [1, 2],
           numOfwall = wallEachTime[Math.floor(Math.random()*2)];

@@ -27,23 +27,19 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
 
-
   constructor(props: object) {
     super(props);
     this.paused = false; 
     this.over = false;
     
-    
-    // this.entities = Entities.getInitial();
     Entities.getInitial(this);
-    // Entities.getFollowing(this);
-    
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
   }
 
   // all side effects here
   componentDidMount() {
+    this.engine.stop();
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
@@ -71,7 +67,6 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
       } else {
         console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
         this.engine.start();
-
       }
     } else {
       console.log("GAME OVER")
@@ -90,6 +85,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   onEvent(e: EventType) {
     if (e.type === "stopped") {
       this.paused = true;
+      console.log("BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBOBOBO")
     } else if (e.type === "started") {
       this.paused = false;
     }
@@ -112,11 +108,11 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
       <View style={{ flex: 1, }}>
         
         <TouchableWithoutFeedback onPress={
-          // this.pauseOrResume
-          () => {
-            Entities.getFollowing(this.entities);
-            console.log(this.entities.wall);
-          }
+            this.pauseOrResume
+            // () => {
+            //   Entities.getFollowing(this.entities);
+            //   console.log(this.entities.wall);
+            // }
           }>
           <View style={{ 
             backgroundColor:"yellow",
@@ -128,7 +124,10 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
-          onPressIn={() => {this.entities.gravity = -0.5;}}
+          onPressIn={() => {
+            if (this.paused) {this.pauseOrResume()};
+            this.entities.gravity = -0.5; 
+          }}
           onPressOut={() => {this.entities.gravity = 0.5;}}>
            {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
@@ -138,7 +137,8 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
               onEvent={ this.onEvent }
               style={{ flex: 1 }}
               systems={ [Physics.system] }
-              entities={ this.entities } />
+              entities={ this.entities } 
+              running={ this.paused } />
             <StatusBar hidden />
           </View>
         </TouchableWithoutFeedback>
