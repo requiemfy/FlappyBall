@@ -12,32 +12,29 @@ import FlappyBallGame from "../..";
 import Box from "../../components/Box";
 
 export namespace Matter {
-  type Coordinates = {x: number, y:number};
+
+  type Coordinates = {x?: number, y?:number};
   type MatterProps = { [key: string]: any };
 
-  type DynamicBody = (center?: Coordinates) => MatterProps;
+  // center obj is required but x, y props is optional LOL
+  type DynamicBody = (center: Coordinates) => MatterProps;
+
   // type DynamicBody = (x: number | null, y: number | null) => MatterProps;
 
-  type StaticBody = (center?: Coordinates, position?: string) => MatterProps;
-  type Bodies = (
-    bodies: InitialParams
-  ) => MatterProps;
   type Body = (matter: MatterProps) => MatterProps
   
 
   // ================================ Matter entities ================================
-  const createPlayer: DynamicBody = (center) => {
-    let x, y;
-    if (center === undefined) {
-      x = 20;
-      y = 100;
-    } else {
-      x = center.x;
-      y = center.y;
-    }
-
-
-
+  // const createPlayer: DynamicBody = (center) => {
+  //   let x, y;
+  //   if (center === undefined) {
+  //     x = 20;
+  //     y = 100;
+  //   } else {
+  //     x = center.x;
+  //     y = center.y;
+  //   }
+  const createPlayer: DynamicBody = ({ x = 20, y = 100 }) => {
     const 
       { width, height, gameHeight } = window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -96,38 +93,49 @@ export namespace Matter {
     });
   }
   
+
+
+  type WallParams = Coordinates & { position?: string };
+
+  type StaticBody = (params: WallParams) => MatterProps;
+
+
   // const createWall: StaticBody = (centerX, centerY, pos = "down") => {
-  const createWall: StaticBody = (center, pos = "down") => {
-    let centerX, centerY;
+  // const createWall: StaticBody = (center, position = "down") => {
+  const createWall: StaticBody = ({ x, y, position }) => {
+
+    // let centerX, centerY;
     const 
       { width, height, gameHeight } = window(),
       wallWidth = width * 0.07, 
       wallHeight = gameHeight * 0.4;
 
-      // if (centerX === undefined) {
+      // if (center === undefined) {
       //   centerX = width / 2;
-      //   if (pos === "down") {
+      //   if (position === "down") {
       //     centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
-      //   } else if (pos === "up") {
+      //   } else if (position === "up") {
       //     centerY = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
       //   }
+      // } else {
+      //   centerX = center.x;
+      //   centerY = center.y;
       // }
 
-      if (center === undefined) {
-        centerX = width / 2;
-        if (pos === "down") {
-          centerY = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
-        } else if (pos === "up") {
-          centerY = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
+      if (!x && !y) { // both undefined
+        x = width / 2;
+        if (position === "down") {
+          y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+        } else if (position === "up") {
+          y = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
         }
-      } else {
-        centerX = center.x;
-        centerY = center.y;
       }
 
     return createBody ({
-      x: centerX,
-      y: centerY,
+      x: x,
+      y: y,
+      // x: centerX,
+      // y: centerY,
       width: wallWidth,
       height: wallHeight,
       borderRadius: 0,
@@ -167,13 +175,21 @@ export namespace Matter {
 
 
   // except wall
-  type InitialParams = { player: { center: Coordinates } | any }
-  export const getInitial: Bodies = (bodies: InitialParams) => { // required params
+  type InitialParams = { player: Coordinates }; // player obj is required but props are optional
+  type InitialBodies = (bodies?: InitialParams) => MatterProps;
+ 
+  // export const getInitial: InitialBodies = (bodies) => { // required params
+  // bodies = { player: {} } is necessary for being optional => {} | undefined
+  // we can extract property from undefined obj
+  // but we can extract undefined props from obj
+  export const getInitial: InitialBodies = (bodies = { player: {} }) => {
     const player = bodies.player;
     const matter = {
-      player: createPlayer(player.center),
-      floor: createFloor(),
-      roof: createRoof(),
+      // player: createPlayer(player.center),
+      player: createPlayer(player),
+
+      floor: createFloor({}), //
+      roof: createRoof({}),
     }
     WORLD.add(world, [matter.player.body, matter.floor.body, matter.roof.body]);
     ////////////////////////////////////////////////////////////
@@ -198,12 +214,18 @@ export namespace Matter {
 
   // used in entities
   // export const getFollowing = (bodies = { wall: [undefined, undefined, "up"] }) => {
-  type FollowingParams = { wall: { center: Coordinates, position: string } | any };
-  export const getFollowing = (bodies: FollowingParams) => {
-    const wall = bodies.wall;
+
+  // type FollowingParams = { wall: { center: Coordinates, position: string } | any };
+
+
+  type FollowingParams = { wall: WallParams }; // this should not be optional/undefined
+  type FollowingBodies = (bodies?: FollowingParams) => MatterProps;
+
+  export const getFollowing: FollowingBodies = (bodies = { wall: {} }) => {
     const matter = {
       // wall: createWall(bodies.wall[0], bodies.wall[1], bodies.wall[2]), // you go expect 3 values
-      wall: createWall(wall.center, wall.position),
+      // wall: createWall(wall.center, wall.position),
+      wall: createWall(bodies.wall),
     };
     
     WORLD.add(world, matter.wall.body);

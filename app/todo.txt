@@ -28,7 +28,7 @@ namespaces [DONE]
 
 add wall [TARGET]
 
-refactor default values, cohesion
+refactor default values, cohesion, test undefined == false
 
 
 

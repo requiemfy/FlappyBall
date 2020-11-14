@@ -70,7 +70,7 @@ export namespace Physics {
 
     moveWalls();
     removeWall();
-    // showWall();
+    showWall();
   }
 
 
