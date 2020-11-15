@@ -35,6 +35,9 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
+    this.playerFly = this.playerFly.bind(this);
+    this.playerFall = this.playerFall.bind(this);
+
   }
 
   // all side effects here
@@ -85,7 +88,6 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   onEvent(e: EventType) {
     if (e.type === "stopped") {
       this.paused = true;
-      console.log("BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBOBOBO")
     } else if (e.type === "started") {
       this.paused = false;
     }
@@ -95,6 +97,16 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     console.log("this.paused " + this.paused);
     console.log("--------------------------");
     ////////////////////////////////////////////////////////////
+  }
+
+
+  playerFly() {
+    if (this.paused) this.pauseOrResume();
+    this.entities.gravity = -0.5; 
+  }
+
+  playerFall() {
+    this.entities.gravity = 0.5;
   }
 
   render() {
@@ -124,11 +136,8 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
-          onPressIn={() => {
-            if (this.paused) {this.pauseOrResume()};
-            this.entities.gravity = -0.5; 
-          }}
-          onPressOut={() => {this.entities.gravity = 0.5;}}>
+          onPressIn={ this.playerFly }
+          onPressOut={ this.playerFall }>
            {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
           <View style={{ flex: 1 }}> 

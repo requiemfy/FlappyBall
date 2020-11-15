@@ -85,6 +85,7 @@ export namespace Entities {
     game.entities = entities;
   }
 
+  // used in Physics.ts for wall
   // soon i may add more following entities
   export const getFollowing = (entities: any) => {
     showWall(entities);    

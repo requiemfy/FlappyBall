@@ -35,7 +35,23 @@ export namespace Orientation {
 
   export const removeChangeListener = () => Dimensions.removeEventListener('change', callback);
 
+  // =============================== SPECIFIC ===============================
   // helper functions
+  const orientPlayerCoords: OrientPlayer = (game) => {
+    const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
+    return orientEntityCoords(lastEntX, lastEntY);
+  }
+  
+  // const orientWallCoords = (game: any) => {
+  //   let walls = [];
+  //   for (let i = 0; i < game.entities.wall.length; i++) {
+  //     const { lastEntX, lastEntY } = lastEntityCoords(game.entities[i]);
+  //     walls.push([orientEntityCoords(lastEntX, lastEntY)]);
+  //   }
+  //   return walls;
+  // }
+
+  // ================================ GENERAL ================================
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {
     const bodies = {
       player: orientPlayerCoords(game), 
@@ -45,21 +61,6 @@ export namespace Orientation {
     Entities.swap(game, bodies);
   }
 
-  const orientPlayerCoords: OrientPlayer = (game) => {
-    const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
-    return orientEntityCoords(lastEntX, lastEntY);
-  }
-  
-  const orientWallCoords = (game: any) => {
-    let walls = [];
-    for (let i = 0; i < game.entities.wall.length; i++) {
-      const { lastEntX, lastEntY } = lastEntityCoords(game.entities[i]);
-      walls.push([orientEntityCoords(lastEntX, lastEntY)]);
-    }
-    return walls;
-  }
-
-  // ------------------------- GENERAL -------------------------
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
     const 
       { width, height, gameHeight } = window(),

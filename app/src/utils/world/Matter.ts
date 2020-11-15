@@ -8,8 +8,6 @@ import {
   NAVBAR_HEIGHT
 } from "./constants";
 import window from "../helpers/dimensions";
-import FlappyBallGame from "../..";
-import Box from "../../components/Box";
 
 export namespace Matter {
 

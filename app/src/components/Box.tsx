@@ -13,7 +13,7 @@ interface BoxState {}
 
 // PureComponent won't work
 export default class Box extends React.Component<BoxProps, BoxState> {
-  componentWillUnmount(){
+  componentWillUnmount() {
     console.log("UNMOUNTING....");
   }
 

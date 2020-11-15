@@ -33,16 +33,7 @@ refactor default values, cohesion, test undefined == false
 
 
 what am i changing:
-createWall
 
-Matter.getFollowing
-Matter.getInitial
-type Bodies
-
-type StaticBody
-Entities showWall
-type Dynamic
-createPlayer
 
 
 
@@ -51,3 +42,39 @@ when migrating:
 App.tsx
 app.json : orientation: default
 package.json
+
+
+
+
+{
+  "expo": {
+    "name": "FlappyBall",
+    "slug": "FlappyBall",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

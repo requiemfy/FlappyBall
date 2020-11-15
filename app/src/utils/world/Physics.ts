@@ -44,7 +44,7 @@ export namespace Physics {
     }
 
     var len = entities.wall.length, wallIndex, wall;
-    const moveWalls = async () => {
+    const moveWalls = () => {
       if (len > 0) {
         wallIndex = entities.wall[len-1];
         wall = entities[wallIndex];
@@ -63,7 +63,7 @@ export namespace Physics {
     const showWall = () => {
       entities.distance++;
       if (entities.distance === 200) {
-        Entities.getFollowing(entities)
+        Entities.getFollowing(entities) // wall
         entities.distance = 0;
       }
     }
