@@ -5,8 +5,8 @@ import { BODY, engine, world, ENGINE, EVENTS, COMPOSITE } from "./constants";
 import { Entities } from './Entities';
 
 export namespace Physics {
-
-  type Physics = (entities: Entities.Initial, { time }: any) => Entities.Initial;
+  type AllEntities = Entities.Initial & Entities.Following;
+  type Physics = (entities: AllEntities, { time }: any) => AllEntities;
   type Event = (game: FlappyBallGame) => void;
   
   // this GameEngine system is called every ticks
@@ -29,7 +29,7 @@ export namespace Physics {
   };
 
   // special relativity
-  const wallRelativity = (entities: Entities.Initial) => {
+  const wallRelativity = (entities: AllEntities) => { //@remind refactor nested functions
     // sadly, i need to pass whole entities obj for the sake of pass by reference
     // so that i can delete an entity of it
     const isWallOutOfVision = () => {
@@ -63,7 +63,9 @@ export namespace Physics {
     const showWall = () => {
       entities.distance++;
       if (entities.distance === 200) {
-        Entities.getFollowing(entities) // wall
+        // Entities.getFollowing(entities) // wall //@remind clear this
+        Entities.getFollowing.walls(entities) // wall
+
         entities.distance = 0;
       }
     }

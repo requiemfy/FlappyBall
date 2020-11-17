@@ -83,7 +83,8 @@ export namespace Matter {
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
       { width, height, gameHeight } = window(),
-      wallWidth = width * 0.07, 
+      // wallWidth = width * 0.07, 
+      wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
     if (!x && !y) { // both undefined
       x = width + (wallWidth / 2);

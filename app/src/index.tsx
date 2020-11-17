@@ -12,7 +12,7 @@ import { Physics } from './utils/world/Physics';
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
-  entities: Entities.Initial;
+  entities: Entities.Initial & Entities.Following;
   paused: boolean;
   over: boolean;
   

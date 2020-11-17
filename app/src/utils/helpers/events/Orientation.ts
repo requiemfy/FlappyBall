@@ -1,7 +1,7 @@
 
 import { Dimensions } from "react-native";
 import FlappyBallGame from "../../..";
-import { NAVBAR_HEIGHT } from "../../world/constants";
+import { NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
 import window from "../dimensions";
@@ -40,25 +40,32 @@ export namespace Orientation {
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
-  // const orientWallCoords = (game: any) => {
-  //   let walls = [];
-  //   for (let i = 0; i < game.entities.wall.length; i++) {
-  //     const { lastEntX, lastEntY } = lastEntityCoords(game.entities[i]);
-  //     walls.push([orientEntityCoords(lastEntX, lastEntY)]);
-  //   }
-  //   return walls;
-  // }
+  const orientWallCoords = (game: any) => {
+    let wallsCoords = [],
+        wallIds = game.entities.wall,
+        wallNum = game.entities.wall.length;
+
+    while(wallNum--) {
+        const 
+          wallKey = wallIds[wallNum],
+          wall = game.entities[wallKey],
+          { lastEntX, lastEntY } = lastEntityCoords(wall);
+        wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
+    }
+
+    return wallsCoords;
+  }
 
   // ================================ GENERAL ================================
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {
-    const bodies = {
+    const coords = {
       player: orientPlayerCoords(game), 
-      // walls: orientWallCoords(game),
-      // walls: [null]
+      walls: orientWallCoords(game),
     };
-    Entities.swap(game, bodies);
+    Entities.swap(game, coords);
   }
 
+  //@todo fix orientation percentage
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
     const 
       { width, height, gameHeight } = window(),
