@@ -9,11 +9,29 @@
     for (let i = 0; i < 9000000; i++) { Math.sqrt(i**5) }
   }
 
-  function mathA() {
-    someMath();
+
+  let myPromise = () => new Promise(function(myResolve, myReject) {
+    // someMath();
+
+    let myvar;
     for (let i = 0; i < 20; i++) {
-      console.log("MATH A");
+      if (i == 19) {
+        console.log("MATH A");
+        myvar = "i hate you";
+      }
     }
+    // myResolve("I love You !!");
+    myResolve(myvar);
+
+  });
+
+  async function mathA() {
+    someMath();
+    setTimeout( () => {
+        for (let i = 0; i < 20; i++) {console.log("MATH A");}
+      }, 0
+    );
+    return "done";
   }
   function mathB() {
     for (let i = 0; i < 10; i++) {
@@ -58,7 +76,8 @@
 
 
   async function b() {
-    await mathA();
+    // await mathA();
+    console.log(await myPromise()) ;
     console.log('in b (await)')
   }
   asycnAwait.onclick = function() {

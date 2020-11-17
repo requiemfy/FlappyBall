@@ -25,10 +25,8 @@ export namespace Orientation {
       console.log("ORIENTATION CHANGED");
       console.log("game.paused: " + game.paused);
       ////////////////////////////////////////////////////////////
-      const userPaused = game.paused;
-      !userPaused ? game.engine.stop() : null;
+      !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
-      !userPaused ? game.engine.start() : null;
     };
     Dimensions.addEventListener('change', callback);
   };
@@ -39,7 +37,7 @@ export namespace Orientation {
   // helper functions
   const orientPlayerCoords: OrientPlayer = (game) => {
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
-    return orientEntityCoords(lastEntX, lastEntY);
+    return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
   // const orientWallCoords = (game: any) => {

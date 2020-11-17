@@ -10,7 +10,6 @@ import {
 import window from "../helpers/dimensions";
 
 export namespace Matter {
-
   type Coordinates = {x?: number, y?:number};
   type MatterProps = { [key: string]: any };
   type Body = (matter: MatterProps) => MatterProps
@@ -27,11 +26,10 @@ export namespace Matter {
     const 
       { width, height, gameHeight } = window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
-    return createBody ({
+    return createCircle ({
       x: x,
       y: y,
-      width: playerBaseSize,
-      height: playerBaseSize,
+      size: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
       static: false,
@@ -53,7 +51,7 @@ export namespace Matter {
     console.log("\tDimensions width: " + width)
     console.log("\tDimensions height: " + height)
     ////////////////////////////////////////////////////////////
-    return createBody ({
+    return createRectangle ({
       x: centerX,
       y: centerY,
       width: floorWidth,
@@ -71,7 +69,7 @@ export namespace Matter {
       roofHeight = gameHeight * ROOF_HEIGHT,
       centerX = width / 2, 
       centerY = roofHeight / 2; // papatong lang sa nav bar pababa
-    return createBody ({
+    return createRectangle ({
       x: centerX,
       y: centerY,
       width: roofWidth,
@@ -95,7 +93,7 @@ export namespace Matter {
         y = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
       }
     }
-    return createBody ({
+    return createRectangle ({
       x: x,
       y: y,
       width: wallWidth,
@@ -108,13 +106,25 @@ export namespace Matter {
   // ================================ Matter Entities ================================
 
   // ======================= Matter General Functions/Getters =======================
-  const createBody: Body = (prop) => {
+  const createRectangle: Body = (prop) => {
     return {
       width: prop.width,
       height: prop.height,
       borderRadius: prop.borderRadius,
       color: prop.color,
       body: BODIES.rectangle(prop.x, prop.y, prop.width, prop.height, { isStatic: prop.static })
+    }
+  }
+
+  const createCircle: Body = (prop) => {
+    // circle view size is effected by border radius
+    // while circle body in matter js, it's size = radius
+    const bodySize = prop.size / 2; // for Circle Matterjs Body
+    return {
+      size: prop.size, // for Circle View Component
+      borderRadius: prop.borderRadius,
+      color: prop.color,
+      body: BODIES.circle(prop.x, prop.y, bodySize, { isStatic: prop.static })
     }
   }
 

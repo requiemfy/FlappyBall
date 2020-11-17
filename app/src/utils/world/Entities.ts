@@ -1,8 +1,9 @@
 import Box from "../../components/Box";
-import { COMPOSITE, engine, world, BODY } from "./constants";
+import { COMPOSITE, engine, world, BODY, NOT_BODY } from "./constants";
 import { Matter } from "./Matter";
 import { Body } from 'matter-js';
 import FlappyBallGame from "../..";
+import Circle from "../../components/Circle";
 
 export namespace Entities {
   type Physics = { 
@@ -57,12 +58,12 @@ export namespace Entities {
           engine: engine, 
           world: world 
         },
-        player: { 
+        player: {
           body: player.body, 
-          size: [player.width, player.height], 
+          size: player.size,
           borderRadius: player.borderRadius,
           color: player.color, 
-          renderer: Box,
+          renderer: Circle,
         },
         floor: { 
           body: floor.body, 
@@ -93,49 +94,53 @@ export namespace Entities {
 
   let wallPosition = "down";
   const showWall = (entities: any) => {
-    const extractWall = () => {
-      const 
-        matter = Matter.getFollowing({ 
-          wall: {
-            position: wallPosition,
-          } 
-        }),
-
-        wall = matter.wall,
-        entity = {
-          body: wall.body, 
-          size: [wall.width, wall.height], 
-          borderRadius: wall.borderRadius,
-          color: wall.color, 
-          renderer: Box,
-        };
-
-      let wallId = 0;
-      while (entities.wall.includes(wallId)) {wallId++;}
-      entities.wall.push(wallId);
-      entities[wallId] = entity;
-      if (wallPosition === "down") {wallPosition = "up";} 
-      else {wallPosition = "down";}
-    };
-
-    const getWall = () => {
+    // get the wall
+    (() => {
       let wallEachTime = [1, 2],
           numOfwall = wallEachTime[Math.floor(Math.random()*2)];
-      while (numOfwall--) {extractWall();}
-    }
-    getWall();
+      while (numOfwall--) {
+        // extract the wall
+        (() => {
+          const 
+            matter = Matter.getFollowing({ 
+              wall: {
+                position: wallPosition,
+              } 
+            }),
+    
+            wall = matter.wall,
+            entity = {
+              body: wall.body, 
+              size: [wall.width, wall.height], 
+              borderRadius: wall.borderRadius,
+              color: wall.color, 
+              renderer: Box,
+            };
+    
+          let wallId = 0;
+          while (entities.wall.includes(wallId)) {wallId++;}
+          entities.wall.push(wallId);
+          entities[wallId] = entity;
+          if (wallPosition === "down") {wallPosition = "up";} 
+          else {wallPosition = "down";}
+        })();
+      }
+    })();
   }
 
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {
-    COMPOSITE.remove(world, game.entities.player.body);
-    COMPOSITE.remove(world, game.entities.floor.body);
-    COMPOSITE.remove(world, game.entities.roof.body);
+    // remove the current bodies
+    for (let entity in game.entities) {
+      if (!NOT_BODY.includes(entity)) {
+        COMPOSITE.remove(world, game.entities[entity].body)
+      }
+    }
     ////////////////////////////////////////////////////////////
     console.log("----------------------------------------------------");
     console.log("\t\tREMOVING BODIES...")
     console.log("--------------------------");
-    console.log("WORLD BODIES: " + world.bodies.length);
+    console.log("CURRENT WORLD BODIES: " + world.bodies.length);
     console.log("----------------------------------------------------\n\n");
     ////////////////////////////////////////////////////////////
     getInitial(game, dynamic);

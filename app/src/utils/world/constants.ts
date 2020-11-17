@@ -14,7 +14,10 @@ const BODIES = Matter.Bodies,
       PLAYER_SIZE = 0.05,
       FLOOR_HEIGHT = 0.05,
       ROOF_HEIGHT = 0.05,
-      NAVBAR_HEIGHT = 50;
+      NAVBAR_HEIGHT = 50,
+
+      NOT_BODY = ["physics", "gravity", "wall", "distance"];
+
 
 export {
   BODIES,
@@ -31,4 +34,6 @@ export {
   FLOOR_HEIGHT,
   ROOF_HEIGHT,
   NAVBAR_HEIGHT,
+
+  NOT_BODY,
 };
