@@ -1,7 +1,7 @@
 
 import { Dimensions } from "react-native";
 import FlappyBallGame from "../../..";
-import { NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
+import { GAME_DIM_RATIO, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
 import window from "../dimensions";
@@ -34,7 +34,6 @@ export namespace Orientation {
   export const removeChangeListener = () => Dimensions.removeEventListener('change', callback);
 
   // =============================== SPECIFIC ===============================
-  // helper functions
   const orientPlayerCoords: OrientPlayer = (game) => {
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
@@ -66,21 +65,42 @@ export namespace Orientation {
   }
 
   //@todo fix orientation percentage
+  // issues: wall distance is affected by orientation wtf
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
+    // const 
+    //   { width, height, gameHeight } = window(),
+    //   [ prevWidth, prevGameHeight ] = [ height, width - NAVBAR_HEIGHT ], // this is tricky
+    //   updatedX = getUpdatedAxis(lastEntX, prevWidth, width),
+    //   updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
+    //   ////////////////////////////////////////////////////////////
+    //   console.log("\t----diemensions of x,y: " + width + ", " + height );
+    //   console.log("\t----lastPlayer of x,y: " + lastEntX + ", " + lastEntY );
+    //   console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
+    //   console.log("````````````````````````````````````````````````````````````");
+    //   ////////////////////////////////////////////////////////////
+
     const 
-      { width, height, gameHeight } = window(),
-      [ prevWidth, prevHeight ] = [ height, width - NAVBAR_HEIGHT ], // this is tricky
-      updatedX = getUpdatedAxis(lastEntX, prevWidth, width),
-      updatedY = getUpdatedAxis(lastEntY, prevHeight, gameHeight);
+      { width, height, gameHeight } = window(), // current screen dimensions
+      { prevGameHeight, prevGameWidth } = getPrevGameDim(width),
+      currGameWidth = GAME_DIM_RATIO * gameHeight, // current game width
+
+      updatedX = getUpdatedAxis(lastEntX, prevGameWidth, currGameWidth),
+      updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////
       console.log("\t----diemensions of x,y: " + width + ", " + height );
       console.log("\t----lastPlayer of x,y: " + lastEntX + ", " + lastEntY );
       console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
       console.log("````````````````````````````````````````````````````````````");
       ////////////////////////////////////////////////////////////
-    // return [ updatedX, updatedY ];
-    // return { center: { x: updatedX, y: updatedY } };
+
     return { x: updatedX, y: updatedY };
+  }
+
+  const getPrevGameDim = (width: number) => {
+    const
+      prevHeight = width - NAVBAR_HEIGHT,
+      prevWidth = GAME_DIM_RATIO * prevHeight;
+    return { prevGameHeight: prevHeight, prevGameWidth: prevWidth }
   }
   
   const lastEntityCoords: EntityCoords = (entity) => {

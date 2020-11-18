@@ -1,12 +1,22 @@
 import { Bodies } from "matter-js";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
-import { BODY, engine, world, ENGINE, EVENTS, COMPOSITE } from "./constants";
+import window, { getOrientation } from "../helpers/dimensions";
+import { 
+  BODY, 
+  engine, 
+  world, 
+  ENGINE, 
+  EVENTS, 
+  COMPOSITE, 
+  BASE_WIDTH, 
+  MAX_BASE_WIDTH, 
+  WALL_DISTANCE 
+} from "./constants";
 import { Entities } from './Entities';
 
 export namespace Physics {
-  type AllEntities = Entities.Initial & Entities.Following;
-  type Physics = (entities: AllEntities, { time }: any) => AllEntities;
+  type Physics = (entities: Entities.All, { time }: any) => Entities.All;
   type Event = (game: FlappyBallGame) => void;
   
   // this GameEngine system is called every ticks
@@ -29,7 +39,7 @@ export namespace Physics {
   };
 
   // special relativity
-  const wallRelativity = (entities: AllEntities) => { //@remind refactor nested functions
+  const wallRelativity = (entities: Entities.All) => { //@remind refactor nested functions
     // sadly, i need to pass whole entities obj for the sake of pass by reference
     // so that i can delete an entity of it
     const isWallOutOfVision = () => {
@@ -61,13 +71,25 @@ export namespace Physics {
     }
 
     const showWall = () => {
-      entities.distance++;
-      if (entities.distance === 200) {
-        // Entities.getFollowing(entities) // wall //@remind clear this
-        Entities.getFollowing.walls(entities) // wall
+      // entities.distance++;
+      // if (entities.distance === 200) {
+      //   // Entities.getFollowing(entities) // wall //@remind clear this
+      //   Entities.getFollowing.walls(entities) // wall
 
-        entities.distance = 0;
+      //   entities.distance = 0;
+      // }
+      let wallCount = entities.wall.length;
+      if (wallCount > 0) {
+        const wallIndex = entities.wall[wallCount-1],
+              lastWallX = entities[wallIndex].body.position.x,
+              { width, height } = window(),
+              gameWidth = getOrientation(width, height) === "landscape" ?
+                          width : MAX_BASE_WIDTH,
+              distance = gameWidth - lastWallX,
+              percentDist = distance / gameWidth;
+        if (percentDist >= WALL_DISTANCE) Entities.getFollowing.walls(entities);
       }
+      else Entities.getFollowing.walls(entities); // 1st wall
     }
 
     moveWalls();

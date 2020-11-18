@@ -1,12 +1,13 @@
 import Box from "../../components/Box";
-import { COMPOSITE, engine, world, BODY, NOT_BODY } from "./constants";
+import { COMPOSITE, engine, world, BODY, NOT_BODY, BASE_WIDTH, MAX_BASE_WIDTH, WALL_DISTANCE } from "./constants";
 import { Matter } from "./Matter";
 import { Body } from 'matter-js';
 import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
+import window, { getOrientation } from "../helpers/dimensions";
 
 export namespace Entities {
-  type AllEntities = Initial & Following;
+  export type All = Initial & Following;
   type Physics = { 
     engine: typeof engine;
     world: typeof world ;
@@ -22,7 +23,7 @@ export namespace Entities {
     dynamic: InitialParams & FollowingParams, // yea, NOT optional
   ) => void;
 
-  type Coordinates = { x: number, y: number };
+  type Coordinates = { x?: number, y?: number };
   type InitialParams = { player: Coordinates };
   type FollowingParams = { walls: Coordinates[], };
 
@@ -42,7 +43,7 @@ export namespace Entities {
   export type Initial = { 
     // indexable types
     [key: string]: any;
-    // [key: number]: Physical; // special purpose for wall
+    [key: number]: Physical; // special purpose for wall
     // mandatory properties
     physics: Physics;
     player: Physical;
@@ -71,25 +72,48 @@ export namespace Entities {
           color: player.color, 
           renderer: Circle,
         },
-        floor: { 
-          body: floor.body, 
-          size: [floor.width, floor.height], 
-          borderRadius: floor.borderRadius,
-          color: floor.color, 
-          renderer: Box,
-        },
-        roof: { 
-          body: roof.body, 
-          size: [roof.width, roof.height], 
-          borderRadius: roof.borderRadius,
-          color: roof.color, 
-          renderer: Box,
-        },
+        // floor: { 
+        //   body: floor.body, 
+        //   size: [floor.width, floor.height], 
+        //   borderRadius: floor.borderRadius,
+        //   color: floor.color, 
+        //   renderer: Box,
+        // },
+        // roof: { 
+        //   body: roof.body, 
+        //   size: [roof.width, roof.height], 
+        //   borderRadius: roof.borderRadius,
+        //   color: roof.color, 
+        //   renderer: Box,
+        // },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity. this is array of wall ids
         distance: 0, // testing purpose
       }
     game.entities = entities;
+    
+    // special case, adding initial walls
+    for (let wallNum = 8; wallNum--;) {
+      console.log("create wall wall wall wall")
+      if (game.entities.wall.length > 0) {
+        //@remind refactor this way of getting wall redundant
+        //@audit-info check GAME_DIM_RATIO here
+        const wallCount = game.entities.wall.length,
+              wallIndex = game.entities.wall[wallCount-1],
+              firstWallX = game.entities[wallIndex].body.position.x,
+              //@remind refactor this redundant distance percent, also in physics.ts
+              { width, height } = window(),
+              gameWidth = getOrientation(width, height) === "landscape" ?
+                          width : MAX_BASE_WIDTH,
+              distance = gameWidth * WALL_DISTANCE,
+              newWallX = firstWallX - distance;
+
+        console.log("first wall x: " + firstWallX);
+        
+        getFollowing.walls(game.entities, { x: newWallX });
+      }
+      else getFollowing.walls(game.entities);
+    }
   }
 
   // used in Physics.ts for wall
@@ -98,11 +122,11 @@ export namespace Entities {
   //   showWall(entities);    
   // }
   export const getFollowing = {
-    // walls: (entities: AllEntities) => showWall(entities),
+    // walls: (entities: All) => showWall(entities),
     walls: (() => {
       let wallPosition = "down",
           wallEachTime = [1, 2];
-      return function (entities: AllEntities, coords?: Coordinates) {
+      return function (entities: All, coords?: Coordinates) {
         let numOfwall = wallEachTime[Math.floor(Math.random()*2)];
         while (numOfwall--) {
           (function getWall(){
@@ -123,6 +147,7 @@ export namespace Entities {
                 renderer: Box,
               };
       
+            // record the wall id
             let wallId = 0;
             while (entities.wall.includes(wallId)) {wallId++;}
             entities.wall.push(wallId);
@@ -134,42 +159,6 @@ export namespace Entities {
       }
     })(),
   }
-
-  // const showWall = (() => {
-  //   let wallPosition = "down",
-  //       wallEachTime = [1, 2];
-  //   return function (entities: AllEntities, coords?: Coordinates) {
-  //     let numOfwall = wallEachTime[Math.floor(Math.random()*2)];
-  //     while (numOfwall--) {
-  //       (function getWall(){
-  //         const 
-  //           matter = Matter.getFollowing({ 
-  //             wall: {
-  //               ...coords,
-  //               position: wallPosition,
-  //             } 
-  //           }),
-    
-  //           wall = matter.wall,
-  //           entity = {
-  //             body: wall.body, 
-  //             size: [wall.width, wall.height], 
-  //             borderRadius: wall.borderRadius,
-  //             color: wall.color, 
-  //             renderer: Box,
-  //           };
-    
-  //         let wallId = 0;
-  //         while (entities.wall.includes(wallId)) {wallId++;}
-  //         entities.wall.push(wallId);
-  //         entities[wallId] = entity;
-  //         if (wallPosition === "down") {wallPosition = "up";} 
-  //         else {wallPosition = "down";}
-  //       })();
-  //     }
-  //   }
-  // })();
-
 
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {

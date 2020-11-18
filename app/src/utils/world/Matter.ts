@@ -5,9 +5,12 @@ import {
   ROOF_HEIGHT, 
   world, 
   WORLD, 
-  NAVBAR_HEIGHT
+  NAVBAR_HEIGHT,
+  BASE_WIDTH,
+  MAX_BASE_WIDTH,
+  BASE_HEIGHT
 } from "./constants";
-import window from "../helpers/dimensions";
+import window, {getOrientation} from "../helpers/dimensions";
 
 export namespace Matter {
   type Coordinates = {x?: number, y?:number};
@@ -80,14 +83,21 @@ export namespace Matter {
     });
   }
   
+  //@remind clean here
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
       { width, height, gameHeight } = window(),
       // wallWidth = width * 0.07, 
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
-    if (!x && !y) { // both undefined
-      x = width + (wallWidth / 2);
+
+    //@audit-info Check why GAME_DIM_RATION is not used here in creating wall by default here
+      
+    if (!x) { // if x undefined
+      if (getOrientation(width, height) === "landscape") x = width + (wallWidth / 2)
+      else x = MAX_BASE_WIDTH + (wallWidth / 2);
+    }
+    if (!y) { // if y undefined
       if (position === "down") {
         y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
       } else if (position === "up") {
