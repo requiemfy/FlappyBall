@@ -106,8 +106,11 @@ export namespace Entities {
             firstWallX = game.entities[wallIndex].body.position.x,
             //@remind refactor this redundant distance percent, also in physics.ts
             { screenWidth, screenHeight } = GameDimension.window(),
-            gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
-                        GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+
+            // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+            //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+            gameWidth = GameDimension.getWidth("now"),
+
             distance = gameWidth * WALL_DISTANCE,
             newWallX = firstWallX - distance;
           getFollowing.walls(game.entities, { x: newWallX });
