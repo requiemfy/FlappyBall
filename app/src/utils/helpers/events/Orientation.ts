@@ -46,7 +46,6 @@ export namespace Orientation {
         wallNum = wallIds.length;
 
     while(wallNum--) {
-      console.log("orient wall: " + wallNum); //@remind clear console
       const 
         wallKey = wallIds[wallNum],
         wall = game.entities[wallKey],
@@ -66,25 +65,10 @@ export namespace Orientation {
     Entities.swap(game, coords);
   }
 
-  //@todo fix orientation percentage
-  // issues: wall distance is affected by orientation wtf
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
-    // const 
-    //   { width, height, gameHeight } = window(),
-    //   [ prevWidth, prevGameHeight ] = [ height, width - NAVBAR_HEIGHT ], // this is tricky
-    //   updatedX = getUpdatedAxis(lastEntX, prevWidth, width),
-    //   updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
-    //   ////////////////////////////////////////////////////////////
-    //   console.log("\t----diemensions of x,y: " + width + ", " + height );
-    //   console.log("\t----lastPlayer of x,y: " + lastEntX + ", " + lastEntY );
-    //   console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
-    //   console.log("````````````````````````````````````````````````````````````");
-    //   ////////////////////////////////////////////////////////////
-
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(), // current screen dimensions
       { prevGameHeight, prevGameWidth } = getPrevGameDim(screenWidth, screenHeight),
-      // gameWidth = GAME_DIM_RATIO * gameHeight, // current game width //@remind clear here
       gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
                   GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
@@ -104,9 +88,6 @@ export namespace Orientation {
   const getPrevGameDim = (width: number, height: number) => {
     const
       prevHeight = width - NAVBAR_HEIGHT,
-
-      //@remind clear HERE
-      // prevWidth = GAME_DIM_RATIO * prevHeight;
       prevWidth = GameDimension.getOrientation(width, height) === "landscape" ?
                   GAME_PORTRAIT_WIDTH : GAME_LANDSCAPE_WIDTH;
       //if landscape now, then prev is portrait

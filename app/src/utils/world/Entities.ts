@@ -97,22 +97,19 @@ export namespace Entities {
     // special case, adding initial walls
     if (!game.entitiesInitialized) {
       for (let wallNum = 8; wallNum--;) {
-        console.log("create wall wall wall wall"); //@follow-up clear console
         // we need exactly wall obj to check changing value
         if (game.entities.wall.length > 0) {
           //@remind refactor this way of getting wall redundant
-          const wallCount = game.entities.wall.length,
-                wallIndex = game.entities.wall[wallCount-1],
-                firstWallX = game.entities[wallIndex].body.position.x,
-                //@remind refactor this redundant distance percent, also in physics.ts
-                { screenWidth, screenHeight } = GameDimension.window(),
-                gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
-                            GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
-                distance = gameWidth * WALL_DISTANCE,
-                newWallX = firstWallX - distance;
-  
-          console.log("first wall x: " + firstWallX); //@follow-up clear console
-          
+          const 
+            wallCount = game.entities.wall.length,
+            wallIndex = game.entities.wall[wallCount-1],
+            firstWallX = game.entities[wallIndex].body.position.x,
+            //@remind refactor this redundant distance percent, also in physics.ts
+            { screenWidth, screenHeight } = GameDimension.window(),
+            gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+                        GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+            distance = gameWidth * WALL_DISTANCE,
+            newWallX = firstWallX - distance;
           getFollowing.walls(game.entities, { x: newWallX });
         }
         else getFollowing.walls(game.entities);
@@ -145,8 +142,6 @@ export namespace Entities {
                 } 
               }),
               
-              //@audit orientation from landscape to protrait ruin wall
-
               wall = matter.wall,
               entity = {
                 body: wall.body, 
@@ -171,18 +166,9 @@ export namespace Entities {
 
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {
-    // remove the current bodies
-
-    for (let coords in dynamic.walls) {
-      console.log("wall coords: "); //@remind clear console
-      console.log(dynamic.walls[coords]);
-    }
-
     for (let entity in game.entities) {
-      console.log("SWAP ENTITY: " + entity); //@follow-up clear console
       if (!NOT_BODY.includes(entity)) {
         COMPOSITE.remove(world, game.entities[entity].body);
-        console.log("ENTITY REMOVED"); //@follow-up clear console
       }
     }
     ////////////////////////////////////////////////////////////

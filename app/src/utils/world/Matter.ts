@@ -86,14 +86,12 @@ export namespace Matter {
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(), //@note gameHeight is auto update
-      // wallWidth = width * 0.07, 
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
 
     if (!x) { // if x undefined
       if (GameDimension.getOrientation(screenWidth, screenHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
-      console.log("wall x is default"); //@follow-up clear console
     }
     if (!y) { // if y undefined
       if (position === "down") {
@@ -101,7 +99,6 @@ export namespace Matter {
       } else if (position === "up") {
         y = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
       }
-      console.log("wall y is default"); //@follow-up clear console
     }
     return createRectangle ({
       x: x,
