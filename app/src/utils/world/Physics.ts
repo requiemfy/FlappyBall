@@ -82,8 +82,8 @@ export namespace Physics {
       if (wallCount > 0) {
         const wallIndex = entities.wall[wallCount-1],
               lastWallX = entities[wallIndex].body.position.x,
-              { width, height } = window(),
-              gameWidth = getOrientation(width, height) === "landscape" ?
+              { screenWidth, screenHeight } = window(),
+              gameWidth = getOrientation(screenWidth, screenHeight) === "landscape" ?
                           GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
               distance = gameWidth - lastWallX,
               percentDist = distance / gameWidth;

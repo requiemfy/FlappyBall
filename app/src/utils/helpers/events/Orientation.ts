@@ -81,15 +81,15 @@ export namespace Orientation {
     //   ////////////////////////////////////////////////////////////
 
     const 
-      { width, height, gameHeight } = window(), // current screen dimensions
-      { prevGameHeight, prevGameWidth } = getPrevGameDim(width, height),
+      { screenWidth, screenHeight, gameHeight } = window(), // current screen dimensions
+      { prevGameHeight, prevGameWidth } = getPrevGameDim(screenWidth, screenHeight),
       // gameWidth = GAME_DIM_RATIO * gameHeight, // current game width //@remind clear here
-      gameWidth = getOrientation(width, height) === "landscape" ?
+      gameWidth = getOrientation(screenWidth, screenHeight) === "landscape" ?
                   GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////
-      console.log("\t----diemensions of x,y: " + width + ", " + height );
+      console.log("\t----diemensions of x,y: " + screenWidth + ", " + screenHeight );
       console.log("\t----prev game dim: x,y" + prevGameWidth + ", " + prevGameHeight );
       console.log("\t----current game dim: x,y" + gameWidth + ", " + gameHeight );
       console.log("\t----Entity of x,y: " + lastEntX + ", " + lastEntY );

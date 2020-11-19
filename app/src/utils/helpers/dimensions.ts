@@ -9,8 +9,8 @@ export default function window() {
     gameWidth = width - NAVBAR_HEIGHT;
 
   return {
-    width: width,
-    height: height,
+    screenWidth: width,
+    screenHeight: height,
     gameHeight: gameHeight,
     gameWidth: gameWidth //@remind clear this if possible
   };

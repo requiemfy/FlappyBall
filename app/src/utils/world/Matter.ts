@@ -26,7 +26,7 @@ export namespace Matter {
   // ================================ Matter entities ================================
   const createPlayer: DynamicBody = ({ x = 20, y = 100 }) => {
     const 
-      { width, height, gameHeight } = window(),
+      { screenWidth, screenHeight, gameHeight } = window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
     return createCircle ({
       x: x,
@@ -43,15 +43,15 @@ export namespace Matter {
       // NOTE: matter js CENTER x, y works differently.
       // Observe centerX, which is half of screen width
       // but we didn't explicity minus the half of floor width to it
-      { width, height, gameHeight } = window(),
-      [ floorWidth, floorHeight ] = [ width, gameHeight * FLOOR_HEIGHT ],
-      [ centerX, centerY ] = [ width / 2, gameHeight - (floorHeight / 2) ]
+      { screenWidth, screenHeight, gameHeight } = window(),
+      [ floorWidth, floorHeight ] = [ screenWidth, gameHeight * FLOOR_HEIGHT ],
+      [ centerX, centerY ] = [ screenWidth / 2, gameHeight - (floorHeight / 2) ]
     ////////////////////////////////////////////////////////////
     console.log("\nmatter.tsx: ");
     console.log("=========== ============== ===========");
     console.log("CREATING FLOOR");
-    console.log("\tDimensions width: " + width)
-    console.log("\tDimensions height: " + height)
+    console.log("\tDimensions width: " + screenWidth)
+    console.log("\tDimensions height: " + screenHeight)
     ////////////////////////////////////////////////////////////
     return createRectangle ({
       x: centerX,
@@ -66,10 +66,10 @@ export namespace Matter {
   
   const createRoof: StaticBody = () => {
     const 
-      { width, height, gameHeight } = window(),
-      roofWidth = width, 
+      { screenWidth, screenHeight, gameHeight } = window(),
+      roofWidth = screenWidth, 
       roofHeight = gameHeight * ROOF_HEIGHT,
-      centerX = width / 2, 
+      centerX = screenWidth / 2, 
       centerY = roofHeight / 2; // papatong lang sa nav bar pababa
     return createRectangle ({
       x: centerX,
@@ -85,13 +85,13 @@ export namespace Matter {
   //@remind clean here
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
-      { width, height, gameHeight } = window(), //@note gameHeight is auto update
+      { screenWidth, screenHeight, gameHeight } = window(), //@note gameHeight is auto update
       // wallWidth = width * 0.07, 
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
 
     if (!x) { // if x undefined
-      if (getOrientation(width, height) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
+      if (getOrientation(screenWidth, screenHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
       console.log("wall x is default"); //@follow-up clear console
     }
