@@ -1,7 +1,7 @@
 import { Bodies } from "matter-js";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
-import window, { getOrientation } from "../helpers/dimensions";
+import { GameDimension } from "../helpers/dimensions";
 import { 
   BODY, 
   engine, 
@@ -82,8 +82,8 @@ export namespace Physics {
       if (wallCount > 0) {
         const wallIndex = entities.wall[wallCount-1],
               lastWallX = entities[wallIndex].body.position.x,
-              { screenWidth, screenHeight } = window(),
-              gameWidth = getOrientation(screenWidth, screenHeight) === "landscape" ?
+              { screenWidth, screenHeight } = GameDimension.window(),
+              gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
                           GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
               distance = gameWidth - lastWallX,
               percentDist = distance / gameWidth;

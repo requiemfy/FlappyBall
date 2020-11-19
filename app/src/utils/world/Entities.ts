@@ -4,7 +4,8 @@ import { Matter } from "./Matter";
 import { Body } from 'matter-js';
 import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
-import window, { getOrientation } from "../helpers/dimensions";
+// import window, { getOrientation } from "../helpers/dimensions";
+import { GameDimension } from "../helpers/dimensions";
 
 export namespace Entities {
   export type All = Initial & Following;
@@ -104,8 +105,8 @@ export namespace Entities {
                 wallIndex = game.entities.wall[wallCount-1],
                 firstWallX = game.entities[wallIndex].body.position.x,
                 //@remind refactor this redundant distance percent, also in physics.ts
-                { screenWidth, screenHeight } = window(),
-                gameWidth = getOrientation(screenWidth, screenHeight) === "landscape" ?
+                { screenWidth, screenHeight } = GameDimension.window(),
+                gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
                             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
                 distance = gameWidth * WALL_DISTANCE,
                 newWallX = firstWallX - distance;

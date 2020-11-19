@@ -4,7 +4,8 @@ import FlappyBallGame from "../../..";
 import { GAME_DIM_RATIO, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
-import window, { getOrientation } from "../dimensions";
+// import window, { getOrientation } from "../dimensions";
+import { GameDimension } from "../dimensions";
 
 export namespace Orientation {
   type Event = (event: object) => void;
@@ -81,10 +82,10 @@ export namespace Orientation {
     //   ////////////////////////////////////////////////////////////
 
     const 
-      { screenWidth, screenHeight, gameHeight } = window(), // current screen dimensions
+      { screenWidth, screenHeight, gameHeight } = GameDimension.window(), // current screen dimensions
       { prevGameHeight, prevGameWidth } = getPrevGameDim(screenWidth, screenHeight),
       // gameWidth = GAME_DIM_RATIO * gameHeight, // current game width //@remind clear here
-      gameWidth = getOrientation(screenWidth, screenHeight) === "landscape" ?
+      gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
                   GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
@@ -106,7 +107,7 @@ export namespace Orientation {
 
       //@remind clear HERE
       // prevWidth = GAME_DIM_RATIO * prevHeight;
-      prevWidth = getOrientation(width, height) === "landscape" ?
+      prevWidth = GameDimension.getOrientation(width, height) === "landscape" ?
                   GAME_PORTRAIT_WIDTH : GAME_LANDSCAPE_WIDTH;
       //if landscape now, then prev is portrait
 

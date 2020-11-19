@@ -9,7 +9,7 @@ import {
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
 } from "./constants";
-import window, {getOrientation} from "../helpers/dimensions";
+import { GameDimension } from "../helpers/dimensions";
 
 export namespace Matter {
   type Coordinates = {x?: number, y?:number};
@@ -26,7 +26,7 @@ export namespace Matter {
   // ================================ Matter entities ================================
   const createPlayer: DynamicBody = ({ x = 20, y = 100 }) => {
     const 
-      { screenWidth, screenHeight, gameHeight } = window(),
+      { screenWidth, screenHeight, gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
     return createCircle ({
       x: x,
@@ -43,7 +43,7 @@ export namespace Matter {
       // NOTE: matter js CENTER x, y works differently.
       // Observe centerX, which is half of screen width
       // but we didn't explicity minus the half of floor width to it
-      { screenWidth, screenHeight, gameHeight } = window(),
+      { screenWidth, screenHeight, gameHeight } = GameDimension.window(),
       [ floorWidth, floorHeight ] = [ screenWidth, gameHeight * FLOOR_HEIGHT ],
       [ centerX, centerY ] = [ screenWidth / 2, gameHeight - (floorHeight / 2) ]
     ////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ export namespace Matter {
   
   const createRoof: StaticBody = () => {
     const 
-      { screenWidth, screenHeight, gameHeight } = window(),
+      { screenWidth, screenHeight, gameHeight } = GameDimension.window(),
       roofWidth = screenWidth, 
       roofHeight = gameHeight * ROOF_HEIGHT,
       centerX = screenWidth / 2, 
@@ -85,13 +85,13 @@ export namespace Matter {
   //@remind clean here
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
-      { screenWidth, screenHeight, gameHeight } = window(), //@note gameHeight is auto update
+      { screenWidth, screenHeight, gameHeight } = GameDimension.window(), //@note gameHeight is auto update
       // wallWidth = width * 0.07, 
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
 
     if (!x) { // if x undefined
-      if (getOrientation(screenWidth, screenHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
+      if (GameDimension.getOrientation(screenWidth, screenHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
       console.log("wall x is default"); //@follow-up clear console
     }
