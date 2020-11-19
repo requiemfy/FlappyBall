@@ -1,7 +1,7 @@
 
 import { Dimensions } from "react-native";
 import FlappyBallGame from "../../..";
-import { GAME_DIM_RATIO, MAX_BASE_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
+import { GAME_DIM_RATIO, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
 import window, { getOrientation } from "../dimensions";
@@ -45,11 +45,12 @@ export namespace Orientation {
         wallNum = wallIds.length;
 
     while(wallNum--) {
-        const 
-          wallKey = wallIds[wallNum],
-          wall = game.entities[wallKey],
-          { lastEntX, lastEntY } = lastEntityCoords(wall);
-        wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
+      console.log("orient wall: " + wallNum); //@remind clear console
+      const 
+        wallKey = wallIds[wallNum],
+        wall = game.entities[wallKey],
+        { lastEntX, lastEntY } = lastEntityCoords(wall);
+      wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
     }
 
     return wallsCoords;
@@ -84,13 +85,15 @@ export namespace Orientation {
       { prevGameHeight, prevGameWidth } = getPrevGameDim(width, height),
       // gameWidth = GAME_DIM_RATIO * gameHeight, // current game width //@remind clear here
       gameWidth = getOrientation(width, height) === "landscape" ?
-                  width : MAX_BASE_WIDTH,
+                  GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////
       console.log("\t----diemensions of x,y: " + width + ", " + height );
-      console.log("\t----lastPlayer of x,y: " + lastEntX + ", " + lastEntY );
-      console.log("\t----updatedPlayerCoords of x,y: " + updatedX + ", " + updatedY );
+      console.log("\t----prev game dim: x,y" + prevGameWidth + ", " + prevGameHeight );
+      console.log("\t----current game dim: x,y" + gameWidth + ", " + gameHeight );
+      console.log("\t----Entity of x,y: " + lastEntX + ", " + lastEntY );
+      console.log("\t----Update Entity of x,y: " + updatedX + ", " + updatedY );
       console.log("````````````````````````````````````````````````````````````");
       ////////////////////////////////////////////////////////////
 
@@ -104,7 +107,7 @@ export namespace Orientation {
       //@remind clear HERE
       // prevWidth = GAME_DIM_RATIO * prevHeight;
       prevWidth = getOrientation(width, height) === "landscape" ?
-                  MAX_BASE_WIDTH : width;
+                  GAME_PORTRAIT_WIDTH : GAME_LANDSCAPE_WIDTH;
       //if landscape now, then prev is portrait
 
 

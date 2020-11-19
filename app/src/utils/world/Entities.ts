@@ -1,5 +1,5 @@
 import Box from "../../components/Box";
-import { COMPOSITE, engine, world, BODY, NOT_BODY, BASE_WIDTH, MAX_BASE_WIDTH, WALL_DISTANCE } from "./constants";
+import { COMPOSITE, engine, world, BODY, NOT_BODY, WALL_DISTANCE, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH } from "./constants";
 import { Matter } from "./Matter";
 import { Body } from 'matter-js';
 import FlappyBallGame from "../..";
@@ -106,7 +106,7 @@ export namespace Entities {
                 //@remind refactor this redundant distance percent, also in physics.ts
                 { width, height } = window(),
                 gameWidth = getOrientation(width, height) === "landscape" ?
-                            width : MAX_BASE_WIDTH,
+                            GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
                 distance = gameWidth * WALL_DISTANCE,
                 newWallX = firstWallX - distance;
   
@@ -171,7 +171,12 @@ export namespace Entities {
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {
     // remove the current bodies
-    console.log("swap wall len: " + dynamic.walls.length) //@follow-up clear console
+
+    for (let coords in dynamic.walls) {
+      console.log("wall coords: "); //@remind clear console
+      console.log(dynamic.walls[coords]);
+    }
+
     for (let entity in game.entities) {
       console.log("SWAP ENTITY: " + entity); //@follow-up clear console
       if (!NOT_BODY.includes(entity)) {

@@ -9,9 +9,9 @@ import {
   ENGINE, 
   EVENTS, 
   COMPOSITE, 
-  BASE_WIDTH, 
-  MAX_BASE_WIDTH, 
-  WALL_DISTANCE 
+  WALL_DISTANCE, 
+  GAME_LANDSCAPE_WIDTH,
+  GAME_PORTRAIT_WIDTH
 } from "./constants";
 import { Entities } from './Entities';
 
@@ -84,7 +84,7 @@ export namespace Physics {
               lastWallX = entities[wallIndex].body.position.x,
               { width, height } = window(),
               gameWidth = getOrientation(width, height) === "landscape" ?
-                          width : MAX_BASE_WIDTH,
+                          GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
               distance = gameWidth - lastWallX,
               percentDist = distance / gameWidth;
         if (percentDist >= WALL_DISTANCE) Entities.getFollowing.walls(entities);

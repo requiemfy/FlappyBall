@@ -6,9 +6,8 @@ import {
   world, 
   WORLD, 
   NAVBAR_HEIGHT,
-  BASE_WIDTH,
-  MAX_BASE_WIDTH,
-  BASE_HEIGHT
+  GAME_LANDSCAPE_WIDTH,
+  GAME_PORTRAIT_WIDTH,
 } from "./constants";
 import window, {getOrientation} from "../helpers/dimensions";
 
@@ -86,14 +85,14 @@ export namespace Matter {
   //@remind clean here
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
-      { width, height, gameHeight } = window(),
+      { width, height, gameHeight } = window(), //@note gameHeight is auto update
       // wallWidth = width * 0.07, 
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
 
     if (!x) { // if x undefined
-      if (getOrientation(width, height) === "landscape") x = width + (wallWidth / 2)
-      else x = MAX_BASE_WIDTH + (wallWidth / 2);
+      if (getOrientation(width, height) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
+      else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
       console.log("wall x is default"); //@follow-up clear console
     }
     if (!y) { // if y undefined

@@ -17,11 +17,16 @@ const BODIES = Matter.Bodies,
       ROOF_HEIGHT = 0.05,
       NAVBAR_HEIGHT = 50,
 
-      { width, height } = Dimensions.get("window"),
-      BASE_HEIGHT = width > height ? width : height,
-      BASE_WIDTH = width > height ? height : width,
-      MAX_BASE_WIDTH = BASE_HEIGHT * 2, // this is the max width in landscape proportion
-      GAME_DIM_RATIO = BASE_WIDTH / BASE_HEIGHT, // not used anymore
+      { width, height } = Dimensions.get("window"), 
+
+      //@note landscape game dims
+      GAME_LANDSCAPE_HEIGHT = (width > height ? height : width) - NAVBAR_HEIGHT,
+      GAME_LANDSCAPE_WIDTH = (width > height ? width : height),
+      //@note getting game dim ration - in landscape as fixed base
+      GAME_DIM_RATIO = GAME_LANDSCAPE_HEIGHT / GAME_LANDSCAPE_WIDTH,
+      //@note portrait game dims
+      GAME_PORTRAIT_HEIGHT = (width > height ? width : height) - NAVBAR_HEIGHT,
+      GAME_PORTRAIT_WIDTH = GAME_PORTRAIT_HEIGHT / GAME_DIM_RATIO,
 
       WALL_DISTANCE = 0.10,
       NOT_BODY = ["physics", "gravity", "wall", "distance",];
@@ -43,9 +48,10 @@ export {
   ROOF_HEIGHT,
   NAVBAR_HEIGHT,
 
-  BASE_HEIGHT,
-  BASE_WIDTH,
-  MAX_BASE_WIDTH,
+  // GAME_LANDSCAPE_HEIGHT,
+  GAME_LANDSCAPE_WIDTH,
+  // GAME_PORTRAIT_HEIGHT,
+  GAME_PORTRAIT_WIDTH,
   GAME_DIM_RATIO,
 
   WALL_DISTANCE,
