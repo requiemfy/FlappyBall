@@ -21,10 +21,10 @@ const BODIES = Matter.Bodies,
       BASE_HEIGHT = width > height ? width : height,
       BASE_WIDTH = width > height ? height : width,
       MAX_BASE_WIDTH = BASE_HEIGHT * 2, // this is the max width in landscape proportion
-      GAME_DIM_RATIO = BASE_WIDTH / BASE_HEIGHT,
+      GAME_DIM_RATIO = BASE_WIDTH / BASE_HEIGHT, // not used anymore
 
       WALL_DISTANCE = 0.10,
-      NOT_BODY = ["physics", "gravity", "wall", "distance"];
+      NOT_BODY = ["physics", "gravity", "wall", "distance",];
 
 
 export {

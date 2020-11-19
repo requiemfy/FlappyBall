@@ -91,11 +91,10 @@ export namespace Matter {
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.4;
 
-    //@audit-info Check why GAME_DIM_RATION is not used here in creating wall by default here
-      
     if (!x) { // if x undefined
       if (getOrientation(width, height) === "landscape") x = width + (wallWidth / 2)
       else x = MAX_BASE_WIDTH + (wallWidth / 2);
+      console.log("wall x is default"); //@follow-up clear console
     }
     if (!y) { // if y undefined
       if (position === "down") {
@@ -103,6 +102,7 @@ export namespace Matter {
       } else if (position === "up") {
         y = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
       }
+      console.log("wall y is default"); //@follow-up clear console
     }
     return createRectangle ({
       x: x,
@@ -166,6 +166,7 @@ export namespace Matter {
       wall: createWall(bodies.wall),
     };
     WORLD.add(world, matter.wall.body);
+    console.log("world.bodies.length: " + world.bodies.length);
     return matter;
   }
   // ======================= Matter General Functions/Getters =======================

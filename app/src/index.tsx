@@ -15,6 +15,7 @@ interface Game {
   entities: Entities.Initial & Entities.Following;
   paused: boolean;
   over: boolean;
+  entitiesInitialized: boolean;
   
   pauseOrResume(): boolean; // toggle true/false and pass to paused
   onEvent(e: EventType): void;
@@ -26,11 +27,13 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   entities: any; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
+  entitiesInitialized: boolean;
 
   constructor(props: object) {
     super(props);
     this.paused = false; 
     this.over = false;
+    this.entitiesInitialized = false;
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);

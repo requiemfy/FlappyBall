@@ -1,10 +1,10 @@
 
 import { Dimensions } from "react-native";
 import FlappyBallGame from "../../..";
-import { GAME_DIM_RATIO, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
+import { GAME_DIM_RATIO, MAX_BASE_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
-import window from "../dimensions";
+import window, { getOrientation } from "../dimensions";
 
 export namespace Orientation {
   type Event = (event: object) => void;
@@ -42,7 +42,7 @@ export namespace Orientation {
   const orientWallCoords = (game: any) => {
     let wallsCoords = [],
         wallIds = game.entities.wall,
-        wallNum = game.entities.wall.length;
+        wallNum = wallIds.length;
 
     while(wallNum--) {
         const 
@@ -81,10 +81,11 @@ export namespace Orientation {
 
     const 
       { width, height, gameHeight } = window(), // current screen dimensions
-      { prevGameHeight, prevGameWidth } = getPrevGameDim(width),
-      currGameWidth = GAME_DIM_RATIO * gameHeight, // current game width
-
-      updatedX = getUpdatedAxis(lastEntX, prevGameWidth, currGameWidth),
+      { prevGameHeight, prevGameWidth } = getPrevGameDim(width, height),
+      // gameWidth = GAME_DIM_RATIO * gameHeight, // current game width //@remind clear here
+      gameWidth = getOrientation(width, height) === "landscape" ?
+                  width : MAX_BASE_WIDTH,
+      updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////
       console.log("\t----diemensions of x,y: " + width + ", " + height );
@@ -96,10 +97,17 @@ export namespace Orientation {
     return { x: updatedX, y: updatedY };
   }
 
-  const getPrevGameDim = (width: number) => {
+  const getPrevGameDim = (width: number, height: number) => {
     const
       prevHeight = width - NAVBAR_HEIGHT,
-      prevWidth = GAME_DIM_RATIO * prevHeight;
+
+      //@remind clear HERE
+      // prevWidth = GAME_DIM_RATIO * prevHeight;
+      prevWidth = getOrientation(width, height) === "landscape" ?
+                  MAX_BASE_WIDTH : width;
+      //if landscape now, then prev is portrait
+
+
     return { prevGameHeight: prevHeight, prevGameWidth: prevWidth }
   }
   

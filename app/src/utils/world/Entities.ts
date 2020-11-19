@@ -72,48 +72,53 @@ export namespace Entities {
           color: player.color, 
           renderer: Circle,
         },
-        // floor: { 
-        //   body: floor.body, 
-        //   size: [floor.width, floor.height], 
-        //   borderRadius: floor.borderRadius,
-        //   color: floor.color, 
-        //   renderer: Box,
-        // },
-        // roof: { 
-        //   body: roof.body, 
-        //   size: [roof.width, roof.height], 
-        //   borderRadius: roof.borderRadius,
-        //   color: roof.color, 
-        //   renderer: Box,
-        // },
+        floor: { 
+          body: floor.body, 
+          size: [floor.width, floor.height], 
+          borderRadius: floor.borderRadius,
+          color: floor.color, 
+          renderer: Box,
+        },
+        roof: { 
+          body: roof.body, 
+          size: [roof.width, roof.height], 
+          borderRadius: roof.borderRadius,
+          color: roof.color, 
+          renderer: Box,
+        },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity. this is array of wall ids
         distance: 0, // testing purpose
       }
     game.entities = entities;
     
+    
     // special case, adding initial walls
-    for (let wallNum = 8; wallNum--;) {
-      console.log("create wall wall wall wall")
-      if (game.entities.wall.length > 0) {
-        //@remind refactor this way of getting wall redundant
-        //@audit-info check GAME_DIM_RATIO here
-        const wallCount = game.entities.wall.length,
-              wallIndex = game.entities.wall[wallCount-1],
-              firstWallX = game.entities[wallIndex].body.position.x,
-              //@remind refactor this redundant distance percent, also in physics.ts
-              { width, height } = window(),
-              gameWidth = getOrientation(width, height) === "landscape" ?
-                          width : MAX_BASE_WIDTH,
-              distance = gameWidth * WALL_DISTANCE,
-              newWallX = firstWallX - distance;
-
-        console.log("first wall x: " + firstWallX);
-        
-        getFollowing.walls(game.entities, { x: newWallX });
+    if (!game.entitiesInitialized) {
+      for (let wallNum = 8; wallNum--;) {
+        console.log("create wall wall wall wall"); //@follow-up clear console
+        // we need exactly wall obj to check changing value
+        if (game.entities.wall.length > 0) {
+          //@remind refactor this way of getting wall redundant
+          const wallCount = game.entities.wall.length,
+                wallIndex = game.entities.wall[wallCount-1],
+                firstWallX = game.entities[wallIndex].body.position.x,
+                //@remind refactor this redundant distance percent, also in physics.ts
+                { width, height } = window(),
+                gameWidth = getOrientation(width, height) === "landscape" ?
+                            width : MAX_BASE_WIDTH,
+                distance = gameWidth * WALL_DISTANCE,
+                newWallX = firstWallX - distance;
+  
+          console.log("first wall x: " + firstWallX); //@follow-up clear console
+          
+          getFollowing.walls(game.entities, { x: newWallX });
+        }
+        else getFollowing.walls(game.entities);
       }
-      else getFollowing.walls(game.entities);
+      game.entitiesInitialized = true;
     }
+    
   }
 
   // used in Physics.ts for wall
@@ -127,7 +132,8 @@ export namespace Entities {
       let wallPosition = "down",
           wallEachTime = [1, 2];
       return function (entities: All, coords?: Coordinates) {
-        let numOfwall = wallEachTime[Math.floor(Math.random()*2)];
+        let notDefault = coords !== undefined ? coords.y !== undefined : false;
+        let numOfwall =  notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)]; //@note 1 wall only if not defualt creation
         while (numOfwall--) {
           (function getWall(){
             const 
@@ -137,7 +143,9 @@ export namespace Entities {
                   position: wallPosition, // this is disregarded if we have coords
                 } 
               }),
-      
+              
+              //@audit orientation from landscape to protrait ruin wall
+
               wall = matter.wall,
               entity = {
                 body: wall.body, 
@@ -163,9 +171,12 @@ export namespace Entities {
   // used in orientation change
   export const swap: Recreation = (game, dynamic) => {
     // remove the current bodies
+    console.log("swap wall len: " + dynamic.walls.length) //@follow-up clear console
     for (let entity in game.entities) {
+      console.log("SWAP ENTITY: " + entity); //@follow-up clear console
       if (!NOT_BODY.includes(entity)) {
-        COMPOSITE.remove(world, game.entities[entity].body)
+        COMPOSITE.remove(world, game.entities[entity].body);
+        console.log("ENTITY REMOVED"); //@follow-up clear console
       }
     }
     ////////////////////////////////////////////////////////////
