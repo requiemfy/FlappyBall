@@ -87,7 +87,7 @@ export namespace Matter {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(), //@note gameHeight is auto update
       wallWidth = gameHeight * 0.07, 
-      wallHeight = gameHeight * 0.4;
+      wallHeight = gameHeight * 0.2;
 
     if (!x) { // if x undefined
       if (GameDimension.getOrientation(screenWidth, screenHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)

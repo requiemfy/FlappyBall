@@ -71,25 +71,29 @@ export namespace Physics {
     }
 
     const showWall = () => {
-      // entities.distance++;
-      // if (entities.distance === 200) {
-      //   // Entities.getFollowing(entities) // wall //@remind clear this
-      //   Entities.getFollowing.walls(entities) // wall
-
-      //   entities.distance = 0;
-      // }
       let wallCount = entities.wall.length;
-      if (wallCount > 0) {
-        const wallIndex = entities.wall[wallCount-1],
-              lastWallX = entities[wallIndex].body.position.x,
+      if (wallCount > 0) { //@remind refactor this
+        const lastIndex = entities.wall[wallCount-1], // issue here wall index switches sometimes
+              firstIndex = entities.wall[0],
+              lastWallX = entities[lastIndex].body.position.x,
+              firstWallX = entities[firstIndex].body.position.x,
               { screenWidth, screenHeight } = GameDimension.window(),
               gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
                           GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
-              distance = gameWidth - lastWallX,
-              percentDist = distance / gameWidth;
-        if (percentDist >= WALL_DISTANCE) Entities.getFollowing.walls(entities);
+              // last wall
+              lastDistance = gameWidth - lastWallX,
+              percentLastDist = lastDistance / gameWidth,
+              // first wall
+              firstDistance = gameWidth - firstWallX,
+              percentFirstDist = firstDistance / gameWidth;
+        if (percentLastDist >= WALL_DISTANCE && percentFirstDist >= WALL_DISTANCE) {
+          console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE")
+          Entities.getFollowing.walls(entities);
+        }
       }
-      else Entities.getFollowing.walls(entities); // 1st wall
+      // else {
+      //   Entities.getFollowing.walls(entities); // 1st wall
+      // }
     }
 
     moveWalls();

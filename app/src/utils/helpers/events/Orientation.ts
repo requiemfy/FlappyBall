@@ -50,6 +50,7 @@ export namespace Orientation {
         wallKey = wallIds[wallNum],
         wall = game.entities[wallKey],
         { lastEntX, lastEntY } = lastEntityCoords(wall);
+      console.log("ORIENTATION WALL " + wallKey);
       wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
     }
 
