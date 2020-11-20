@@ -45,9 +45,11 @@ export namespace Orientation {
         wallIds = game.entities.wall,
         wallNum = wallIds.length;
 
-    while(wallNum--) {
+    // while(wallNum--) {
+    for(let i = 0; i < wallNum; i++) {
       const 
-        wallKey = wallIds[wallNum],
+        // wallKey = wallIds[wallNum],
+        wallKey = wallIds[i],
         wall = game.entities[wallKey],
         { lastEntX, lastEntY } = lastEntityCoords(wall);
       console.log("ORIENTATION WALL " + wallKey);
@@ -70,8 +72,9 @@ export namespace Orientation {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(), // current screen dimensions
       { prevGameHeight, prevGameWidth } = getPrevGameDim(screenWidth, screenHeight),
-      gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
-                  GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+      // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+      //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+      gameWidth = GameDimension.getWidth("now"),
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////

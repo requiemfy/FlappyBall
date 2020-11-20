@@ -1,7 +1,7 @@
 import { Dimensions } from "react-native"
 import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT } from "../world/constants";
 
-//@remind make namespace
+//@todo create types everywhere
 export namespace GameDimension {
 
   export function window() {
@@ -14,7 +14,7 @@ export namespace GameDimension {
       screenWidth: width,
       screenHeight: height,
       gameHeight: gameHeight,
-      gameWidth: gameWidth //@remind clear this if possible
+      // gameWidth: gameWidth //@remind clear this if possible
     };
   }
   
@@ -22,7 +22,6 @@ export namespace GameDimension {
     return width > height ? "landscape" : "portrait";
   }
 
-  //@todo now use this to other
   type When = { now: string, previous: string };
   type GameWidth = (when: keyof When) => number;
   export const getWidth: GameWidth = (() => {

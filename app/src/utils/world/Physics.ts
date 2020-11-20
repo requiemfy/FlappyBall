@@ -78,15 +78,17 @@ export namespace Physics {
               lastWallX = entities[lastIndex].body.position.x,
               firstWallX = entities[firstIndex].body.position.x,
               { screenWidth, screenHeight } = GameDimension.window(),
-              gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
-                          GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+              // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+              //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+              gameWidth = GameDimension.getWidth("now"),
               // last wall
               lastDistance = gameWidth - lastWallX,
-              percentLastDist = lastDistance / gameWidth,
+              percentLastDist = lastDistance / gameWidth;
               // first wall
-              firstDistance = gameWidth - firstWallX,
-              percentFirstDist = firstDistance / gameWidth;
-        if (percentLastDist >= WALL_DISTANCE && percentFirstDist >= WALL_DISTANCE) {
+              // firstDistance = gameWidth - firstWallX,
+              // percentFirstDist = firstDistance / gameWidth;
+        // if (percentLastDist >= WALL_DISTANCE && percentFirstDist >= WALL_DISTANCE) {
+        if (percentLastDist >= WALL_DISTANCE) {
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE")
           Entities.getFollowing.walls(entities);
         }
