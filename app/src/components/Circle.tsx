@@ -3,16 +3,16 @@
 import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
-interface BoxProps {
+interface CircleProps {
   size:number,
   body:any, 
   borderRadius:number,
   color:string
 }
-interface BoxState {}
+interface CircleState {}
 
 // PureComponent won't work
-export default class Circle extends React.Component<BoxProps, BoxState> {
+export default class Circle extends React.Component<CircleProps, CircleState> {
   componentWillUnmount() {
     console.log("UNMOUNTING....");
   }

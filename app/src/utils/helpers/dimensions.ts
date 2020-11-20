@@ -23,9 +23,10 @@ export namespace GameDimension {
   }
 
   //@todo now use this to other
-  export const getWidth = (() => {
+  type When = { now: string, previous: string };
+  type GameWidth = (when: keyof When) => number;
+  export const getWidth: GameWidth = (() => {
     type DimParam = (dim1: number, dim2: number) => number;
-    type WhenParam = { now: string, previous: string };
 
     const getDim: DimParam = (dim1, dim2) => {
       const { screenWidth, screenHeight } = GameDimension.window(),
@@ -34,7 +35,7 @@ export namespace GameDimension {
         else return dim2;
     }
 
-    return (when: keyof WhenParam) => {
+    return (when: keyof When) => {
       if (when === "now") return getDim(GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH)
       else return getDim(GAME_PORTRAIT_WIDTH, GAME_LANDSCAPE_WIDTH);
     }
