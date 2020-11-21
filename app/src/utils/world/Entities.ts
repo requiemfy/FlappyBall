@@ -37,7 +37,7 @@ export namespace Entities {
   }
 
   export type Following = {
-    [key: number]: Physical; // special purpose for wall
+    [key: number]: Physical; // special purpose for following wall
   }
 
   // used in index, physics

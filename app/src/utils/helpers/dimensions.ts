@@ -14,7 +14,6 @@ export namespace GameDimension {
       screenWidth: width,
       screenHeight: height,
       gameHeight: gameHeight,
-      // gameWidth: gameWidth //@remind clear this if possible
     };
   }
   

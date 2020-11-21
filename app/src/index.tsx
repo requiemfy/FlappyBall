@@ -143,11 +143,11 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           onPressOut={ this.playerFall }>
            {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
-          <View style={{ flex: 1 }}> 
+          <View style={{ flex: 1, width: "100%", backgroundColor: "blue", }}> 
             <GameEngine
               ref={ (ref) => { this.engine = ref; } }
               onEvent={ this.onEvent }
-              style={{ flex: 1 }}
+              style={{ flex: 1, width: "100%" }}
               systems={ [Physics.system] }
               entities={ this.entities } 
               running={ this.paused } />

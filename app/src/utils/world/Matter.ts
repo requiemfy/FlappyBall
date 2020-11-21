@@ -24,7 +24,7 @@ export namespace Matter {
   type InitialBodies = (bodies?: InitialParams) => MatterProps;
 
   // ================================ Matter entities ================================
-  const createPlayer: DynamicBody = ({ x = 20, y = 100 }) => {
+  const createPlayer: DynamicBody = ({ x = 40, y = 100 }) => {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -82,7 +82,7 @@ export namespace Matter {
     });
   }
   
-  //@remind clean here
+  //@todo put type in todo to limit up down string val
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(), //@note gameHeight is auto update

@@ -39,69 +39,78 @@ export namespace Physics {
   };
 
   // special relativity
-  const wallRelativity = (entities: Entities.All) => { //@remind refactor nested functions
-    // sadly, i need to pass whole entities obj for the sake of pass by reference
-    // so that i can delete an entity of it
-    const isWallOutOfVision = () => {
-      const wallIndex = entities.wall[0], wall = entities[wallIndex];
-      // console.log("LAST WALL X: " + (wall.body.position.x + (wall.size[0] / 2)));
+  //@audit closure then type this
+  const wallRelativity = (() => { //@remind refactor nested functions
+    // type Params = (entities: Entities.All) => boolean | void;
+    type Ent = {get: Entities.All | any, set: (ent: Entities.All) => void};
+    const entities: Ent = {
+      get: null,
+      set: function (entities: Entities.All) {this.get = entities},
+    };
+
+
+
+    const moveWalls = () => {
+      let wallLen = entities.get.wall.length, wallIndex, wall;
+      (function move(){
+        if (wallLen > 0) {
+          wallIndex = entities.get.wall[wallLen-1];
+          wall = entities.get[wallIndex];
+          wallLen--;
+          BODY.translate( wall.body, {x: -1, y: 0} );
+          move();
+        }
+      })();
+
+      // if (wallLen > 0) {
+      //   wallIndex = entities.wall[wallLen-1];
+      //   wall = entities[wallIndex];
+      //   wallLen--;
+      //   BODY.translate( wall.body, {x: -1, y: 0} );
+      //   moveWalls();
+      // }
+    }
+    
+    const isWallOutOfVision = () => { // sadly, i need to pass whole entities obj for the sake of pass by reference so that i can delete an entity of it
+      const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
         COMPOSITE.remove(world, wall.body);
-        delete entities[wallIndex]; // this is necessary
+        delete entities.get[wallIndex]; // this is necessary
         return true;
       }
       return false;
     }
 
-    var len = entities.wall.length, wallIndex, wall;
-    const moveWalls = () => {
-      if (len > 0) {
-        wallIndex = entities.wall[len-1];
-        wall = entities[wallIndex];
-        len--;
-        BODY.translate( wall.body, {x: -1, y: 0} );
-        moveWalls();
-      }
-    }
+  
 
     const removeWall = () => {
-      if ( entities.wall.length > 0 && isWallOutOfVision()) {
-        entities.wall.splice(0, 1); // remove wall id
+      if ( entities.get.wall.length > 0 && isWallOutOfVision()) {
+        entities.get.wall.splice(0, 1); // remove wall id
       }
     }
 
-    const showWall = () => {
-      let wallCount = entities.wall.length;
+    const showNextWall = () => {
+      let wallCount = entities.get.wall.length;
       if (wallCount > 0) { //@remind refactor this
-        const lastIndex = entities.wall[wallCount-1], // issue here wall index switches sometimes
-              firstIndex = entities.wall[0],
-              lastWallX = entities[lastIndex].body.position.x,
-              firstWallX = entities[firstIndex].body.position.x,
-              { screenWidth, screenHeight } = GameDimension.window(),
-              // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
-              //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
+        const lastIndex = entities.get.wall[wallCount-1], // issue here wall index switches sometimes
+              lastWallX = entities.get[lastIndex].body.position.x,
               gameWidth = GameDimension.getWidth("now"),
-              // last wall
               lastDistance = gameWidth - lastWallX,
               percentLastDist = lastDistance / gameWidth;
-              // first wall
-              // firstDistance = gameWidth - firstWallX,
-              // percentFirstDist = firstDistance / gameWidth;
-        // if (percentLastDist >= WALL_DISTANCE && percentFirstDist >= WALL_DISTANCE) {
         if (percentLastDist >= WALL_DISTANCE) {
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE")
-          Entities.getFollowing.walls(entities);
+          Entities.getFollowing.walls(entities.get);
         }
       }
-      // else {
-      //   Entities.getFollowing.walls(entities); // 1st wall
-      // }
     }
 
-    moveWalls();
-    removeWall();
-    showWall();
-  }
+    return (ent: Entities.All) => {
+      entities.set(ent);
+      moveWalls();
+      removeWall();
+      showNextWall();
+    }
+  })();
 
 
 
@@ -122,12 +131,6 @@ export namespace Physics {
       setTimeout(() => game.engine.stop(), 0);
       // -----------------------------------------------------------
       gameOverAlert();
-      ////////////////////////////////////////////////////////////
-      // console.log("\nindex.tsx:")
-      // console.log("--------------------------");
-      // console.log("STOPPING GAME ENGINE!! EXPECT RENDERING");
-      // console.log("--------------------------\n");
-      ////////////////////////////////////////////////////////////
     });
   }
   
