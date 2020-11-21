@@ -39,16 +39,13 @@ export namespace Physics {
   };
 
   // special relativity
-  //@audit closure then type this
+  //@todo closure then type this
   const wallRelativity = (() => { //@remind refactor nested functions
-    // type Params = (entities: Entities.All) => boolean | void;
     type Ent = {get: Entities.All | any, set: (ent: Entities.All) => void};
     const entities: Ent = {
       get: null,
       set: function (entities: Entities.All) {this.get = entities},
     };
-
-
 
     const moveWalls = () => {
       let wallLen = entities.get.wall.length, wallIndex, wall;
@@ -80,8 +77,6 @@ export namespace Physics {
       }
       return false;
     }
-
-  
 
     const removeWall = () => {
       if ( entities.get.wall.length > 0 && isWallOutOfVision()) {

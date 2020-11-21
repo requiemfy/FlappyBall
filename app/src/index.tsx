@@ -9,6 +9,9 @@ import { Entities } from './utils/world/Entities';
 import { Matter } from './utils/world/Matter';
 import { Physics } from './utils/world/Physics';
 
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+
+
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
@@ -129,11 +132,10 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
             //   console.log(this.entities.wall);
             // }
           }>
-          <View style={{ 
+          <View style={{ //@todo check this in real device
             backgroundColor:"yellow",
             width: "100%",
             height: NAVBAR_HEIGHT,
-            top: 0,
             }}></View>
         </TouchableWithoutFeedback>
 
@@ -143,15 +145,21 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           onPressOut={ this.playerFall }>
            {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
-          <View style={{ flex: 1, width: "100%", backgroundColor: "blue", }}> 
-            <GameEngine
-              ref={ (ref) => { this.engine = ref; } }
-              onEvent={ this.onEvent }
-              style={{ flex: 1, width: "100%" }}
-              systems={ [Physics.system] }
-              entities={ this.entities } 
-              running={ this.paused } />
-            <StatusBar hidden />
+          <View style={{ 
+            flex: 1, 
+            backgroundColor: "pink", }}> 
+            <View style={{ 
+              flex: 1, 
+              backgroundColor: "blue", }}>
+              <GameEngine
+                ref={ (ref) => { this.engine = ref; } }
+                onEvent={ this.onEvent }
+                style={{ flex: 1, }}
+                systems={ [Physics.system] }
+                entities={ this.entities } 
+                running={ this.paused } />
+              <StatusBar hidden />
+            </View>
           </View>
         </TouchableWithoutFeedback>
         {/* ------------------------------------------------------------ */}

@@ -57,10 +57,14 @@ export namespace Entities {
 
   export const getInitial: Bodies = (game, dynamic) => {
     const
-      matter = Matter.getInitial(dynamic),
-      player = matter.player,
-      floor = matter.floor,
-      roof = matter.roof,
+      // matter = Matter.getInitial(dynamic),
+      // player = matter.player,
+      // floor = matter.floor,
+      // roof = matter.roof,
+      player = Matter.getPlayer(dynamic), //@note player is auto extracted in Matter.ts
+      floor = Matter.getFloor(),
+      roof = Matter.getRoof(),
+
       entities = { 
         physics: { 
           engine: engine, 

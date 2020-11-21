@@ -68,6 +68,7 @@ export namespace Matter {
     const 
       { screenWidth, screenHeight, gameHeight } = GameDimension.window(),
       roofWidth = screenWidth, 
+
       roofHeight = gameHeight * ROOF_HEIGHT,
       centerX = screenWidth / 2, 
       centerY = roofHeight / 2; // papatong lang sa nav bar pababa
@@ -135,28 +136,65 @@ export namespace Matter {
     }
   }
 
-  // export const getInitial: InitialBodies = (bodies) => { // required params
-  // bodies = { player: {} } is necessary for being optional => {} | undefined
-  // we can extract property from undefined obj
+
+  // export const getInitial: InitialBodies = (bodies = { player: {} }) => { 
+    
+  //   const 
+  //     player = bodies.player,
+  //     matter = {
+  //       player: createPlayer(player),
+  //       floor: createFloor({}), // object is required, but params are optional
+  //       roof: createRoof({}),
+  //     }
+  //   WORLD.add(world, [matter.player.body, matter.floor.body, matter.roof.body]);
+  //   ////////////////////////////////////////////////////////////
+  //   console.log("----------- GETTING MATTER -----------");
+  //   console.log("world.bodies.length: " + world.bodies.length);
+  //   console.log("=========== ============== ===========");
+  //   ////////////////////////////////////////////////////////////
+  //   return matter;
+  // }
+
+  // we can't extract property from undefined obj
   // but we can extract undefined props from obj
-  export const getInitial: InitialBodies = (bodies = { player: {} }) => {
-    const 
-      player = bodies.player,
-      matter = {
-        player: createPlayer(player),
-        floor: createFloor({}), // object is required, but params are optional
-        roof: createRoof({}),
-      }
-    WORLD.add(world, [matter.player.body, matter.floor.body, matter.roof.body]);
-    ////////////////////////////////////////////////////////////
-    console.log("----------- GETTING MATTER -----------");
-    console.log("world.bodies.length: " + world.bodies.length);
-    console.log("=========== ============== ===========");
-    ////////////////////////////////////////////////////////////
-    return matter;
+  // won't work                         { player } - because we access x,y from player which is possibly undef obj
+  export const getPlayer = (body = { player: {} }) => {
+    // @todo we have issue here, if dynamic is undefined this will work
+    // but if dynamic is eg. { wall: {} } which is not undefined, i assume default val wont work 
+    const player = createPlayer(body.player);
+    WORLD.add(world, player.body);
+    console.log("Creating Player - world.bodies.length: " + world.bodies.length);
+    return player;
+  }
+  export const getRoof = () => {
+    const roof = createRoof({});
+    WORLD.add(world, roof.body);
+    console.log("Creating Roof - world.bodies.length: " + world.bodies.length);
+    return roof;
+  }
+  export const getFloor = () => {
+    const floor = createFloor({});
+    WORLD.add(world, floor.body);
+    console.log("Creating Floor - world.bodies.length: " + world.bodies.length);
+    return floor;
+  }
+  export const getWall = (body = { wall: {} }) => { // @todo same issue to player
+    const wall = createWall(body.wall);
+    WORLD.add(world, wall.body);
+    console.log("Creating Wall - world.bodies.length: " + world.bodies.length);
+    return wall;
   }
 
   // used in entities
+  // export const getFollowing: FollowingBodies = (bodies = { wall: {} }) => {
+  //   const matter = {
+  //     wall: createWall(bodies.wall),
+  //   };
+  //   WORLD.add(world, matter.wall.body);
+  //   console.log("world.bodies.length: " + world.bodies.length);
+  //   return matter;
+  // }
+  // @todo refactor this fn
   export const getFollowing: FollowingBodies = (bodies = { wall: {} }) => {
     const matter = {
       wall: createWall(bodies.wall),

@@ -1,4 +1,5 @@
-import { Dimensions } from "react-native"
+import { Dimensions } from "react-native";
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT } from "../world/constants";
 
 //@todo create types everywhere
