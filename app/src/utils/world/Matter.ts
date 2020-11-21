@@ -158,10 +158,8 @@ export namespace Matter {
   // we can't extract property from undefined obj
   // but we can extract undefined props from obj
   // won't work                         { player } - because we access x,y from player which is possibly undef obj
-  export const getPlayer = (body = { player: {} }) => {
-    // @todo we have issue here, if dynamic is undefined this will work
-    // but if dynamic is eg. { wall: {} } which is not undefined, i assume default val wont work 
-    const player = createPlayer(body.player);
+  export const getPlayer = (coords = {}) => {
+    const player = createPlayer(coords);
     WORLD.add(world, player.body);
     console.log("Creating Player - world.bodies.length: " + world.bodies.length);
     return player;
@@ -178,8 +176,8 @@ export namespace Matter {
     console.log("Creating Floor - world.bodies.length: " + world.bodies.length);
     return floor;
   }
-  export const getWall = (body = { wall: {} }) => { // @todo same issue to player
-    const wall = createWall(body.wall);
+  export const getWall = (prop = {}) => { // @todo same issue to player
+    const wall = createWall(prop);
     WORLD.add(world, wall.body);
     console.log("Creating Wall - world.bodies.length: " + world.bodies.length);
     return wall;
@@ -195,14 +193,14 @@ export namespace Matter {
   //   return matter;
   // }
   // @todo refactor this fn
-  export const getFollowing: FollowingBodies = (bodies = { wall: {} }) => {
-    const matter = {
-      wall: createWall(bodies.wall),
-    };
-    WORLD.add(world, matter.wall.body);
-    console.log("world.bodies.length: " + world.bodies.length);
-    return matter;
-  }
+  // export const getFollowing: FollowingBodies = (bodies = { wall: {} }) => {
+  //   const matter = {
+  //     wall: createWall(bodies.wall),
+  //   };
+  //   WORLD.add(world, matter.wall.body);
+  //   console.log("world.bodies.length: " + world.bodies.length);
+  //   return matter;
+  // }
   // ======================= Matter General Functions/Getters =======================
 
 }

@@ -55,13 +55,13 @@ export namespace Entities {
     counter: number; // testing purpose
   }
 
-  export const getInitial: Bodies = (game, dynamic) => {
+  export const getInitial: Bodies = (game, dynamic = { player: {} }) => {
     const
       // matter = Matter.getInitial(dynamic),
       // player = matter.player,
       // floor = matter.floor,
       // roof = matter.roof,
-      player = Matter.getPlayer(dynamic), //@note player is auto extracted in Matter.ts
+      player = Matter.getPlayer(dynamic.player), //@note player is auto extracted in Matter.ts
       floor = Matter.getFloor(),
       roof = Matter.getRoof(),
 
@@ -142,14 +142,14 @@ export namespace Entities {
         while (numOfwall--) {
           (function getWall(){
             const 
-              matter = Matter.getFollowing({ 
-                wall: {
+              wall = Matter.getWall({ 
+                // wall: {
                   ...coords,
                   position: wallPosition, // this is disregarded if we have coords
-                } 
+                // } 
               }),
               
-              wall = matter.wall,
+              // wall = matter.wall,
               entity = {
                 body: wall.body, 
                 size: [wall.width, wall.height], 
@@ -185,8 +185,7 @@ export namespace Entities {
     console.log("CURRENT WORLD BODIES: " + world.bodies.length);
     console.log("----------------------------------------------------\n\n");
     ////////////////////////////////////////////////////////////
-    const player = { player: dynamic.player },
-          walls = dynamic.walls;
+    const walls = dynamic.walls;
     getInitial(game, dynamic);
     for (let wall in walls) {
       getFollowing.walls(game.entities, walls[wall]);
