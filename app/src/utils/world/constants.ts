@@ -21,7 +21,7 @@ const BODIES = Matter.Bodies,
 
       GAME_LANDSCAPE_HEIGHT = (width > height ? height : width) - NAVBAR_HEIGHT,
       GAME_LANDSCAPE_WIDTH = (width > height ? width : height),
-      GAME_DIM_RATIO = GAME_LANDSCAPE_HEIGHT / GAME_LANDSCAPE_WIDTH, //@note getting game dim ratio - in landscape as fixed base
+      GAME_DIM_RATIO = GAME_LANDSCAPE_HEIGHT / GAME_LANDSCAPE_WIDTH, //@note getting game dim ratio - in landscape as fixed basis
       GAME_PORTRAIT_HEIGHT = (width > height ? width : height) - NAVBAR_HEIGHT,
       GAME_PORTRAIT_WIDTH = GAME_PORTRAIT_HEIGHT / GAME_DIM_RATIO,
 

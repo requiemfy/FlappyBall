@@ -12,8 +12,8 @@ export namespace GameDimension {
       gameWidth = width - NAVBAR_HEIGHT;
   
     return {
-      screenWidth: width,
-      screenHeight: height,
+      windowWidth: width,
+      windowHeight: height,
       gameHeight: gameHeight,
     };
   }
@@ -28,8 +28,8 @@ export namespace GameDimension {
     type DimParam = (dim1: number, dim2: number) => number;
 
     const getDim: DimParam = (dim1, dim2) => {
-      const { screenWidth, screenHeight } = GameDimension.window(),
-        orientation = GameDimension.getOrientation(screenWidth, screenHeight);
+      const { windowWidth, windowHeight } = GameDimension.window(),
+        orientation = GameDimension.getOrientation(windowWidth, windowHeight);
         if (orientation === "landscape") return dim1
         else return dim2;
     }

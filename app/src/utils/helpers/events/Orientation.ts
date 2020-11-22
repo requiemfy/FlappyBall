@@ -1,5 +1,7 @@
 
 import { Dimensions } from "react-native";
+import { GameEngine } from "react-native-game-engine";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
 import { GAME_DIM_RATIO, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
@@ -28,6 +30,20 @@ export namespace Orientation {
       ////////////////////////////////////////////////////////////
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
+
+      const { width, height } = Dimensions.get("window");
+      if (GameDimension.getOrientation(width, height) === "landscape") {
+        game.setState({ 
+          screenTop: 0,
+          screenLeft: getStatusBarHeight(),
+        });
+      } else {
+        game.setState({ 
+          screenTop: getStatusBarHeight(),
+          screenLeft: 0,
+        })
+      }
+
     };
     Dimensions.addEventListener('change', callback);
   };
@@ -70,15 +86,15 @@ export namespace Orientation {
 
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
     const 
-      { screenWidth, screenHeight, gameHeight } = GameDimension.window(), // current screen dimensions
-      { prevGameHeight, prevGameWidth } = getPrevGameDim(screenWidth, screenHeight),
-      // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+      { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // current screen dimensions
+      { prevGameHeight, prevGameWidth } = getPrevGameDim(windowWidth, windowHeight),
+      // gameWidth = GameDimension.getOrientation(windowWidth, windowHeight) === "landscape" ?
       //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       gameWidth = GameDimension.getWidth("now"),
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
       ////////////////////////////////////////////////////////////
-      console.log("\t----diemensions of x,y: " + screenWidth + ", " + screenHeight );
+      console.log("\t----diemensions of x,y: " + windowWidth + ", " + windowHeight );
       console.log("\t----prev game dim: x,y" + prevGameWidth + ", " + prevGameHeight );
       console.log("\t----current game dim: x,y" + gameWidth + ", " + gameHeight );
       console.log("\t----Entity of x,y: " + lastEntX + ", " + lastEntY );

@@ -10,6 +10,7 @@ import { Matter } from './utils/world/Matter';
 import { Physics } from './utils/world/Physics';
 
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import { GameDimension } from './utils/helpers/dimensions';
 
 
 interface EventType { type: string; }
@@ -31,12 +32,26 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
+  state: { screenTop: number, screenLeft: number}
 
   constructor(props: object) {
     super(props);
-    this.paused = false; 
+    this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
+
+    const { width, height } = Dimensions.get("window");
+    if (GameDimension.getOrientation(width, height) === "landscape") {
+      this.state = { 
+        screenTop: 0,
+        screenLeft: getStatusBarHeight(),
+      }
+    } else {
+      this.state = { 
+        screenTop: getStatusBarHeight(),
+        screenLeft: 0,
+      }
+    }
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
@@ -132,10 +147,10 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
             //   console.log(this.entities.wall);
             // }
           }>
-          <View style={{ //@todo check this in real device
+          <View style={{
             backgroundColor:"yellow",
             width: "100%",
-            height: NAVBAR_HEIGHT,
+            height: NAVBAR_HEIGHT + this.state.screenTop,
             }}></View>
         </TouchableWithoutFeedback>
 
@@ -147,19 +162,32 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           and TouchableWithoutFeedback only works with 1 component */}
           <View style={{ 
             flex: 1, 
+            flexDirection: "row",
             backgroundColor: "pink", }}> 
-            <View style={{ 
+
+            <View style={{ // @note status bar indent
+              backgroundColor: "red", 
+              width: this.state.screenLeft,
+              zIndex: 9999,
+              }}></View>
+
+            <View style={{ // @note this View is GameEngine container, in case i wanted to adjust it's overall position
               flex: 1, 
-              backgroundColor: "blue", }}>
+              backgroundColor: "blue", 
+              // left: this.state.screenLeft,
+              }}>
               <GameEngine
                 ref={ (ref) => { this.engine = ref; } }
                 onEvent={ this.onEvent }
                 style={{ flex: 1, }}
                 systems={ [Physics.system] }
                 entities={ this.entities } 
-                running={ this.paused } />
+                running={ !this.paused } />
               <StatusBar hidden />
             </View>
+
+            {/* @todo buttom buttons height */}
+
           </View>
         </TouchableWithoutFeedback>
         {/* ------------------------------------------------------------ */}

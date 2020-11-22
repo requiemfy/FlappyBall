@@ -109,9 +109,9 @@ export namespace Entities {
             wallIndex = game.entities.wall[wallCount-1],
             firstWallX = game.entities[wallIndex].body.position.x,
             //@remind refactor this redundant distance percent, also in physics.ts
-            { screenWidth, screenHeight } = GameDimension.window(),
+            { windowWidth, windowHeight } = GameDimension.window(),
 
-            // gameWidth = GameDimension.getOrientation(screenWidth, screenHeight) === "landscape" ?
+            // gameWidth = GameDimension.getOrientation(windowWidth, windowHeight) === "landscape" ?
             //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
             gameWidth = GameDimension.getWidth("now"),
 
