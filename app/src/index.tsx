@@ -32,26 +32,12 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
-  state: { screenTop: number, screenLeft: number}
 
   constructor(props: object) {
     super(props);
     this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
-
-    const { width, height } = Dimensions.get("window");
-    if (GameDimension.getOrientation(width, height) === "landscape") {
-      this.state = { 
-        screenTop: 0,
-        screenLeft: getStatusBarHeight(),
-      }
-    } else {
-      this.state = { 
-        screenTop: getStatusBarHeight(),
-        screenLeft: 0,
-      }
-    }
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
@@ -150,7 +136,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           <View style={{
             backgroundColor:"yellow",
             width: "100%",
-            height: NAVBAR_HEIGHT + this.state.screenTop,
+            height: NAVBAR_HEIGHT, // @remind clear
             }}></View>
         </TouchableWithoutFeedback>
 
@@ -162,19 +148,12 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           and TouchableWithoutFeedback only works with 1 component */}
           <View style={{ 
             flex: 1, 
-            flexDirection: "row",
             backgroundColor: "pink", }}> 
-
-            <View style={{ // @note status bar indent
-              backgroundColor: "red", 
-              width: this.state.screenLeft,
-              zIndex: 9999,
-              }}></View>
 
             <View style={{ // @note this View is GameEngine container, in case i wanted to adjust it's overall position
               flex: 1, 
               backgroundColor: "blue", 
-              // left: this.state.screenLeft,
+              left: 0,
               }}>
               <GameEngine
                 ref={ (ref) => { this.engine = ref; } }
@@ -185,8 +164,6 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
                 running={ !this.paused } />
               <StatusBar hidden />
             </View>
-
-            {/* @todo buttom buttons height */}
 
           </View>
         </TouchableWithoutFeedback>

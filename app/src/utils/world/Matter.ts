@@ -5,9 +5,12 @@ import {
   ROOF_HEIGHT, 
   world, 
   WORLD, 
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
   NAVBAR_HEIGHT,
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
+  KEYS_HEIGHT,
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
 
@@ -64,8 +67,7 @@ export namespace Matter {
   const createRoof: StaticBody = () => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      roofWidth = windowWidth, 
-
+      roofWidth = windowWidth,
       roofHeight = gameHeight * ROOF_HEIGHT,
       centerX = windowWidth / 2, 
       centerY = roofHeight / 2; // papatong lang sa nav bar pababa

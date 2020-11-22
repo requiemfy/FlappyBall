@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
 import { Dimensions } from "react-native"
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 // matter constants
 const BODIES = Matter.Bodies,
@@ -12,22 +13,45 @@ const BODIES = Matter.Bodies,
       engine = ENGINE.create({ enableSleeping:false } ),
       world = engine.world,
       
-      PLAYER_SIZE = 0.05,
-      FLOOR_HEIGHT = 0.05,
-      ROOF_HEIGHT = 0.05,
+      
       NAVBAR_HEIGHT = 50,
 
-      { width, height } = Dimensions.get("window"), 
+      { WINDOW_WIDTH, WINDOW_HEIGHT } = (() => { 
+        const { width, height } = Dimensions.get("window");
+        return  { WINDOW_WIDTH: width, WINDOW_HEIGHT: height };
+      })(),
 
-      GAME_LANDSCAPE_HEIGHT = (width > height ? height : width) - NAVBAR_HEIGHT,
-      GAME_LANDSCAPE_WIDTH = (width > height ? width : height),
+      { SCREEN_WIDTH, SCREEN_HEIGHT } = (() => { 
+        const { width, height } = Dimensions.get("screen");
+        return  { SCREEN_WIDTH: width, SCREEN_HEIGHT: height };
+      })(),
+
+      // @remind try to make this better
+      // @note game window dimensions
+      // GAME_LANDSCAPE_HEIGHT = (WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_HEIGHT : WINDOW_WIDTH) - NAVBAR_HEIGHT,
+      // GAME_LANDSCAPE_WIDTH = (WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_WIDTH : WINDOW_HEIGHT),
+      // GAME_DIM_RATIO = GAME_LANDSCAPE_HEIGHT / GAME_LANDSCAPE_WIDTH, //@note getting game dim ratio - in landscape as fixed basis
+      // GAME_PORTRAIT_HEIGHT = (WINDOW_WIDTH > WINDOW_HEIGHT ? WINDOW_WIDTH : WINDOW_HEIGHT) - NAVBAR_HEIGHT,
+      // GAME_PORTRAIT_WIDTH = GAME_PORTRAIT_HEIGHT / GAME_DIM_RATIO,
+      GAME_LANDSCAPE_HEIGHT = SCREEN_WIDTH - NAVBAR_HEIGHT,
+      GAME_LANDSCAPE_WIDTH = SCREEN_HEIGHT,
       GAME_DIM_RATIO = GAME_LANDSCAPE_HEIGHT / GAME_LANDSCAPE_WIDTH, //@note getting game dim ratio - in landscape as fixed basis
-      GAME_PORTRAIT_HEIGHT = (width > height ? width : height) - NAVBAR_HEIGHT,
+      GAME_PORTRAIT_HEIGHT = SCREEN_HEIGHT - NAVBAR_HEIGHT,
       GAME_PORTRAIT_WIDTH = GAME_PORTRAIT_HEIGHT / GAME_DIM_RATIO,
 
-      WALL_DISTANCE = 0.10,
-      NOT_BODY = ["physics", "gravity", "wall", "distance",];
 
+      // @note soft key
+      KEYS_HEIGHT = SCREEN_HEIGHT - (WINDOW_HEIGHT + getStatusBarHeight()),
+
+      WALL_DISTANCE = 0.10,
+      NOT_BODY = ["physics", "gravity", "wall", "distance",],
+      
+      PLAYER_SIZE = 0.05,
+      // FLOOR_HEIGHT = 0.05,
+      FLOOR_HEIGHT = (KEYS_HEIGHT + NAVBAR_HEIGHT) / SCREEN_HEIGHT,
+      ROOF_HEIGHT = 0.05;
+
+console.log("FLOOR_HEIGHT " + FLOOR_HEIGHT)
 
 export {
   BODIES,
@@ -40,16 +64,13 @@ export {
   engine,
   world,
 
-  PLAYER_SIZE,
-  FLOOR_HEIGHT,
-  ROOF_HEIGHT,
-  NAVBAR_HEIGHT,
+  PLAYER_SIZE, FLOOR_HEIGHT, ROOF_HEIGHT, NAVBAR_HEIGHT,
 
-  // GAME_LANDSCAPE_HEIGHT,
-  GAME_LANDSCAPE_WIDTH,
-  // GAME_PORTRAIT_HEIGHT,
-  GAME_PORTRAIT_WIDTH,
-  GAME_DIM_RATIO,
+  SCREEN_WIDTH, SCREEN_HEIGHT,
+
+  GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH,
+
+  KEYS_HEIGHT,
 
   WALL_DISTANCE,
   NOT_BODY,

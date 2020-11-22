@@ -3,7 +3,7 @@ import { Dimensions } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
-import { GAME_DIM_RATIO, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
+import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
 // import window, { getOrientation } from "../dimensions";
@@ -30,19 +30,6 @@ export namespace Orientation {
       ////////////////////////////////////////////////////////////
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
-
-      const { width, height } = Dimensions.get("window");
-      if (GameDimension.getOrientation(width, height) === "landscape") {
-        game.setState({ 
-          screenTop: 0,
-          screenLeft: getStatusBarHeight(),
-        });
-      } else {
-        game.setState({ 
-          screenTop: getStatusBarHeight(),
-          screenLeft: 0,
-        })
-      }
 
     };
     Dimensions.addEventListener('change', callback);

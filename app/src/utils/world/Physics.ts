@@ -18,6 +18,7 @@ import { Entities } from './Entities';
 export namespace Physics {
   type Physics = (entities: Entities.All, { time }: any) => Entities.All;
   type Event = (game: FlappyBallGame) => void;
+  type Relativity = (entiies: Entities.All) => void;
   
   // this GameEngine system is called every ticks
   // that's why i didn't put collision event listener here
@@ -39,14 +40,12 @@ export namespace Physics {
   };
 
   // special relativity
-  //@todo closure then type this
-  const wallRelativity = (() => { //@remind refactor nested functions
+  const wallRelativity: Relativity = (() => { 
     type Ent = {get: Entities.All | any, set: (ent: Entities.All) => void};
     const entities: Ent = {
       get: null,
       set: function (entities: Entities.All) {this.get = entities},
     };
-
     const moveWalls = () => {
       let wallLen = entities.get.wall.length, wallIndex, wall;
       (function move(){
@@ -58,16 +57,7 @@ export namespace Physics {
           move();
         }
       })();
-
-      // if (wallLen > 0) {
-      //   wallIndex = entities.wall[wallLen-1];
-      //   wall = entities[wallIndex];
-      //   wallLen--;
-      //   BODY.translate( wall.body, {x: -1, y: 0} );
-      //   moveWalls();
-      // }
     }
-    
     const isWallOutOfVision = () => { // sadly, i need to pass whole entities obj for the sake of pass by reference so that i can delete an entity of it
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
@@ -77,17 +67,15 @@ export namespace Physics {
       }
       return false;
     }
-
     const removeWall = () => {
       if ( entities.get.wall.length > 0 && isWallOutOfVision()) {
         entities.get.wall.splice(0, 1); // remove wall id
       }
     }
-
     const showNextWall = () => {
       let wallCount = entities.get.wall.length;
-      if (wallCount > 0) { //@remind refactor this
-        const lastIndex = entities.get.wall[wallCount-1], // issue here wall index switches sometimes
+      if (wallCount > 0) {
+        const lastIndex = entities.get.wall[wallCount-1],
               lastWallX = entities.get[lastIndex].body.position.x,
               gameWidth = GameDimension.getWidth("now"),
               lastDistance = gameWidth - lastWallX,
@@ -98,7 +86,6 @@ export namespace Physics {
         }
       }
     }
-
     return (ent: Entities.All) => {
       entities.set(ent);
       moveWalls();
@@ -106,8 +93,6 @@ export namespace Physics {
       showNextWall();
     }
   })();
-
-
 
   // this is called in componentDidMount() 
   export const collision: Event = (game) => {

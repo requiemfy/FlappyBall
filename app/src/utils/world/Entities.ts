@@ -108,13 +108,7 @@ export namespace Entities {
             wallCount = game.entities.wall.length,
             wallIndex = game.entities.wall[wallCount-1],
             firstWallX = game.entities[wallIndex].body.position.x,
-            //@remind refactor this redundant distance percent, also in physics.ts
-            { windowWidth, windowHeight } = GameDimension.window(),
-
-            // gameWidth = GameDimension.getOrientation(windowWidth, windowHeight) === "landscape" ?
-            //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
             gameWidth = GameDimension.getWidth("now"),
-
             distance = gameWidth * WALL_DISTANCE,
             newWallX = firstWallX - distance;
           getFollowing.walls(game.entities, { x: newWallX });
@@ -132,7 +126,6 @@ export namespace Entities {
   //   showWall(entities);    
   // }
   export const getFollowing = {
-    // walls: (entities: All) => showWall(entities),
     walls: (() => {
       let wallPosition = "down",
           wallEachTime = [1, 2];
@@ -143,13 +136,10 @@ export namespace Entities {
           (function getWall(){
             const 
               wall = Matter.getWall({ 
-                // wall: {
-                  ...coords,
-                  position: wallPosition, // this is disregarded if we have coords
-                // } 
+                ...coords,
+                position: wallPosition, // @note this is disregarded if we have coords
               }),
               
-              // wall = matter.wall,
               entity = {
                 body: wall.body, 
                 size: [wall.width, wall.height], 
