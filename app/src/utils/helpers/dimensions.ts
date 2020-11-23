@@ -27,6 +27,8 @@ export namespace GameDimension {
     };
   }
   
+  // @note i created this independet function for getting orientation
+  // instead of always use class object and rely on class orientation property everytime i needed
   export const getOrientation: Orientation = (width, height) => {
     return width > height ? "landscape" : "portrait";
   }

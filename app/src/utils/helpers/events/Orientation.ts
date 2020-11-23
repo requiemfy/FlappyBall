@@ -3,10 +3,11 @@ import { Dimensions } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
-import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY } from "../../world/constants";
+import { BODY, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY, SCREEN_HEIGHT } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
-// import window, { getOrientation } from "../dimensions";
+import { DeviceMotion } from 'expo-sensors';
+
 import { GameDimension } from "../dimensions";
 
 export namespace Orientation {
@@ -18,11 +19,12 @@ export namespace Orientation {
   type EntityCoords = (entity: Entities.Physical) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
-  let callback: Event;
+  let callback: any; // Event
 
   export const addChangeListener: OrientGame = (game) => {
     console.log("\torientation.tsx: addChangeListener!!!");
-    callback = (event: object) => {
+
+    callback = () => {
       ////////////////////////////////////////////////////////////
       console.log("\n\norientation.tsx:\n````````````````````````````````````````````````````````````");
       console.log("ORIENTATION CHANGED");
@@ -30,9 +32,33 @@ export namespace Orientation {
       ////////////////////////////////////////////////////////////
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
-
     };
-    Dimensions.addEventListener('change', callback);
+    Dimensions.addEventListener('change', callback); // @note luckily this will not invoke in eg. landscape left to landscape right
+
+    DeviceMotion.isAvailableAsync().then((supported) => {
+      if (supported) {
+        let prevOrient: number; // @note we are not sure what's first orientation
+        DeviceMotion.addListener((current) => {
+          if (prevOrient !== current.orientation) {
+            console.log("orientation " + current.orientation);
+            // if (current.orientation == 90) {
+            //   BODY.translate(game.entities.roof.body, { x: -getStatusBarHeight(), y: 0 });
+            //   BODY.translate(game.entities.floor.body, { x: -getStatusBarHeight(), y: 0 });
+            //   game.setState({ left: getStatusBarHeight(), });
+            // }
+            // else {
+            //   BODY.translate(game.entities.roof.body, { x: getStatusBarHeight(), y: 0 });
+            //   BODY.translate(game.entities.floor.body, { x: getStatusBarHeight(), y: 0 });
+            //   game.setState({ left: 0, });
+            // }
+            prevOrient = current.orientation;
+          }
+        });
+      }
+    });
+
+   
+    
   };
 
   export const removeChangeListener = () => Dimensions.removeEventListener('change', callback);
@@ -75,8 +101,6 @@ export namespace Orientation {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // current screen dimensions
       { prevGameHeight, prevGameWidth } = getPrevGameDim(windowWidth, windowHeight),
-      // gameWidth = GameDimension.getOrientation(windowWidth, windowHeight) === "landscape" ?
-      //             GAME_LANDSCAPE_WIDTH : GAME_PORTRAIT_WIDTH,
       gameWidth = GameDimension.getWidth("now"),
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);

@@ -12,6 +12,9 @@ import { Physics } from './utils/world/Physics';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { GameDimension } from './utils/helpers/dimensions';
 
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { DeviceMotion } from 'expo-sensors';
+
 
 interface EventType { type: string; }
 interface Game {
@@ -32,12 +35,15 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
+  state: { left: number };
 
   constructor(props: object) {
     super(props);
+    
     this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
+    this.state = { left: 0 };
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
@@ -63,7 +69,8 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   componentWillUnmount() {
     console.log("componentWillUnmount!!")
     GameAppState.removeChangeListener();
-    Orientation.removeChangeListener();
+    // Orientation.removeChangeListener();
+    DeviceMotion.removeAllListeners();
   }
 
   // used in pause button,
@@ -109,11 +116,17 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
   playerFly() {
     if (this.paused) this.pauseOrResume();
-    this.entities.gravity = -0.5; 
+    let { width, height } = Dimensions.get("window"),
+        orient = GameDimension.getOrientation(width, height);
+    if (orient === "landscape") this.entities.gravity = -0.2;
+    else this.entities.gravity = -0.3; 
   }
 
   playerFall() {
-    this.entities.gravity = 0.5;
+    let { width, height } = Dimensions.get("window"),
+        orient = GameDimension.getOrientation(width, height);
+    if (orient === "landscape") this.entities.gravity = 0.2;
+    else this.entities.gravity = 0.3; 
   }
 
   render() {
@@ -148,12 +161,19 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
           and TouchableWithoutFeedback only works with 1 component */}
           <View style={{ 
             flex: 1, 
+            flexDirection: "row",
             backgroundColor: "pink", }}> 
+{/* 
+            <View style={{
+                // flex: 1,
+                backgroundColor: "red",
+                width: this.state.left,
+              }}></View> */}
 
             <View style={{ // @note this View is GameEngine container, in case i wanted to adjust it's overall position
               flex: 1, 
               backgroundColor: "blue", 
-              left: 0,
+              left: this.state.left,
               }}>
               <GameEngine
                 ref={ (ref) => { this.engine = ref; } }

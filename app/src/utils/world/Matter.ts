@@ -10,9 +10,10 @@ import {
   NAVBAR_HEIGHT,
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
-  KEYS_HEIGHT,
+  BODY,
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
 export namespace Matter {
   type Coordinates = {x?: number, y?:number};

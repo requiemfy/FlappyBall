@@ -41,17 +41,14 @@ const BODIES = Matter.Bodies,
 
 
       // @note soft key
-      KEYS_HEIGHT = SCREEN_HEIGHT - (WINDOW_HEIGHT + getStatusBarHeight()),
+      KEYS_HEIGHT = SCREEN_HEIGHT - (GAME_PORTRAIT_HEIGHT + getStatusBarHeight()),
 
       WALL_DISTANCE = 0.10,
       NOT_BODY = ["physics", "gravity", "wall", "distance",],
       
       PLAYER_SIZE = 0.05,
-      // FLOOR_HEIGHT = 0.05,
-      FLOOR_HEIGHT = (KEYS_HEIGHT + NAVBAR_HEIGHT) / SCREEN_HEIGHT,
+      FLOOR_HEIGHT = (KEYS_HEIGHT / SCREEN_HEIGHT) + 0.05,
       ROOF_HEIGHT = 0.05;
-
-console.log("FLOOR_HEIGHT " + FLOOR_HEIGHT)
 
 export {
   BODIES,
@@ -69,8 +66,6 @@ export {
   SCREEN_WIDTH, SCREEN_HEIGHT,
 
   GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH,
-
-  KEYS_HEIGHT,
 
   WALL_DISTANCE,
   NOT_BODY,
