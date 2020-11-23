@@ -41,20 +41,13 @@ export namespace Orientation {
         DeviceMotion.addListener((current) => {
           if (prevOrient !== current.orientation) {
             console.log("orientation " + current.orientation);
-            if (current.orientation == 90) {
-              game.setState({ left: getStatusBarHeight(), });
-            }
-            else {
-              game.setState({ left: 0, });
-            }
+            if (current.orientation == 90) game.setState({ left: getStatusBarHeight(), })
+            else game.setState({ left: 0, });
             prevOrient = current.orientation;
           }
         });
       }
     });
-
-   
-    
   };
 
   export const removeChangeListener = () => Dimensions.removeEventListener('change', callback);
@@ -70,10 +63,8 @@ export namespace Orientation {
         wallIds = game.entities.wall,
         wallNum = wallIds.length;
 
-    // while(wallNum--) {
     for(let i = 0; i < wallNum; i++) {
       const 
-        // wallKey = wallIds[wallNum],
         wallKey = wallIds[i],
         wall = game.entities[wallKey],
         { lastEntX, lastEntY } = lastEntityCoords(wall);
@@ -84,7 +75,7 @@ export namespace Orientation {
     return wallsCoords;
   }
 
-  // ================================ GENERAL ================================
+  // ================================ CALCULATIONS ================================
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {
     const coords = {
       player: orientPlayerCoords(game), 
@@ -118,8 +109,6 @@ export namespace Orientation {
       prevWidth = GameDimension.getOrientation(width, height) === "landscape" ?
                   GAME_PORTRAIT_WIDTH : GAME_LANDSCAPE_WIDTH;
       //if landscape now, then prev is portrait
-
-
     return { prevGameHeight: prevHeight, prevGameWidth: prevWidth }
   }
   

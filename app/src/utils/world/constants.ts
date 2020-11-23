@@ -25,7 +25,6 @@ const BODIES = Matter.Bodies,
       
       NAVBAR_HEIGHT = 50,
 
-      // @remind try to make this better
       // game window dimensions
       GAME_LANDSCAPE_HEIGHT = SCREEN_WIDTH - NAVBAR_HEIGHT,
       GAME_LANDSCAPE_WIDTH = SCREEN_HEIGHT,

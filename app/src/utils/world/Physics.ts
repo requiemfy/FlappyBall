@@ -1,6 +1,7 @@
 import { Bodies } from "matter-js";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
+import { Coordinates } from "../helpers/Coordinates";
 import { GameDimension } from "../helpers/dimensions";
 import { 
   BODY, 
@@ -66,21 +67,18 @@ export namespace Physics {
       return false;
     }
     const removeWall = () => {
-      if ( entities.get.wall.length > 0 && isWallOutOfVision()) {
-        entities.get.wall.splice(0, 1); // remove wall id
-      }
+      if ( entities.get.wall.length > 0 && isWallOutOfVision()) entities.get.wall.splice(0, 1); // remove wall id
     }
     const showNextWall = () => {
-      let wallCount = entities.get.wall.length;
-      if (wallCount > 0) {
-        const lastIndex = entities.get.wall[wallCount-1],
-              lastWallX = entities.get[lastIndex].body.position.x,
-              gameWidth = GameDimension.getWidth("now"),
-              lastDistance = gameWidth - lastWallX,
-              percentLastDist = lastDistance / gameWidth;
+      if (entities.get.wall.length > 0) {
+        const 
+          lastWallX = Coordinates.getLastWallX(entities.get),
+          gameWidth = GameDimension.getWidth("now"),
+          lastDistance = gameWidth - lastWallX,
+          percentLastDist = lastDistance / gameWidth;
         if (percentLastDist >= WALL_DISTANCE) {
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE")
-          Entities.getFollowing.walls(entities.get);
+          Entities.following.getWalls(entities.get);
         }
       }
     }
