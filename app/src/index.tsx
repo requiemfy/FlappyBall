@@ -39,7 +39,6 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
   constructor(props: object) {
     super(props);
-    
     this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
@@ -68,9 +67,8 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
 
   componentWillUnmount() {
     console.log("componentWillUnmount!!")
+    Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
-    // Orientation.removeChangeListener();
-    DeviceMotion.removeAllListeners();
   }
 
   // used in pause button,

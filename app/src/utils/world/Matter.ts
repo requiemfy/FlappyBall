@@ -5,12 +5,8 @@ import {
   ROOF_HEIGHT, 
   world, 
   WORLD, 
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-  NAVBAR_HEIGHT,
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
-  BODY,
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
 import { getStatusBarHeight } from "react-native-status-bar-height";
@@ -67,7 +63,7 @@ export namespace Matter {
   
   const createRoof: StaticBody = () => {
     const 
-      { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
+      { windowWidth, gameHeight } = GameDimension.window(),
       [ roofWidth, roofHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * ROOF_HEIGHT ],
       [ centerX, centerY ] = [ windowWidth / 2, roofHeight / 2 ];
     return createRectangle ({
@@ -84,8 +80,7 @@ export namespace Matter {
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
-      wallWidth = gameHeight * 0.07, 
-      wallHeight = gameHeight * 0.2;
+      [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * 0.2 ]; // @todo random height
 
     if (!x) { // if x undefined
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)

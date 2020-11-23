@@ -50,7 +50,10 @@ export namespace Orientation {
     });
   };
 
-  export const removeChangeListener = () => Dimensions.removeEventListener('change', callback);
+  export const removeChangeListener = () => {
+    Dimensions.removeEventListener('change', callback);
+    DeviceMotion.removeAllListeners();
+  }
 
   // =============================== SPECIFIC ===============================
   const orientPlayerCoords: OrientPlayer = (game) => {
@@ -71,7 +74,6 @@ export namespace Orientation {
       console.log("ORIENTATION WALL " + wallKey);
       wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
     }
-
     return wallsCoords;
   }
 
@@ -99,7 +101,6 @@ export namespace Orientation {
       console.log("\t----Update Entity of x,y: " + updatedX + ", " + updatedY );
       console.log("````````````````````````````````````````````````````````````");
       ////////////////////////////////////////////////////////////
-
     return { x: updatedX, y: updatedY };
   }
 

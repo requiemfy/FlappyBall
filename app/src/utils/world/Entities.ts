@@ -5,7 +5,7 @@ import { Body } from 'matter-js';
 import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
 import { GameDimension } from "../helpers/dimensions";
-import { Coordinates } from "../helpers/Coordinates";
+import { Coordinates } from "../helpers/coordinates";
 
 export namespace Entities {
   type Physics = { 
@@ -143,27 +143,6 @@ export namespace Entities {
     })(),
   }
 
-  // used in orientation change
-  // export const swap: Recreation = (game, dynamic) => {
-  //   for (let entity in game.entities) {
-  //     if (!NOT_BODY.includes(entity)) {
-  //       COMPOSITE.remove(world, game.entities[entity].body);
-  //     }
-  //   }
-  //   ////////////////////////////////////////////////////////////
-  //   console.log("----------------------------------------------------");
-  //   console.log("\t\tREMOVING BODIES...")
-  //   console.log("--------------------------");
-  //   console.log("CURRENT WORLD BODIES: " + world.bodies.length);
-  //   console.log("----------------------------------------------------\n\n");
-  //   ////////////////////////////////////////////////////////////
-  //   const walls = dynamic.walls;
-  //   getInitial(game, dynamic);
-  //   for (let wall in walls) {
-  //     following.getWalls(game.entities, walls[wall]);
-  //   }
-  //   game.engine.swap(game.entities);
-  // }
   export const swap: Recreation = (() => {
     type args = {
       game: FlappyBallGame | any, 

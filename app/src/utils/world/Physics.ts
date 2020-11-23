@@ -1,7 +1,7 @@
 import { Bodies } from "matter-js";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
-import { Coordinates } from "../helpers/Coordinates";
+import { Coordinates } from "../helpers/coordinates";
 import { GameDimension } from "../helpers/dimensions";
 import { 
   BODY, 
@@ -57,7 +57,7 @@ export namespace Physics {
         }
       })();
     }
-    const isWallOutOfVision = () => { // sadly, i need to pass whole entities obj for the sake of pass by reference so that i can delete an entity of it
+    const isWallOutOfVision = () => {
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
         COMPOSITE.remove(world, wall.body);
