@@ -41,16 +41,12 @@ export namespace Orientation {
         DeviceMotion.addListener((current) => {
           if (prevOrient !== current.orientation) {
             console.log("orientation " + current.orientation);
-            // if (current.orientation == 90) {
-            //   BODY.translate(game.entities.roof.body, { x: -getStatusBarHeight(), y: 0 });
-            //   BODY.translate(game.entities.floor.body, { x: -getStatusBarHeight(), y: 0 });
-            //   game.setState({ left: getStatusBarHeight(), });
-            // }
-            // else {
-            //   BODY.translate(game.entities.roof.body, { x: getStatusBarHeight(), y: 0 });
-            //   BODY.translate(game.entities.floor.body, { x: getStatusBarHeight(), y: 0 });
-            //   game.setState({ left: 0, });
-            // }
+            if (current.orientation == 90) {
+              game.setState({ left: getStatusBarHeight(), });
+            }
+            else {
+              game.setState({ left: 0, });
+            }
             prevOrient = current.orientation;
           }
         });

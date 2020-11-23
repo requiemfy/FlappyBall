@@ -43,9 +43,9 @@ export namespace Matter {
     const 
       // NOTE: matter js CENTER x, y works differently.
       // Observe centerX, which is half of screen width
-      // but we didn't explicity minus the half of floor width to it
+      // but we didn't explicity minus the half of floor width to it to fit the floor
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      [ floorWidth, floorHeight ] = [ windowWidth, gameHeight * FLOOR_HEIGHT ],
+      [ floorWidth, floorHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
       [ centerX, centerY ] = [ windowWidth / 2, gameHeight - (floorHeight / 2) ]
     ////////////////////////////////////////////////////////////
     console.log("\nmatter.tsx: ");
@@ -68,10 +68,8 @@ export namespace Matter {
   const createRoof: StaticBody = () => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      roofWidth = windowWidth,
-      roofHeight = gameHeight * ROOF_HEIGHT,
-      centerX = windowWidth / 2, 
-      centerY = roofHeight / 2; // papatong lang sa nav bar pababa
+      [ roofWidth, roofHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * ROOF_HEIGHT ],
+      [ centerX, centerY ] = [ windowWidth / 2, roofHeight / 2 ];
     return createRectangle ({
       x: centerX,
       y: centerY,
