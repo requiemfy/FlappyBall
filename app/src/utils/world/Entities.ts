@@ -61,7 +61,7 @@ export namespace Entities {
       // player = matter.player,
       // floor = matter.floor,
       // roof = matter.roof,
-      player = Matter.getPlayer(dynamic.player), //@note player is auto extracted in Matter.ts
+      player = Matter.getPlayer(dynamic.player), // player is auto extracted in Matter.ts
       floor = Matter.getFloor(),
       roof = Matter.getRoof(),
 
@@ -131,13 +131,13 @@ export namespace Entities {
           wallEachTime = [1, 2];
       return function (entities: All, coords?: Coordinates) {
         let notDefault = coords !== undefined ? coords.y !== undefined : false;
-        let numOfwall =  notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)]; //@note 1 wall only if not defualt creation
+        let numOfwall =  notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)]; // 1 wall only if not defualt creation
         while (numOfwall--) {
           (function getWall(){
             const 
               wall = Matter.getWall({ 
                 ...coords,
-                position: wallPosition, // @note this is disregarded if we have coords
+                position: wallPosition, // this is disregarded if we have coords
               }),
               
               entity = {

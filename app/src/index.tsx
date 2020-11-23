@@ -139,17 +139,11 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     return (
       <View style={{ flex: 1, }}>
         
-        <TouchableWithoutFeedback onPress={
-            this.pauseOrResume
-            // () => {
-            //   Entities.getFollowing(this.entities);
-            //   console.log(this.entities.wall);
-            // }
-          }>
+        <TouchableWithoutFeedback onPress={ this.pauseOrResume }>
           <View style={{
             backgroundColor:"yellow",
             width: "100%",
-            height: NAVBAR_HEIGHT, // @remind clear
+            height: NAVBAR_HEIGHT,
             }}></View>
         </TouchableWithoutFeedback>
 
@@ -163,27 +157,19 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
             flex: 1, 
             flexDirection: "row",
             backgroundColor: "pink", }}> 
-{/* 
-            <View style={{
-                // flex: 1,
-                backgroundColor: "red",
-                width: this.state.left,
-              }}></View> */}
 
-            <View style={{ // @note this View is GameEngine container, in case i wanted to adjust it's overall position
-              flex: 1, 
-              backgroundColor: "blue", 
-              left: this.state.left,
-              }}>
-              <GameEngine
-                ref={ (ref) => { this.engine = ref; } }
-                onEvent={ this.onEvent }
-                style={{ flex: 1, }}
-                systems={ [Physics.system] }
-                entities={ this.entities } 
-                running={ !this.paused } />
-              <StatusBar hidden />
-            </View>
+            <GameEngine
+              ref={ (ref) => { this.engine = ref; } }
+              onEvent={ this.onEvent }
+              style={{ 
+                flex: 1, 
+                backgroundColor: "blue", 
+                left: this.state.left,
+              }}
+              systems={ [Physics.system] }
+              entities={ this.entities } 
+              running={ !this.paused } />
+            <StatusBar hidden />
 
           </View>
         </TouchableWithoutFeedback>

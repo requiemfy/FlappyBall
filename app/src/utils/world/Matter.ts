@@ -83,7 +83,7 @@ export namespace Matter {
   
   const createWall: StaticBody = ({ x, y, position = "down" }) => {
     const 
-      { windowWidth, windowHeight, gameHeight } = GameDimension.window(), //@note gameHeight is auto update
+      { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       wallWidth = gameHeight * 0.07, 
       wallHeight = gameHeight * 0.2;
 

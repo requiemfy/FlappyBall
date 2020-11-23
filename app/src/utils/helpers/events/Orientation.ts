@@ -33,11 +33,11 @@ export namespace Orientation {
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
     };
-    Dimensions.addEventListener('change', callback); // @note luckily this will not invoke in eg. landscape left to landscape right
+    Dimensions.addEventListener('change', callback); // luckily this will not invoke in eg. landscape left to landscape right
 
     DeviceMotion.isAvailableAsync().then((supported) => {
       if (supported) {
-        let prevOrient: number; // @note we are not sure what's first orientation
+        let prevOrient: number; // we are not sure what's first orientation
         DeviceMotion.addListener((current) => {
           if (prevOrient !== current.orientation) {
             console.log("orientation " + current.orientation);

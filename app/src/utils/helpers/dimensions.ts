@@ -7,7 +7,7 @@ export namespace GameDimension {
   type GameWindow = () => { windowWidth: number, windowHeight: number, gameHeight: number }
   type Orientation = (width: number, height: number) => string; 
 
-  export const window: GameWindow = () => { // @note this is game window, not device
+  export const window: GameWindow = () => { // this is game window, not device
     const 
       { width, height } = Dimensions.get("window"),
       orientation = getOrientation(width, height);
@@ -23,11 +23,11 @@ export namespace GameDimension {
     return {
       windowWidth: screenW,
       windowHeight: screenH,
-      gameHeight: gameHeight, // @note from roof to floor
+      gameHeight: gameHeight, // from roof to floor
     };
   }
   
-  // @note i created this independet function for getting orientation
+  // i created this independet function for getting orientation
   // instead of always use class object and rely on class orientation property everytime i needed
   export const getOrientation: Orientation = (width, height) => {
     return width > height ? "landscape" : "portrait";

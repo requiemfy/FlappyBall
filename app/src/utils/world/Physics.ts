@@ -10,8 +10,6 @@ import {
   EVENTS, 
   COMPOSITE, 
   WALL_DISTANCE, 
-  GAME_LANDSCAPE_WIDTH,
-  GAME_PORTRAIT_WIDTH
 } from "./constants";
 import { Entities } from './Entities';
 
@@ -44,7 +42,7 @@ export namespace Physics {
     type Ent = {get: Entities.All | any, set: (ent: Entities.All) => void};
     const entities: Ent = {
       get: null,
-      set: function (entities: Entities.All) {this.get = entities},
+      set: function (entities: Entities.All) { this.get = entities },
     };
     const moveWalls = () => {
       let wallLen = entities.get.wall.length, wallIndex, wall;
