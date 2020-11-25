@@ -16,12 +16,12 @@ export namespace Matter {
   type MatterProps = { [key: string]: any };
   type Body = (matter: MatterProps) => MatterProps
   type WallPos = keyof { up: string, down: string};
-  type WallParams = Coordinates & { position?: WallPos };
-  type StaticBody = (params: WallParams) => MatterProps; // object is required, but params are optional
+  type WallParams = Coordinates & { height?: number, position?: WallPos };
+  type StaticBody = (params: WallParams | any) => MatterProps; // object is required, but params are optional
   type DynamicBody = (center: Coordinates) => MatterProps;  // center obj is required but x, y props is optional LOL
 
   // ==================================== Entities ===================================
-  const createPlayer: DynamicBody = ({ x = 40, y = 100 }) => {
+  const createPlayer: DynamicBody = ({ x = 40, y = 250 }) => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -77,11 +77,11 @@ export namespace Matter {
     });
   }
   
-  const createWall: StaticBody = ({ x, y, position = "down" }) => {
+  const createWall: StaticBody = ({ x, y, heightPercent, position = "down" }) => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
-      [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * 0.2 ]; // @todo random height
-
+      [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
+    console.log(heightPercent);
     if (!x) { // if x undefined
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
@@ -98,6 +98,7 @@ export namespace Matter {
       y: y,
       width: wallWidth,
       height: wallHeight,
+      heightPercent: heightPercent,
       borderRadius: 0,
       color: "black",
       static: true,

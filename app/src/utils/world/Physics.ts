@@ -57,7 +57,7 @@ export namespace Physics {
         }
       })();
     }
-    const isWallOutOfVision = () => {
+    const isWallOutOfVision = () => { // @todo extend unmount
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
         COMPOSITE.remove(world, wall.body);

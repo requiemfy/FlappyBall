@@ -24,7 +24,7 @@ export namespace Entities {
   type InitialParams = { player: Coordinates };
   type FollowingParams = { walls: Coordinates[], };
   type FollowingMethods = {
-    getWalls: (entities: All, coords?: Coordinates) => void,
+    getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number }) => void,
   };
   export type All = Initial & Following;
   export type Physical = {
@@ -67,20 +67,20 @@ export namespace Entities {
           color: player.color, 
           renderer: Circle,
         },
-        floor: { 
-          body: floor.body, 
-          size: [floor.width, floor.height], 
-          borderRadius: floor.borderRadius,
-          color: floor.color, 
-          renderer: Box,
-        },
-        roof: { 
-          body: roof.body, 
-          size: [roof.width, roof.height], 
-          borderRadius: roof.borderRadius,
-          color: roof.color, 
-          renderer: Box,
-        },
+        // floor: { 
+        //   body: floor.body, 
+        //   size: [floor.width, floor.height], 
+        //   borderRadius: floor.borderRadius,
+        //   color: floor.color, 
+        //   renderer: Box,
+        // },
+        // roof: { 
+        //   body: roof.body, 
+        //   size: [roof.width, roof.height], 
+        //   borderRadius: roof.borderRadius,
+        //   color: roof.color, 
+        //   renderer: Box,
+        // },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity. this is array of wall ids
         distance: 0, // testing purpose
@@ -95,9 +95,9 @@ export namespace Entities {
               lastWallX = Coordinates.getLastWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
               newWallX = lastWallX - distance;
-            following.getWalls(game.entities, { x: newWallX });
+            following.getWalls(game.entities, { x: newWallX }); // default y only
           }
-          else following.getWalls(game.entities); // default x coords
+          else following.getWalls(game.entities); // default x, y coords
         }
         game.entitiesInitialized = true;
       }
@@ -110,22 +110,63 @@ export namespace Entities {
   // soon i may add more following entities
   export const following: FollowingMethods = {
     getWalls: (() => {
+      const randomHeight = (() => {
+        const random = () => {
+          const rand = Math.random();
+          if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = another wall
+          else return rand;
+        }
+        return (n: 1 | 2) => {
+          if (n === 2) {
+            const 
+              height1 = random(), 
+              height2 = (1 - height1) - 0.3;
+            return [ height1, height2 ];
+          }
+          else return [ random() ];
+        }
+      })();
+
+      const extractProps = (wallProps?: any, randomHeight?: any) => {
+        let x, y, heightPercent
+        if (wallProps !== undefined) {
+          x = wallProps.x ? wallProps.x : undefined;
+          y = wallProps.y ? wallProps.y : undefined;
+          heightPercent = wallProps.heightPercent ? wallProps.heightPercent : randomHeight;
+          return { x: x, y: y, heightPercent: heightPercent };
+        } else {
+          return { x: undefined, y: undefined, heightPercent: randomHeight }
+        }
+      } // @audit here
+
       let wallPosition = "down",
           wallEachTime = [1, 2];
-      return <typeof following.getWalls>function(entities, coords?) {
-        let notDefault = coords !== undefined ? coords.y !== undefined : false;
-        let numOfwall =  notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)]; // 1 wall only if not defualt creation
+
+      return <typeof following.getWalls>function(entities, wallProps?) {
+        // @remind refactor not default
+        // this won't work: let notDefault = wallProps.y !== undefined ? true : false;
+        let notDefault = wallProps !== undefined ? wallProps.y !== undefined : false, // if wallProps is only x, then not default wall, ctrl-f: default y only
+            numOfwall = notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)], // 1 wall only if not defualt creation
+            // wallHeightArr = randomHeight(numOfwall == 2 ? 2 : 1); // 
+            wallHeightArr = [ 0.3146822198920567, 0.5187763966772423];
         while (numOfwall--) {
           (function getWall(){
             const 
               wall = Matter.getWall({ 
-                ...coords,
-                position: wallPosition, // this is disregarded if we have coords
+                ...wallProps,
+                heightPercent: (() => { // default random height or pre defined height
+                  if (wallProps !== undefined)
+                    if (wallProps.heightPercent === undefined) return wallHeightArr[numOfwall]; 
+                  console.log("default height");
+                  return;
+                })(),
+                position: wallPosition, // this is disregarded if we have wallProps
               }),
               
               entity = {
                 body: wall.body, 
-                size: [wall.width, wall.height], 
+                size: [wall.width, wall.height],
+                heightPercent: wall.heightPercent,
                 borderRadius: wall.borderRadius,
                 color: wall.color, 
                 renderer: Box,
@@ -143,6 +184,9 @@ export namespace Entities {
     })(),
   }
 
+  // this swap is used in orientation
+  // idea: remove all current entities, then create new ones
+  //       bodies / objects created will auto adjust to current window dimension
   export const swap: Recreation = (() => {
     type args = {
       game: FlappyBallGame | any, 
@@ -177,7 +221,7 @@ export namespace Entities {
       console.log("----------------------------------------------------\n\n");
       ////////////////////////////////////////////////////////////
       getInitial(game, dynamic);
-      getFollowing();
+      getFollowing(); // following: walls, ...etc
       game.engine.swap(game.entities);
     }
   })();

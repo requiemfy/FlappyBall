@@ -61,8 +61,9 @@ export namespace Orientation {
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
-  const orientWallCoords = (game: any) => {
-    let wallsCoords = [],
+  const orientWallCoords = (game: FlappyBallGame) => { // @remind type this
+    type Props = { x: number, y: number, heightPercent: number };
+    let wallProps: Props[] = [],
         wallIds = game.entities.wall,
         wallNum = wallIds.length;
 
@@ -70,11 +71,14 @@ export namespace Orientation {
       const 
         wallKey = wallIds[i],
         wall = game.entities[wallKey],
+        heightPercent = { heightPercent: wall.heightPercent },
         { lastEntX, lastEntY } = lastEntityCoords(wall);
+
       console.log("ORIENTATION WALL " + wallKey);
-      wallsCoords.push(orientEntityCoords(lastEntX, lastEntY));
+
+      wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...heightPercent}); // @remind how to add objects
     }
-    return wallsCoords;
+    return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }
 
   // ================================ CALCULATIONS ================================
@@ -104,7 +108,7 @@ export namespace Orientation {
     return { x: updatedX, y: updatedY };
   }
 
-  const getPrevGameDim = (width: number, height: number) => {
+  const getPrevGameDim = (width: number, height: number) => { // @remind type this
     const
       prevHeight = width - NAVBAR_HEIGHT,
       prevWidth = GameDimension.getOrientation(width, height) === "landscape" ?
