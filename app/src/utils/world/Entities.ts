@@ -67,20 +67,20 @@ export namespace Entities {
           color: player.color, 
           renderer: Circle,
         },
-        // floor: { 
-        //   body: floor.body, 
-        //   size: [floor.width, floor.height], 
-        //   borderRadius: floor.borderRadius,
-        //   color: floor.color, 
-        //   renderer: Box,
-        // },
-        // roof: { 
-        //   body: roof.body, 
-        //   size: [roof.width, roof.height], 
-        //   borderRadius: roof.borderRadius,
-        //   color: roof.color, 
-        //   renderer: Box,
-        // },
+        floor: { 
+          body: floor.body, 
+          size: [floor.width, floor.height], 
+          borderRadius: floor.borderRadius,
+          color: floor.color, 
+          renderer: Box,
+        },
+        roof: { 
+          body: roof.body, 
+          size: [roof.width, roof.height], 
+          borderRadius: roof.borderRadius,
+          color: roof.color, 
+          renderer: Box,
+        },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity. this is array of wall ids
         distance: 0, // testing purpose
@@ -109,60 +109,78 @@ export namespace Entities {
   // because unlike getInitials I can't just show following entities at once
   // soon i may add more following entities
   export const following: FollowingMethods = {
-    getWalls: (() => {
+    getWalls: (() => { // wall/s can only be 1 or 2
       const randomHeight = (() => {
         const random = () => {
           const rand = Math.random();
-          if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = another wall
+          if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = wall
           else return rand;
         }
         return (n: 1 | 2) => {
-          if (n === 2) {
+          if (n === 2) { // if 2 walls, random 2 height
             const 
               height1 = random(), 
               height2 = (1 - height1) - 0.3;
             return [ height1, height2 ];
           }
-          else return [ random() ];
+          else return [ random() ]; // else 1 wall, random 1 height
         }
       })();
 
-      const extractProps = (wallProps?: any, randomHeight?: any) => {
-        let x, y, heightPercent
-        if (wallProps !== undefined) {
-          x = wallProps.x ? wallProps.x : undefined;
-          y = wallProps.y ? wallProps.y : undefined;
-          heightPercent = wallProps.heightPercent ? wallProps.heightPercent : randomHeight;
-          return { x: x, y: y, heightPercent: heightPercent };
-        } else {
-          return { x: undefined, y: undefined, heightPercent: randomHeight }
-        }
-      } // @audit here
+      // const extractProps = (wallProps?: any, randomHeight?: any) => { // @remind refactor this bullshit
+      //   let x, y, heightPercent
+      //   if (wallProps !== undefined) {
+      //     x = wallProps.x ? wallProps.x : undefined;
+      //     y = wallProps.y ? wallProps.y : undefined;
+      //     heightPercent = wallProps.heightPercent ? wallProps.heightPercent : randomHeight;
+      //     return { x: x, y: y, heightPercent: heightPercent };
+      //   } else {
+      //     return { x: undefined, y: undefined, heightPercent: randomHeight }
+      //   }
+      // } 
 
       let wallPosition = "down",
           wallEachTime = [1, 2];
 
-      return <typeof following.getWalls>function(entities, wallProps?) {
-        // @remind refactor not default
+      return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation
         // this won't work: let notDefault = wallProps.y !== undefined ? true : false;
+        // @remind refactor notDefault conditions, so ugly
         let notDefault = wallProps !== undefined ? wallProps.y !== undefined : false, // if wallProps is only x, then not default wall, ctrl-f: default y only
             numOfwall = notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)], // 1 wall only if not defualt creation
-            // wallHeightArr = randomHeight(numOfwall == 2 ? 2 : 1); // 
-            wallHeightArr = [ 0.3146822198920567, 0.5187763966772423];
-        while (numOfwall--) {
+            wallHeightsArr = randomHeight(numOfwall == 2 ? 2 : 1); // @remind wtf is this param
+            // wallHeightsArr = [ 0.3146822198920567, 0.5187763966772423]; // @remind delete
+
+        while (numOfwall--) { // how many walls are shown at a time (up or down or both)
           (function getWall(){
             const 
-              wall = Matter.getWall({ 
-                ...wallProps,
-                heightPercent: (() => { // default random height or pre defined height
-                  if (wallProps !== undefined)
-                    if (wallProps.heightPercent === undefined) return wallHeightArr[numOfwall]; 
-                  console.log("default height");
-                  return;
+              wall = Matter.getWall({ // @audit problem, wallProps as only arg
+                // ...wallProps,
+                // heightPercent: wallHeightsArr[0],
+
+                // x: wallProps ? wallProps.x ? wallProps.x : undefined : undefined,
+                // y: wallProps ? wallProps.y ? wallProps.y : undefined : undefined,
+                // heightPercent: wallProps ? wallProps.heightPercent ? 
+                //                 wallProps.heightPercent : wallHeightsArr[numOfwall] : wallHeightsArr[numOfwall],
+
+                x: wallProps ? wallProps.x : undefined,
+                y: wallProps ? wallProps.y : undefined,
+                heightPercent: (() => { // this can't be undefined
+                  if (wallProps && wallProps.heightPercent) return wallProps.heightPercent;
+                  else return wallHeightsArr[numOfwall];
                 })(),
+
+
+                // heightPercent: (() => { // default random height or pre defined height
+                //   if (wallProps !== undefined)
+                //     if (wallProps.heightPercent === undefined) return wallHeightsArr[numOfwall]; 
+                //   console.log("default height");
+                //   return;
+                // })(),
+                
                 position: wallPosition, // this is disregarded if we have wallProps
               }),
               
+              // walls must return these props
               entity = {
                 body: wall.body, 
                 size: [wall.width, wall.height],

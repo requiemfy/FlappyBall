@@ -33,21 +33,16 @@ export default class Box extends React.Component<BoxProps, BoxState> {
     // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     ////////////////////////////////////////////////////////////
     return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          console.log("BOX PRESSED");
-        }}>
-         <View
-          style={{
-            position: "absolute",
-            left: x,
-            top: y,
-            width: width,
-            height: height,
-            borderRadius: this.props.borderRadius,
-            backgroundColor: this.props.color || "pink"
-          }}/>
-      </TouchableWithoutFeedback>
+      <View
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        width: width,
+        height: height,
+        borderRadius: this.props.borderRadius,
+        backgroundColor: this.props.color || "pink"
+      }}/>
     );
   }
 }

@@ -77,16 +77,21 @@ export namespace Matter {
     });
   }
   
+  // possible cases of coordinates:
+  //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
+  //    x and y are both defined -> showing walls with specific coords, triggered by orientation
+  //    x and y are both undefined -> showing walls by default: coords are purely based on game dimensions
   const createWall: StaticBody = ({ x, y, heightPercent, position = "down" }) => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
-    console.log(heightPercent);
-    if (!x) { // if x undefined
+
+    // @remind try to put this as default param val using function
+    if (!x) { // if x undefined, then it depends on the wall width, game width
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
     }
-    if (!y) { // if y undefined
+    if (!y) { // if y undefined, then it depends on the wall height, game height
       if (position === "down") {
         y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
       } else if (position === "up") {
@@ -111,6 +116,7 @@ export namespace Matter {
     return {
       width: prop.width,
       height: prop.height,
+      heightPercent: prop.heightPercent, // only useful for wall
       borderRadius: prop.borderRadius,
       color: prop.color,
       body: BODIES.rectangle(prop.x, prop.y, prop.width, prop.height, { isStatic: prop.static })

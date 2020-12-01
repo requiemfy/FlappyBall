@@ -52,7 +52,7 @@ export namespace Physics {
           wallIndex = entities.get.wall[wallLen-1];
           wall = entities.get[wallIndex];
           wallLen--;
-          BODY.translate( wall.body, { x: -1, y: 0 } );
+          BODY.translate( wall.body, { x: -1.2, y: 0 } );
           move();
         }
       })();

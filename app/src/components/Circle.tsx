@@ -22,21 +22,16 @@ export default class Circle extends React.Component<CircleProps, CircleState> {
           x = this.props.body.position.x - (size / 2),
           y = this.props.body.position.y - (size / 2);
     return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          console.log("BOX PRESSED");
-        }}>
-         <View
-          style={{
-            position: "absolute",
-            left: x,
-            top: y,
-            width: size,
-            height: size,
-            borderRadius: this.props.borderRadius,
-            backgroundColor: this.props.color || "pink"
-          }}/>
-      </TouchableWithoutFeedback>
+      <View
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        width: size,
+        height: size,
+        borderRadius: this.props.borderRadius,
+        backgroundColor: this.props.color || "pink"
+      }}/>
     );
   }
 }

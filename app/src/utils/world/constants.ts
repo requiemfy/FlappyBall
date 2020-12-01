@@ -39,7 +39,7 @@ const BODIES = Matter.Bodies,
       FLOOR_HEIGHT = (KEYS_HEIGHT / SCREEN_HEIGHT) + 0.05,
       ROOF_HEIGHT = 0.05,
 
-      WALL_DISTANCE = 0.10,
+      WALL_DISTANCE = 0.15,
       NOT_BODY = ["physics", "gravity", "wall", "distance",];
 
 export {
