@@ -10,9 +10,4 @@ export namespace Coordinates {
     return entities[wallIndex].body.position.x;
   }
 
-  // export const getFirstWallX = (entities: any) => { // @remind not in used, clear
-  //   const wallIndex = entities.wall[0];
-  //   return entities[wallIndex].body.position.x;
-  // }
-
 }

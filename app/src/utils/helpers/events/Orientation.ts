@@ -66,7 +66,6 @@ export namespace Orientation {
   }
   
   const orientWallCoords: OrientWall = (game) => {
-    // type Props = { x: number, y: number, heightPercent: number }; // @remind clear
     let wallProps: WallProps[] = [],
         wallIds = game.entities.wall,
         wallNum = wallIds.length;

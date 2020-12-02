@@ -40,21 +40,7 @@ export namespace Physics {
 
   // special relativity
   const wallRelativity: Relativity = (() => { 
-    // @remind clear
-    // type Ent = {ent: any, get: Entities.All | any, set: (ent: Entities.All) => void};
-    // const entities: Ent = { 
-    //   get: null,
-    //   set: function (entities: Entities.All) { this.get = entities },
-    // };
-    // const entities: Ent = (() => {
-    //   let ent: Entities.All;
-    //   return <typeof entities>{
-    //     get: () => ent,
-    //     set: function (entities: Entities.All) { ent = entities },
-    //   }
-    // })();
     const entities: { get?: any } = {};
-
     const moveWalls = () => {
       let wallLen = entities.get.wall.length, wallIndex, wall;
       (function move(){
@@ -81,39 +67,12 @@ export namespace Physics {
     }
     const showNextWall = () => {
       if (entities.get.wall.length > 0) {
-        // const // @remind clear
-        //   // note that vals of first and last wall may interchange, side effect of orientation & swap
-
-        //   // supposed to be for last wall
-        //   lastWallX = Coordinates.getLastWallX(entities.get),
-        //   gameWidth = GameDimension.getWidth("now"),
-        //   lastDistance = gameWidth - lastWallX,
-        //   percentLastDist = lastDistance / gameWidth,
-
-        //   // supposed  to be for first wall
-        //   firstWallX = Coordinates.getFirstWallX(entities.get),
-        //   firstDistance = gameWidth - firstWallX,
-        //   percentFirstDist = firstDistance / gameWidth;
-
-        // // i have to check first wall and last wall because i don't really care much about wall ids
-        // // so i can't certainly say which wall is the very last, but i'm certain they are in order
-        // // there are chances that wall id is in descending order, else ascending
-        // if ((percentLastDist >= WALL_DISTANCE) && (percentFirstDist >= WALL_DISTANCE)) {
-        // // if ((lastDistance >= 200) && (firstDistance >= 200)) { // @remind edited to increase wall distance
-
-        //   console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastWallX: " + lastWallX +
-        //   "firstWallX: " + firstWallX + " gameWidth " + gameWidth);
-
-        //   Entities.following.getWalls(entities.get);
-        // }
-        
         const 
           lastPosId = entities.get.wallInLastPos, // wallInLastPos is initialize in following.getWalls
           lastPosX = entities.get[lastPosId].body.position.x,
           gameWidth = GameDimension.getWidth("now"),
           lastDistance = gameWidth - lastPosX,
           percentLastDist = lastDistance / gameWidth;
-
         // i have to check first wall and last wall because i don't really care much about wall ids
         // so i can't certainly say which wall id is the very last, but i'm certain they are in order
         // there are chances that wall id is in descending order, else ascending
@@ -121,12 +80,9 @@ export namespace Physics {
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastPos" + lastPosX + "gameWidth " + gameWidth);
           Entities.following.getWalls(entities.get);
         }
-
       }
     }
     return (ent: Entities.All) => {
-      // entities.set(ent); // @remind clear
-      // Object.defineProperty(entities, "get", { value: ent, writable: false, configurable: true });
       Object.defineProperty(entities, "get", { get() { return ent }, configurable: true });
       moveWalls();
       removeWall();

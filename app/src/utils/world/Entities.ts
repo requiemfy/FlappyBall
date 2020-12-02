@@ -26,7 +26,9 @@ export namespace Entities {
   type FollowingMethods = {
     getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number }) => void,
   };
+
   export type All = Initial & Following & SystemProps;
+
   export type Physical = {
     body: Body;
     size: number[]; 
@@ -41,6 +43,7 @@ export namespace Entities {
   export type Following = {
     [key: number]: Physical; // following wall
   }
+
   // ENTITIES THAT ARE INITIALIZED AT ONCE
   export type Initial = {
     // [key: string]: any; // additional
@@ -49,20 +52,24 @@ export namespace Entities {
     floor: Physical;
     roof: Physical;
   }
+
+  // ENTITIES THAT ARE NON PHYSICAL
   export type SystemProps = {
     physics: Physics;
     gravity: number;
-    wall: number[];
+    wall: number[]; // actually this is wall ids array
     wallInLastPos: number;
   }
 
+  // ====================================================================================================
+  // ====================================================================================================
   export const getInitial: Bodies = (game, dynamic = { player: {} }) => {
     const
       player = Matter.getPlayer(dynamic.player), // player is auto extracted in Matter.ts
       floor = Matter.getFloor(),
       roof = Matter.getRoof(),
 
-      // setting initial entities with one creation
+      // setting initial entities with one time creation
       entities: Initial & SystemProps = { 
         physics: { 
           engine: engine, 
@@ -89,13 +96,13 @@ export namespace Entities {
           color: roof.color, 
           renderer: Box,
         },
-        gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
-        wall: [], // same reason in gravity. this is array of wall ids
+        gravity: 0.1, 
+        wall: [],
         wallInLastPos: 0,      
       }
     game.entities = entities;
     
-    // setting initial wall entities with many creations (depending on how many "wallNum")
+    // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){
       if (!game.entitiesInitialized) {
         for (let wallNum = 3; wallNum--;) {
@@ -104,8 +111,6 @@ export namespace Entities {
               latestWallX = Coordinates.getLatestWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
               newWallX = latestWallX - distance;
-              // newWallX = latestWallX - 200; // @remind edited to increase wall distance
-
             following.getWalls(game.entities, { x: newWallX }); // default y only
           }
           else following.getWalls(game.entities); // default x, y coords
@@ -114,7 +119,12 @@ export namespace Entities {
       }
     })();
   }
+  // ====================================================================================================
+  // ====================================================================================================
 
+
+  // ====================================================================================================
+  // ====================================================================================================
   // this is object with methods for following entities
   // i just put together methods in an object for "following entities"
   // because unlike getInitials I can't just show "following entities" at once, since it's continuous
@@ -206,22 +216,16 @@ export namespace Entities {
       }
     })(),
   }
+  // ====================================================================================================
+  // ====================================================================================================
 
+  
+  // ====================================================================================================
+  // ====================================================================================================
   // this swap is used in orientation
   // idea: remove all current entities, then create new ones
   //       bodies / objects created will auto adjust to current window dimension
   export const swap: Recreation = (() => {
-    // @remind clear here 
-    // type args = {
-    //   game: FlappyBallGame | any, 
-    //   dynamic: InitialParams & FollowingParams | any,
-    //   set: (game: any, dynamic: any) => void,
-    // };
-    // const params: args = {
-    //   game: null,
-    //   dynamic: null, 
-    //   set: function (game, dynamic) { this.game = game; this.dynamic = dynamic },
-    // }
     type args = {
       game?: FlappyBallGame | any, 
       dynamic?: InitialParams & FollowingParams | any,
@@ -257,5 +261,5 @@ export namespace Entities {
       game.engine.swap(game.entities);
     }
   })();
-
+  // ====================================================================================================
 }
