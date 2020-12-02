@@ -35,6 +35,7 @@ export namespace Orientation {
     };
     Dimensions.addEventListener('change', callback); // luckily this will not invoke in eg. landscape left to landscape right
 
+    // adding identation when Status bar is in the left side, because in actual devices some has something in the middle
     DeviceMotion.isAvailableAsync().then((supported) => {
       if (supported) {
         let prevOrient: number; // we are not sure what's first orientation

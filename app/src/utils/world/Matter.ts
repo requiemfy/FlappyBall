@@ -31,7 +31,7 @@ export namespace Matter {
       size: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      static: false,
+      static: true,
     });
   }
   
@@ -76,7 +76,7 @@ export namespace Matter {
       static: true,
     });
   }
-  
+
   // possible cases of coordinates:
   //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
   //    x and y are both defined -> showing walls with specific coords, triggered by orientation
@@ -85,10 +85,7 @@ export namespace Matter {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
-    
-    console.log("Matter.ts: heightPercent " + heightPercent);
-
-    // @remind try to put this as default param val using function
+    // i can't put these x, y default values in the function param because it also depends on some variables
     if (!x) { // if x undefined, then it depends on the wall width, game width
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);

@@ -89,7 +89,7 @@ export namespace Physics {
         // so i can't certainly say which wall is the very last, but i'm certain they are in order
         // there are chances that wall id is in descending order, else ascending
         if ((percentLastDist >= WALL_DISTANCE) && (percentFirstDist >= WALL_DISTANCE)) {
-        // if (lastDistance > 200) {
+        // if ((lastDistance >= 200) && (firstDistance >= 200)) { // @remind edited to increase wall distance
 
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastWallX: " + lastWallX +
           "firstWallX: " + firstWallX + " gameWidth " + gameWidth);

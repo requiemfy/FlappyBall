@@ -55,6 +55,7 @@ export namespace Entities {
       floor = Matter.getFloor(),
       roof = Matter.getRoof(),
 
+      // setting initial entities with one creation
       entities = { 
         physics: { 
           engine: engine, 
@@ -87,6 +88,7 @@ export namespace Entities {
       }
     game.entities = entities;
     
+    // setting initial wall entities with many creations (depending on how many "wallNum")
     (function getInitialWalls(){
       if (!game.entitiesInitialized) {
         for (let wallNum = 3; wallNum--;) {
@@ -95,7 +97,7 @@ export namespace Entities {
               lastWallX = Coordinates.getLastWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
               newWallX = lastWallX - distance;
-              // newWallX = lastWallX - 200;
+              // newWallX = lastWallX - 200; // @remind edited to increase wall distance
 
             following.getWalls(game.entities, { x: newWallX }); // default y only
           }
@@ -107,8 +109,8 @@ export namespace Entities {
   }
 
   // this is object with methods for following entities
-  // i just put together methods in an object for following entities
-  // because unlike getInitials I can't just show following entities at once
+  // i just put together methods in an object for "following entities"
+  // because unlike getInitials I can't just show "following entities" at once, since it's continuous
   // soon i may add more following entities
   export const following: FollowingMethods = {
     getWalls: (() => { // wall/s can only be 1 or 2
