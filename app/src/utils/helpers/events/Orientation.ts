@@ -12,14 +12,17 @@ import { GameDimension } from "../dimensions";
 
 export namespace Orientation {
   type Event = (event: object) => void;
-  type OrientGame = (game: FlappyBallGame) => void;
+  type WallProps = { x: number, y: number, heightPercent: number };
   type Coordinates = { x: number, y: number };
   type OrientPlayer = (game: FlappyBallGame) => Coordinates;
+  type OrientWall = (game: FlappyBallGame) => WallProps[];
+  type OrientGame = (game: FlappyBallGame) => void;
   type OrientEntity = (x: number, y: number) => Coordinates;
+  type PrevGameDimensions = (width: number, height: number) => { prevGameWidth: number, prevGameHeight: number };
   type EntityCoords = (entity: Entities.Physical) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
-  let callback: any; // Event
+  let callback: Event; // Event
 
   export const addChangeListener: OrientGame = (game) => {
     console.log("\torientation.tsx: addChangeListener!!!");
@@ -62,22 +65,22 @@ export namespace Orientation {
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
-  const orientWallCoords = (game: FlappyBallGame) => { // @remind type this
-    type Props = { x: number, y: number, heightPercent: number };
-    let wallProps: Props[] = [],
+  const orientWallCoords: OrientWall = (game) => {
+    // type Props = { x: number, y: number, heightPercent: number }; // @remind clear
+    let wallProps: WallProps[] = [],
         wallIds = game.entities.wall,
         wallNum = wallIds.length;
 
-    for(let i = 0; i < wallNum; i++) {
+    while(wallNum--) {
       const 
-        wallKey = wallIds[i],
+        wallKey = wallIds[wallNum],
         wall = game.entities[wallKey],
         heightPercent = { heightPercent: wall.heightPercent },
         { lastEntX, lastEntY } = lastEntityCoords(wall);
 
       console.log("ORIENTATION WALL " + wallKey);
 
-      wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...heightPercent}); // @remind how to add objects
+      wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...heightPercent});
     }
     return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }
@@ -109,14 +112,15 @@ export namespace Orientation {
     return { x: updatedX, y: updatedY };
   }
 
-  const getPrevGameDim = (width: number, height: number) => { // @remind type this
+  const getPrevGameDim: PrevGameDimensions = (width, height) => {
     const
       prevHeight = width - NAVBAR_HEIGHT,
       prevWidth = GameDimension.getOrientation(width, height) === "landscape" ?
                   GAME_PORTRAIT_WIDTH : GAME_LANDSCAPE_WIDTH;
-      //if landscape now, then prev is portrait
-    return { prevGameHeight: prevHeight, prevGameWidth: prevWidth }
+      // if landscape now, then prev is portrait
+    return { prevGameWidth: prevWidth, prevGameHeight: prevHeight, }
   }
+
   
   const lastEntityCoords: EntityCoords = (entity) => {
     return {

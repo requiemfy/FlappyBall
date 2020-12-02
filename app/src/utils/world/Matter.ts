@@ -31,7 +31,7 @@ export namespace Matter {
       size: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      static: true,
+      static: false,
     });
   }
   

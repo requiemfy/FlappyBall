@@ -40,7 +40,7 @@ const BODIES = Matter.Bodies,
       ROOF_HEIGHT = 0.05,
 
       WALL_DISTANCE = 0.20,
-      NOT_BODY = ["physics", "gravity", "wall", "distance",];
+      NOT_BODY = ["physics", "gravity", "wall", "distance", "wallInLastPos"];
 
 export {
   BODIES, BODY, ENGINE, RENDER, WORLD, EVENTS, COMPOSITE,

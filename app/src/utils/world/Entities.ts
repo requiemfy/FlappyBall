@@ -26,27 +26,34 @@ export namespace Entities {
   type FollowingMethods = {
     getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number }) => void,
   };
-  export type All = Initial & Following;
+  export type All = Initial & Following & SystemProps;
   export type Physical = {
     body: Body;
     size: number[]; 
     borderRadius: number;
     color: String; 
-    renderer: typeof Box;
+    renderer: typeof Box | typeof Circle;
   }
+
+  // ******* ALWAYS REMEMBER WHEN UPDATING ENTITIES, UPDATE "NOT_BODY" CONSTANT *******
+
+  // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
     [key: number]: Physical; // following wall
   }
-  export type Initial = { // used in index, physics
+  // ENTITIES THAT ARE INITIALIZED AT ONCE
+  export type Initial = {
     // [key: string]: any; // additional
-    [key: number]: Physical; // initial wall additional
-    physics: Physics;
+    [key: number]: Physical; // initial wall
     player: Physical;
     floor: Physical;
     roof: Physical;
+  }
+  export type SystemProps = {
+    physics: Physics;
     gravity: number;
     wall: number[];
-    counter: number; // testing purpose
+    wallInLastPos: number;
   }
 
   export const getInitial: Bodies = (game, dynamic = { player: {} }) => {
@@ -56,7 +63,7 @@ export namespace Entities {
       roof = Matter.getRoof(),
 
       // setting initial entities with one creation
-      entities = { 
+      entities: Initial & SystemProps = { 
         physics: { 
           engine: engine, 
           world: world 
@@ -84,7 +91,7 @@ export namespace Entities {
         },
         gravity: 0.1, // because, we can pass this in physics, and i donno how to pass custom props in system
         wall: [], // same reason in gravity. this is array of wall ids
-        distance: 0, // testing purpose
+        wallInLastPos: 0,      
       }
     game.entities = entities;
     
@@ -94,10 +101,10 @@ export namespace Entities {
         for (let wallNum = 3; wallNum--;) {
           if (game.entities.wall.length > 0) {
             const 
-              lastWallX = Coordinates.getLastWallX(game.entities),
+              latestWallX = Coordinates.getLatestWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
-              newWallX = lastWallX - distance;
-              // newWallX = lastWallX - 200; // @remind edited to increase wall distance
+              newWallX = latestWallX - distance;
+              // newWallX = latestWallX - 200; // @remind edited to increase wall distance
 
             following.getWalls(game.entities, { x: newWallX }); // default y only
           }
@@ -161,13 +168,39 @@ export namespace Entities {
                 color: wall.color, 
                 renderer: Box,
               };
-      
-            let wallId = 0;
-            while (entities.wall.includes(wallId)) {wallId++;}
-            entities.wall.push(wallId);
-            entities[wallId] = entity;
-            if (wallPosition === "down") wallPosition = "up";
-            else wallPosition = "down";
+            
+            // let wallId = 0;
+            // while (entities.wall.includes(wallId)) {wallId++;}
+            // entities.wall.push(wallId);
+            // entities[wallId] = entity;
+            const wallId = (function getWallId() {
+              let _wallId = 0;
+              while (entities.wall.includes(_wallId)) {_wallId++;}
+              entities.wall.push(_wallId);
+              entities[_wallId] = entity;
+              return _wallId;
+            })();
+
+            // if (Coordinates.getLatestWallX(entities) >= entities[entities.wallInLastPos].body.position.x) {
+            //   entities.wallInLastPos = wallId;
+            //   console.log("entities.wallInLastPos: " + entities.wallInLastPos);
+            // }
+            (function setWallInLastPosition() {
+              const
+                latestWallX = Coordinates.getLatestWallX(entities),
+                prevWallX = entities[entities.wallInLastPos].body.position.x;
+              if ( latestWallX >= prevWallX) {
+                entities.wallInLastPos = wallId;
+                console.log("entities.wallInLastPos: " + entities.wallInLastPos);
+              }
+            })();
+             
+            // if (wallPosition === "down") wallPosition = "up";
+            // else wallPosition = "down";
+            (function switchWallPos() {
+              if (wallPosition === "down") wallPosition = "up";
+              else wallPosition = "down";
+            })();
           })();
         }
       }
@@ -178,16 +211,23 @@ export namespace Entities {
   // idea: remove all current entities, then create new ones
   //       bodies / objects created will auto adjust to current window dimension
   export const swap: Recreation = (() => {
+    // @remind clear here 
+    // type args = {
+    //   game: FlappyBallGame | any, 
+    //   dynamic: InitialParams & FollowingParams | any,
+    //   set: (game: any, dynamic: any) => void,
+    // };
+    // const params: args = {
+    //   game: null,
+    //   dynamic: null, 
+    //   set: function (game, dynamic) { this.game = game; this.dynamic = dynamic },
+    // }
     type args = {
-      game: FlappyBallGame | any, 
-      dynamic: InitialParams & FollowingParams | any,
-      set: (game: any, dynamic: any) => void,
+      game?: FlappyBallGame | any, 
+      dynamic?: InitialParams & FollowingParams | any,
     };
-    const params: args = {
-      game: null,
-      dynamic: null,
-      set: function (game, dynamic) { this.game = game; this.dynamic = dynamic },
-    }
+    const params: args = {};
+
     const removeAllEntities = () => {
       const game = params.game;
       for (let entity in game.entities) {
@@ -201,7 +241,9 @@ export namespace Entities {
       }
     }
     return <typeof swap>function (game, dynamic) {
-      params.set(game, dynamic);
+      // params.set(game, dynamic);
+      Object.defineProperty(params, "game", { get() { return game }, configurable: true });
+      Object.defineProperty(params, "dynamic", { get() { return dynamic }, configurable: true });
       removeAllEntities();
       ////////////////////////////////////////////////////////////
       console.log("----------------------------------------------------");
