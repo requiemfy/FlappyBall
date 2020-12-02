@@ -38,8 +38,8 @@ export namespace Entities {
     [key: number]: Physical; // following wall
   }
   export type Initial = { // used in index, physics
-    [key: string]: any;
-    [key: number]: Physical; // initial wall
+    // [key: string]: any; // additional
+    [key: number]: Physical; // initial wall additional
     physics: Physics;
     player: Physical;
     floor: Physical;
@@ -89,12 +89,14 @@ export namespace Entities {
     
     (function getInitialWalls(){
       if (!game.entitiesInitialized) {
-        for (let wallNum = 8; wallNum--;) {
+        for (let wallNum = 3; wallNum--;) {
           if (game.entities.wall.length > 0) {
             const 
               lastWallX = Coordinates.getLastWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
               newWallX = lastWallX - distance;
+              // newWallX = lastWallX - 200;
+
             following.getWalls(game.entities, { x: newWallX }); // default y only
           }
           else following.getWalls(game.entities); // default x, y coords
@@ -110,6 +112,9 @@ export namespace Entities {
   // soon i may add more following entities
   export const following: FollowingMethods = {
     getWalls: (() => { // wall/s can only be 1 or 2
+      let wallPosition = "down",
+          wallEachTime = [1, 2];
+
       const randomHeight = (() => {
         const random = () => {
           const rand = Math.random();
@@ -123,64 +128,29 @@ export namespace Entities {
               height2 = (1 - height1) - 0.3;
             return [ height1, height2 ];
           }
-          else return [ random() ]; // else 1 wall, random 1 height
+          else return [ 0.7 ]; // else 1 wall, specific height
         }
       })();
 
-      // const extractProps = (wallProps?: any, randomHeight?: any) => { // @remind refactor this bullshit
-      //   let x, y, heightPercent
-      //   if (wallProps !== undefined) {
-      //     x = wallProps.x ? wallProps.x : undefined;
-      //     y = wallProps.y ? wallProps.y : undefined;
-      //     heightPercent = wallProps.heightPercent ? wallProps.heightPercent : randomHeight;
-      //     return { x: x, y: y, heightPercent: heightPercent };
-      //   } else {
-      //     return { x: undefined, y: undefined, heightPercent: randomHeight }
-      //   }
-      // } 
-
-      let wallPosition = "down",
-          wallEachTime = [1, 2];
-
       return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation
-        // this won't work: let notDefault = wallProps.y !== undefined ? true : false;
-        // @remind refactor notDefault conditions, so ugly
-        let notDefault = wallProps !== undefined ? wallProps.y !== undefined : false, // if wallProps is only x, then not default wall, ctrl-f: default y only
-            numOfwall = notDefault ? 1 : wallEachTime[Math.floor(Math.random()*2)], // 1 wall only if not defualt creation
-            wallHeightsArr = randomHeight(numOfwall == 2 ? 2 : 1); // @remind wtf is this param
-            // wallHeightsArr = [ 0.3146822198920567, 0.5187763966772423]; // @remind delete
+        let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall, ctrl-f: default y only
+            numOfwall = isDefault ? wallEachTime[Math.floor(Math.random()*2)] : 1, // 1 wall only if not defualt creation
+            wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
           (function getWall(){
             const 
-              wall = Matter.getWall({ // @audit problem, wallProps as only arg
-                // ...wallProps,
-                // heightPercent: wallHeightsArr[0],
-
-                // x: wallProps ? wallProps.x ? wallProps.x : undefined : undefined,
-                // y: wallProps ? wallProps.y ? wallProps.y : undefined : undefined,
-                // heightPercent: wallProps ? wallProps.heightPercent ? 
-                //                 wallProps.heightPercent : wallHeightsArr[numOfwall] : wallHeightsArr[numOfwall],
-
+              wall = Matter.getWall({
                 x: wallProps ? wallProps.x : undefined,
                 y: wallProps ? wallProps.y : undefined,
                 heightPercent: (() => { // this can't be undefined
+                  // any of this conditions should be true
                   if (wallProps && wallProps.heightPercent) return wallProps.heightPercent;
-                  else return wallHeightsArr[numOfwall];
+                  else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
                 })(),
-
-
-                // heightPercent: (() => { // default random height or pre defined height
-                //   if (wallProps !== undefined)
-                //     if (wallProps.heightPercent === undefined) return wallHeightsArr[numOfwall]; 
-                //   console.log("default height");
-                //   return;
-                // })(),
-                
                 position: wallPosition, // this is disregarded if we have wallProps
               }),
               
-              // walls must return these props
               entity = {
                 body: wall.body, 
                 size: [wall.width, wall.height],

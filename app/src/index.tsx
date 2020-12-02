@@ -19,7 +19,7 @@ import { DeviceMotion } from 'expo-sensors';
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
-  entities: Entities.Initial & Entities.Following;
+  entities: Entities.All;
   paused: boolean;
   over: boolean;
   entitiesInitialized: boolean;

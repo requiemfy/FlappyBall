@@ -57,7 +57,7 @@ export namespace Physics {
         }
       })();
     }
-    const isWallOutOfVision = () => { // @todo extend unmount
+    const isWallOutOfVision = () => {
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
         COMPOSITE.remove(world, wall.body);
@@ -72,12 +72,28 @@ export namespace Physics {
     const showNextWall = () => {
       if (entities.get.wall.length > 0) {
         const 
+          // note that vals of first and last wall may interchange, side effect of orientation & swap
+
+          // supposed to be for last wall
           lastWallX = Coordinates.getLastWallX(entities.get),
           gameWidth = GameDimension.getWidth("now"),
           lastDistance = gameWidth - lastWallX,
-          percentLastDist = lastDistance / gameWidth;
-        if (percentLastDist >= WALL_DISTANCE) {
-          console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE")
+          percentLastDist = lastDistance / gameWidth,
+
+          // supposed  to be for first wall
+          firstWallX = Coordinates.getFirstWallX(entities.get),
+          firstDistance = gameWidth - firstWallX,
+          percentFirstDist = firstDistance / gameWidth;
+
+        // i have to check first wall and last wall because i don't really care much about wall ids
+        // so i can't certainly say which wall is the very last, but i'm certain they are in order
+        // there are chances that wall id is in descending order, else ascending
+        if ((percentLastDist >= WALL_DISTANCE) && (percentFirstDist >= WALL_DISTANCE)) {
+        // if (lastDistance > 200) {
+
+          console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastWallX: " + lastWallX +
+          "firstWallX: " + firstWallX + " gameWidth " + gameWidth);
+
           Entities.following.getWalls(entities.get);
         }
       }
