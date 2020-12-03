@@ -1,8 +1,8 @@
 import React from 'react';
-import FlappyBallGame from './app/src';
+import Game from './app/index';
 
 export default function App() {
   return (
-    <FlappyBallGame />
+    <Game />
   );
 }

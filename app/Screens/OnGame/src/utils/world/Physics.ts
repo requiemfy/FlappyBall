@@ -1,7 +1,7 @@
 import { Bodies } from "matter-js";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../..";
-import { gameOverAlert } from "../helpers/alerts";
+import { GameAlert } from "../helpers/alerts";
 import { Coordinates } from "../helpers/coordinates";
 import { GameDimension } from "../helpers/dimensions";
 import { 
@@ -108,7 +108,7 @@ export namespace Physics {
       // but works with setTimeout() as callback, i donno why
       setTimeout(() => game.engine.stop(), 0);
       // -----------------------------------------------------------
-      gameOverAlert();
+      GameAlert.gameOver();
     });
   }
   

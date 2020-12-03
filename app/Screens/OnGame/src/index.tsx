@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AppState, Dimensions } from 'react-native'
+import { Alert, AppState, Dimensions, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
 import { GameAppState } from './utils/helpers/events/GameState';
@@ -13,7 +13,9 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { GameDimension } from './utils/helpers/dimensions';
 
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { DeviceMotion } from 'expo-sensors';
+
+import * as Updates from 'expo-updates';
+import { GameAlert } from './utils/helpers/alerts';
 
 
 interface EventType { type: string; }
@@ -28,21 +30,28 @@ interface Game {
   onEvent(e: EventType): void;
 }
 
-export default class FlappyBallGame extends React.PureComponent implements Game{
+export default class FlappyBallGame extends React.PureComponent implements Game {
 
   engine: any;
   entities: any; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
-  state: { left: number };
+  state: { 
+    left: number, // used in orientation, i needed this because component doesn't automatically render in orientation change
+    running: string, 
+  };
 
   constructor(props: object) {
     super(props);
+
+    // const TEST_UPDATE = 0;
+    // Updates.checkForUpdateAsync().then((update) => update.isAvailable ? GameAlert.hasUpdate() : null);
+
     this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
-    this.state = { left: 0 };
+    this.state = { left: 0, running: "resume", };
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
@@ -100,8 +109,10 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
   onEvent(e: EventType) {
     if (e.type === "stopped") {
       this.paused = true;
+      this.setState({ running: "resume" });
     } else if (e.type === "started") {
       this.paused = false;
+      this.setState({ running: "paused" });
     }
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
@@ -137,13 +148,32 @@ export default class FlappyBallGame extends React.PureComponent implements Game{
     return (
       <View style={{ flex: 1, }}>
         
-        <TouchableWithoutFeedback onPress={ this.pauseOrResume }>
-          <View style={{
+          <View style={{ // @remind make nav bar tsx
             backgroundColor:"yellow",
             width: "100%",
             height: NAVBAR_HEIGHT,
-            }}></View>
-        </TouchableWithoutFeedback>
+          }}>
+            <View style={{ 
+                flex: 1, 
+                flexDirection: "row", 
+                backgroundColor: "red" ,
+                justifyContent: "space-around",
+                alignItems: "center",
+              }}>
+              <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} ></View>
+              <TouchableWithoutFeedback onPress={ this.pauseOrResume }>
+                <View style={{ 
+                  width: "40%", 
+                  height: "90%", 
+                  backgroundColor: "black",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}>
+                  <Text style={{ color: "white" }}> { this.state.running } </Text>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
