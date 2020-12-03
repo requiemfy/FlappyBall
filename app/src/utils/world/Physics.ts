@@ -1,4 +1,5 @@
 import { Bodies } from "matter-js";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../..";
 import { gameOverAlert } from "../helpers/alerts";
 import { Coordinates } from "../helpers/coordinates";
@@ -53,9 +54,10 @@ export namespace Physics {
         }
       })();
     }
-    const isWallOutOfVision = () => { // @remind i'm telling you adjust wall unmount
+    const isWallOutOfVision = () => {
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
-      if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
+      // if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
+      if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
         COMPOSITE.remove(world, wall.body);
         delete entities.get[wallIndex]; // this is necessary
         return true;

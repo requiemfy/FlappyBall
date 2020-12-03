@@ -59,7 +59,7 @@ export namespace Orientation {
     DeviceMotion.removeAllListeners();
   }
 
-  // =============================== SPECIFIC ===============================
+  // =============================== SPECIFIC ENTITY ===============================
   const orientPlayerCoords: OrientPlayer = (game) => {
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
