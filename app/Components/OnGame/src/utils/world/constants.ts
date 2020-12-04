@@ -18,9 +18,14 @@ const BODIES = Matter.Bodies,
         return  { WINDOW_WIDTH: width, WINDOW_HEIGHT: height };
       })(),
 
-      { SCREEN_WIDTH, SCREEN_HEIGHT } = (() => { 
-        const { width, height } = Dimensions.get("screen");
-        return  { SCREEN_WIDTH: width, SCREEN_HEIGHT: height };
+      { SCREEN_WIDTH, SCREEN_HEIGHT } = (() => { // screen dims is always portrait
+        const 
+          { width, height } = Dimensions.get("screen"),
+          screenDims = (() => {
+            if (width > height) return { SCREEN_WIDTH: height, SCREEN_HEIGHT: width };
+            else return { SCREEN_WIDTH: width, SCREEN_HEIGHT: height };
+          })();
+        return screenDims;
       })(),
       
       NAVBAR_HEIGHT = 50,
