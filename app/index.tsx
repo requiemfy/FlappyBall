@@ -24,10 +24,15 @@ export default class Game extends React.PureComponent {
   }
 
   render() {
-    if (this.state.menu) {
-      return <GameMenu game = { this }/>
-    } else {
-      return <FlappyBallGame />
-    }
+    // if (this.state.menu) {
+    //   // return <GameMenu game = { this }/>
+    //   return <GameMenu />
+
+    // } else {
+    //   return <FlappyBallGame />
+    // }
+
+    // return <FlappyBallGame />
+    return <GameMenu />
   }
 }

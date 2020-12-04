@@ -21,10 +21,11 @@ export namespace Matter {
   type DynamicBody = (center: Coordinates) => MatterProps;  // center obj is required but x, y props is optional LOL
 
   // ==================================== Entities ===================================
-  const createPlayer: DynamicBody = ({ x = 40, y = 250 }) => {
-    const 
-      { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
+  const createPlayer: DynamicBody = ({ x = 40, y }) => {
+    const
+      { gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
+    if (!y) { y = gameHeight * 0.35; }
     return createCircle ({
       x: x,
       y: y,

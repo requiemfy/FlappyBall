@@ -112,7 +112,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game 
       this.setState({ running: "resume" });
     } else if (e.type === "started") {
       this.paused = false;
-      this.setState({ running: "paused" });
+      this.setState({ running: "pause" });
     }
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
