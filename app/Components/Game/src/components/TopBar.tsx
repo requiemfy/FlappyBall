@@ -3,7 +3,7 @@ import { Text, TouchableWithoutFeedback, View } from 'react-native';
 import { NAVBAR_HEIGHT } from '../utils/world/constants';
 
 interface Props {
-  running: boolean;
+  running: string;
   pauseOrResume(): boolean; // toggle true/false and pass to paused
 }
 interface State {}
@@ -11,7 +11,7 @@ interface State {}
 export default class TopBar extends React.PureComponent<Props, State> {
   render () {
     return (
-      <View style={{ // @remind make nav bar tsx
+      <View style={{
         backgroundColor:"yellow",
         width: "100%",
         height: NAVBAR_HEIGHT,

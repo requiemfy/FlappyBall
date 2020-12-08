@@ -16,6 +16,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 
 import * as Updates from 'expo-updates';
 import { GameAlert } from './utils/helpers/alerts';
+import TopBar from './components/TopBar';
 
 interface State {}
 interface Props {}
@@ -175,6 +176,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
               </TouchableWithoutFeedback>
             </View>
           </View> */}
+
+          <TopBar pauseOrResume={this.pauseOrResume} running={this.state.running} />
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
