@@ -124,7 +124,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
   }
 
-
   playerFly() {
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
@@ -149,37 +148,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     return ( // @remind score
       <View style={{ flex: 1, }}>
-{/*         
-          <View style={{ // @remind make nav bar tsx
-            backgroundColor:"yellow",
-            width: "100%",
-            height: NAVBAR_HEIGHT,
-          }}>
-            <View style={{ 
-                flex: 1, 
-                flexDirection: "row", 
-                backgroundColor: "red" ,
-                justifyContent: "space-around",
-                alignItems: "center",
-              }}>
-              <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} ></View>
-              <TouchableWithoutFeedback onPress={ this.pauseOrResume }>
-                <View style={{ 
-                  width: "40%", 
-                  height: "90%", 
-                  backgroundColor: "black",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}>
-                  <Text style={{ color: "white" }}> { this.state.running } </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </View> */}
-
-          <TopBar pauseOrResume={this.pauseOrResume} running={this.state.running} />
-
-        {/* ------------------------------------------------------------ */}
+        <TopBar pauseOrResume={this.pauseOrResume} running={this.state.running} />
         <TouchableWithoutFeedback
           onPressIn={ this.playerFly }
           onPressOut={ this.playerFall }>
@@ -189,7 +158,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             flex: 1, 
             flexDirection: "row",
             backgroundColor: "pink", }}> 
-
             <GameEngine
               ref={ (ref) => { this.engine = ref; } }
               onEvent={ this.onEvent }
@@ -202,11 +170,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
               entities={ this.entities } 
               running={ !this.paused } />
             <StatusBar hidden />
-
           </View>
         </TouchableWithoutFeedback>
-        {/* ------------------------------------------------------------ */}
-
       </View>
     );
   }

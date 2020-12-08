@@ -3,25 +3,26 @@
 import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
-interface BoxProps {
+interface Props {
   size:number[];
   body:any; 
   borderRadius:number;
   color:string;
 }
-interface BoxState {}
+interface State {}
 
 // PureComponent won't work
-export default class Box extends React.Component<BoxProps, BoxState> {
+export default class Box extends React.Component<Props, State> {
   componentWillUnmount() {
     console.log("UNMOUNTING....");
   }
 
   render() {
-    const width = this.props.size[0];
-    const height = this.props.size[1];
-    const x = this.props.body.position.x - (width / 2);
-    const y = this.props.body.position.y - (height / 2);
+    const 
+      width = this.props.size[0],
+      height = this.props.size[1],
+      x = this.props.body.position.x - (width / 2),
+      y = this.props.body.position.y - (height / 2);
     ////////////////////////////////////////////////////////////
     // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     // console.log("Box.tsx: RENDERING CLASS BOX");
@@ -34,15 +35,14 @@ export default class Box extends React.Component<BoxProps, BoxState> {
     ////////////////////////////////////////////////////////////
     return (
       <View
-      style={{
-        position: "absolute",
-        left: x,
-        top: y,
-        width: width,
-        height: height,
-        borderRadius: this.props.borderRadius,
-        backgroundColor: this.props.color || "pink"
-      }}/>
+        style={{
+          position: "absolute",
+          left: x,
+          top: y,
+          width: width,
+          height: height,
+          borderRadius: this.props.borderRadius,
+          backgroundColor: this.props.color || "pink", }} />
     );
   }
 }
