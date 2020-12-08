@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { GameMenu } from './Components/Menu/src';
+import { GameMenu } from './Screens/Menu/src';
 
 export default function Game() {
   return (

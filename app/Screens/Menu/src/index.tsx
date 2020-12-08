@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Text, Button, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../OnGame/src';
+import FlappyBallGame from '../../../Components/Game/src';
 import { exp } from 'react-native-reanimated';
 
 export namespace GameMenu {

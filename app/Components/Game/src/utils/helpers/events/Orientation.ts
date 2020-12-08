@@ -119,7 +119,6 @@ export namespace Orientation {
       // if landscape now, then prev is portrait
     return { prevGameWidth: prevWidth, prevGameHeight: prevHeight, }
   }
-
   
   const lastEntityCoords: EntityCoords = (entity) => {
     return {
