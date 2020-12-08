@@ -4,10 +4,10 @@ import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
 interface BoxProps {
-  size:number[],
-  body:any, 
-  borderRadius:number,
-  color:string
+  size:number[];
+  body:any; 
+  borderRadius:number;
+  color:string;
 }
 interface BoxState {}
 

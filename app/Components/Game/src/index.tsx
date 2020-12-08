@@ -17,7 +17,8 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Updates from 'expo-updates';
 import { GameAlert } from './utils/helpers/alerts';
 
-
+interface State {}
+interface Props {}
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
@@ -30,7 +31,7 @@ interface Game {
   onEvent(e: EventType): void;
 }
 
-export default class FlappyBallGame extends React.PureComponent implements Game {
+export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine: any;
   entities: any; // all entities (player, floor)
@@ -145,9 +146,9 @@ export default class FlappyBallGame extends React.PureComponent implements Game 
     console.log("RENDER()...");
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
-    return (
+    return ( // @remind score
       <View style={{ flex: 1, }}>
-        
+{/*         
           <View style={{ // @remind make nav bar tsx
             backgroundColor:"yellow",
             width: "100%",
@@ -173,7 +174,7 @@ export default class FlappyBallGame extends React.PureComponent implements Game 
                 </View>
               </TouchableWithoutFeedback>
             </View>
-          </View>
+          </View> */}
 
         {/* ------------------------------------------------------------ */}
         <TouchableWithoutFeedback
