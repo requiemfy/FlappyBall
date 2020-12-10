@@ -3,6 +3,7 @@ import { Button, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-
 import { NAVBAR_HEIGHT } from '../utils/world/constants';
 
 interface Props {
+  score: number;
   running: string;
   pauseOrResume(): boolean; // toggle true/false and pass to paused
 }
@@ -13,7 +14,9 @@ export default class TopBar extends React.PureComponent<Props, State> {
     return (
       <View style={styles.rootContainer}>
         <View style={styles.subContainer}>
-          <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} ></View>
+          <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} >
+            <Text style={{ color: "white" }} >{ this.props.score }</Text>
+          </View>
 
           {/* alternative button */}
           {/* <TouchableWithoutFeedback onPress={ this.props.pauseOrResume }>
@@ -28,8 +31,7 @@ export default class TopBar extends React.PureComponent<Props, State> {
             </View>
           </TouchableWithoutFeedback> */}
 
-          <View 
-            style={[{ width: "40%", }]}>
+          <View style={[{ width: "40%", }]}>
             <Button
               onPress={this.props.pauseOrResume}
               title={this.props.running}

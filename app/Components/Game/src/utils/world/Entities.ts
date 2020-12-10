@@ -6,6 +6,7 @@ import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
+import { cos } from "react-native-reanimated";
 
 export namespace Entities {
   type Physics = { 
@@ -27,17 +28,15 @@ export namespace Entities {
     getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number }) => void,
   };
 
-  export type All = Initial & Following & SystemProps;
+  export type All = Initial & Following & System;
 
   export type Physical = {
     body: Body;
-    size: number[]; 
+    size: number[] | number | any; // @remind
     borderRadius: number;
     color: String; 
     renderer: typeof Box | typeof Circle;
   }
-
-  // ******* ALWAYS REMEMBER WHEN UPDATING ENTITIES, UPDATE "NOT_BODY" CONSTANT *******
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
@@ -53,12 +52,13 @@ export namespace Entities {
     roof: Physical;
   }
 
-  // ENTITIES THAT ARE NON PHYSICAL
-  export type SystemProps = {
+  // SYSTEM/PHYSICS ENTITIES
+  export type System = {
+    game: FlappyBallGame;
     physics: Physics;
     gravity: number;
     wall: number[]; // actually this is wall ids array
-    wallInLastPos: number;
+    // wallInLastPos: number; // @follow-up
   }
 
   // ====================================================================================================
@@ -70,7 +70,7 @@ export namespace Entities {
       roof = Matter.getRoof(),
 
       // setting initial entities with one time creation
-      entities: Initial & SystemProps = { 
+      entities: Initial & System = { 
         physics: { 
           engine: engine, 
           world: world 
@@ -98,19 +98,26 @@ export namespace Entities {
         },
         gravity: 0.1, 
         wall: [],
-        wallInLastPos: 0,      
+        game: game,
+        // wallInLastPos: 0, // @follow-up
       }
     game.entities = entities;
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){
-      if (!game.entitiesInitialized) {
+      if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
         for (let wallNum = 3; wallNum--;) {
           if (game.entities.wall.length > 0) {
+            // const 
+            //   latestWallX = Coordinates.getEndWall(game.entities), // @follow-up
+            //   distance = GameDimension.getWidth("now") * WALL_DISTANCE,
+            //   newWallX = latestWallX - distance;
+
             const 
-              latestWallX = Coordinates.getLatestWallX(game.entities),
+              firstWallX = Coordinates.getFirstWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
-              newWallX = latestWallX - distance;
+              newWallX = firstWallX - distance;
+
             following.getWalls(game.entities, { x: newWallX }); // default y only
           }
           else following.getWalls(game.entities); // default x, y coords
@@ -151,10 +158,15 @@ export namespace Entities {
         }
       })();
 
+      // let NUM_OF_OBSTACLE = 0; // @remind delete
+
       return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation especially
         let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall, ctrl-f: default y only
             numOfwall = isDefault ? wallEachTime[Math.floor(Math.random()*2)] : 1, // 1 wall only if not defualt creation
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
+
+        // NUM_OF_OBSTACLE++; // @remind delete
+        // console.log("NUM OF OBSTACLE " + NUM_OF_OBSTACLE);
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
           (function getWall(){
@@ -163,9 +175,13 @@ export namespace Entities {
                 x: wallProps ? wallProps.x : undefined,
                 y: wallProps ? wallProps.y : undefined,
                 heightPercent: (() => { // this can't be undefined
-                  // any of this conditions should be true
-                  if (wallProps && wallProps.heightPercent) return wallProps.heightPercent;
-                  else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
+                  try {
+                    // any of this conditions should be true, else throw error
+                    if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
+                    else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
+                    else throw "Entities.ts: heightPercent is undefined which should not be.";
+                  }
+                  catch(err) { console.log(err); }
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
               }),
@@ -179,23 +195,57 @@ export namespace Entities {
                 renderer: Box,
               };
             
-            const wallId = (function getWallId() {
+            // const wallId = (function getWallId() {
+            (function setWallId() { // @follow-up
+              const wallLen = entities.wall.length;
+
               let _wallId = 0;
               while (entities.wall.includes(_wallId)) { _wallId++; } // choose unique id
-              entities.wall.push(_wallId); // record the id
+             
+              // @follow-up
+              // entities.wall.push(_wallId); // record the id
+              // entities[_wallId] = entity; // set id : value
+              // return _wallId;
+
+
+
+
+              if (wallLen > 0) {
+                // const lastWallX = entities[entities.wall[wallLen-1]].body.position.x;
+                const lastWallX = Coordinates.getEndWallX(entities);
+              
+                /////////////////////////////////////////////////////////////////////////////////////////////
+                // console.log("lastWallX: " + lastWallX + ", wall.body.position.x: " + wall.body.position.x);
+              
+                if (wall.body.position.x >= lastWallX) {
+                  entities.wall.push(_wallId); // put wall id at the end
+                  // console.log("PUT TO BEGINNING") ///////////////////////////////////////////////
+                }
+                else {
+                  entities.wall.unshift(_wallId); // put wall id at front
+                  // console.log("PUT TO END") ///////////////////////////////////////////////
+                }
+              } 
+              else { // @remind
+                entities.wall.push(_wallId); // just put the wall id
+                // console.log("PUT TO BEGINNING");  ///////////////////////////////////////////////
+              }
               entities[_wallId] = entity; // set id : value
-              return _wallId;
+
+
+
             })();
 
-            (function setWallInLastPosition() { // to record the id of wall in the last position, for monitoring its distance for showing the next wall
-              const
-                latestWallX = Coordinates.getLatestWallX(entities),
-                prevWallX = entities[entities.wallInLastPos].body.position.x;
-              if ( latestWallX >= prevWallX) { // of course, new added wall supposed to be has the heighest distance
-                entities.wallInLastPos = wallId;
-                console.log("entities.wallInLastPos: " + entities.wallInLastPos);
-              }
-            })();
+            // @follow-up
+            // (function setWallInLastPosition() { // to record the id of wall in the last position, for monitoring its distance for showing the next wall
+            //   const
+            //     latestWallX = Coordinates.getLatestWallX(entities),
+            //     prevWallX = entities[entities.wallInLastPos].body.position.x;
+            //   if (latestWallX >= prevWallX) { // of course, new added wall supposed to be has the heighest distance
+            //     entities.wallInLastPos = wallId;
+            //     console.log("entities.wallInLastPos: " + entities.wallInLastPos);
+            //   }
+            // })();
              
             (function switchWallPos() {
               if (wallPosition === "down") wallPosition = "up";
@@ -225,7 +275,9 @@ export namespace Entities {
     const removeAllEntities = () => {
       const game = params.game;
       for (let entity in game.entities) {
-        if (!NOT_BODY.includes(entity)) COMPOSITE.remove(world, game.entities[entity].body);
+        // if (!NOT_BODY.includes(entity)) COMPOSITE.remove(world, game.entities[entity].body);
+        const isWall = Number.isInteger(entity);
+        if (isWall) COMPOSITE.remove(world, game.entities[entity].body);
       }
     }
     const getFollowing = () => { // for now, following is only wall, but I may add more following entity

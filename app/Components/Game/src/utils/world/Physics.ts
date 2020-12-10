@@ -1,8 +1,6 @@
-import { Bodies } from "matter-js";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../..";
 import { GameAlert } from "../helpers/alerts";
-import { Coordinates } from "../helpers/coordinates";
 import { GameDimension } from "../helpers/dimensions";
 import { 
   BODY, 
@@ -39,9 +37,12 @@ export namespace Physics {
     return entities;
   };
 
-  // special relativity
+  // special relativity - everything related to wall observation
   const wallRelativity: Relativity = (() => { 
-    const entities: { get?: any } = {};
+    const entities: { get?: Entities.All | any } = {};
+    let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
+        recentWallid: null | number | any = null;
+
     const moveWalls = () => {
       let wallLen = entities.get.wall.length, wallIndex, wall;
       (function move(){
@@ -54,9 +55,81 @@ export namespace Physics {
         }
       })();
     }
+
+    const isWallPassedByPlayer = (() => {
+
+      // const notWallPair = (currentWallX: number) => {
+      //   const recentWallX = 
+      //   const gameWidth = GameDimension.getWidth("now"),
+      //         betweenDist = currentWallX - recentWallX,
+      //         percentDist = betweenDist / gameWidth;
+
+      //   console.log("currentWallX: " + currentWallX + ", recentWallX: " + recentWallX + "; percentDist: " + percentDist);
+      //   return percentDist >= WALL_DISTANCE || recentWallX === 0;
+      // }
+      // const thenAddScore = (ent: Entities.All) => {
+      //   ent.game.setState({ score: ent.game.state.score + 1 });
+      // }
+
+      return function() {
+        const ent: Entities.All = entities.get, 
+              currentWallid = ent.wall[nextWall],
+              currentWall = ent[currentWallid],
+              currentWallX = currentWall.body.position.x, // getting latest x of currently passing wall
+              currentWallSize = currentWall.size[0], // width
+              playerX = ent.player.body.position.x,
+              playerSize = ent.player.size;
+        if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
+          nextWall++;
+          // if(notWallPair(currentWallX)) {
+          //   console.log("WALL IS NOT PAIR");
+          //   recentWallid = currentWallid;
+          //   thenAddScore(ent);
+          // }
+
+          console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
+          let EXEC_FN = false;
+
+          if (recentWallid === null
+          // if (recentWallid
+            
+          || !ent[recentWallid] 
+          
+          ) {
+            
+            EXEC_FN ? console.log("FUNCTION BETWEEN DISTANCE EXECUTED") : console.log("FUNCTION BETWEEN DISTANCE NOT");
+            console.log("WALL IS NOT PAIR");
+            recentWallid = currentWallid;
+            ent.game.setState({ score: ent.game.state.score + 1 });
+          }
+          else console.log("WALL IS PAIR");
+        }
+      }
+    })();
+
+    // const isWallPassedByPlayer = (() => {
+    //   return function() {
+    //     const ent: Entities.All = entities.get, 
+    //           wall = ent[ent.wall[nextWall]],
+    //           nextWallX = wall.body.position.x,
+    //           nextWallSize = wall.size[0], // width or x
+    //           playerX = ent.player.body.position.x,
+    //           playerSize = ent.player.size;
+    //     if ((playerX - (playerSize/2)) > (nextWallX + (nextWallSize/2))) {
+          // console.log("asdddddddddddddddddddddddddasdasdasdddddddddd")
+          // nextWall++;
+    //       // if(notWallPair(nextWallX)) {
+    //       //   console.log("WALL IS NOT PAIR");
+    //       //   recentWallX = nextWallX;
+    //       //   thenAddScore(ent);
+    //       // }
+    //       // else console.log("WALL IS PAIR");
+    //     }
+    //   }
+    // })();
+
     const isWallOutOfVision = () => {
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
-      // if ((wall.body.position.x + (wall.size[0] / 2)) < 0) {
       if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
         COMPOSITE.remove(world, wall.body);
         delete entities.get[wallIndex]; // this is necessary
@@ -65,21 +138,26 @@ export namespace Physics {
       return false;
     }
     const removeWall = () => {
-      if ( entities.get.wall.length > 0 && isWallOutOfVision()) entities.get.wall.splice(0, 1); // remove wall id
+      if ( entities.get.wall.length > 0 && isWallOutOfVision()) {
+        nextWall--;
+        if (entities.get.wall[0] === recentWallid) recentWallid = null; // avoid nextWall and recentWallId CONFLICT
+        entities.get.wall.splice(0, 1); // remove wall id in INDEX 0
+      }
     }
     const showNextWall = () => {
-      if (entities.get.wall.length > 0) {
+      const wallLen = entities.get.wall.length;
+      if (wallLen > 0) {
         const 
-          lastPosId = entities.get.wallInLastPos, // wallInLastPos is initialize in following.getWalls
+          // lastPosId = entities.get.wallInLastPos, // wallInLastPos is initialize in following.getWalls
+          lastPosId = entities.get.wall[wallLen-1], 
+          
           lastPosX = entities.get[lastPosId].body.position.x,
           gameWidth = GameDimension.getWidth("now"),
           lastDistance = gameWidth - lastPosX,
           percentLastDist = lastDistance / gameWidth;
-        // i have to check first wall and last wall because i don't really care much about wall ids
-        // so i can't certainly say which wall id is the very last, but i'm certain they are in order
-        // there are chances that wall id is in descending order, else ascending
-        if (percentLastDist >= WALL_DISTANCE) {
+        if (percentLastDist >= WALL_DISTANCE) { // using recorded wall in last position
           console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastPos" + lastPosX + "gameWidth " + gameWidth);
+          console.log(entities.get.wall);
           Entities.following.getWalls(entities.get);
         }
       }
@@ -87,8 +165,9 @@ export namespace Physics {
     return (ent: Entities.All) => {
       Object.defineProperty(entities, "get", { get() { return ent }, configurable: true });
       moveWalls();
-      removeWall();
-      showNextWall();
+      isWallPassedByPlayer(); // then add score
+      removeWall(); // wall index 0
+      showNextWall(); // push wall
     }
   })();
 

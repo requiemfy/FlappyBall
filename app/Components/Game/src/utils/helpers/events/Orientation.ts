@@ -1,9 +1,8 @@
 
 import { Dimensions } from "react-native";
-import { GameEngine } from "react-native-game-engine";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
-import { BODY, GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT, NOT_BODY, SCREEN_HEIGHT } from "../../world/constants";
+import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT } from "../../world/constants";
 import { Entities } from "../../world/Entities";
 
 import { DeviceMotion } from 'expo-sensors';

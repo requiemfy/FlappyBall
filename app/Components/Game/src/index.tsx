@@ -18,8 +18,12 @@ import * as Updates from 'expo-updates';
 import { GameAlert } from './utils/helpers/alerts';
 import TopBar from './components/TopBar';
 
-interface State {}
 interface Props {}
+interface State {
+  left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
+  score: number;
+  running: string; 
+}
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
@@ -35,14 +39,14 @@ interface Game {
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine: any;
-  entities: any; // all entities (player, floor)
+  entities: Entities.All | any; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
-  state: { 
-    left: number, // used in orientation, i needed this because component doesn't automatically render in orientation change
-    running: string, 
-  };
+  // state: { // @follow-up
+  //   // left: number, // used in orientation, i needed this because component doesn't automatically render in orientation change
+  //   // running: string, 
+  // };
 
   constructor(props: object) {
     super(props);
@@ -53,7 +57,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     this.paused = true; 
     this.over = false;
     this.entitiesInitialized = false;
-    this.state = { left: 0, running: "resume", };
+    this.state = { score:0, left: 0, running: "resume", };
     
     Entities.getInitial(this);
     this.pauseOrResume = this.pauseOrResume.bind(this);
@@ -148,7 +152,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     return ( // @remind score
       <View style={{ flex: 1, }}>
-        <TopBar pauseOrResume={this.pauseOrResume} running={this.state.running} />
+        <TopBar score={this.state.score} pauseOrResume={this.pauseOrResume} running={this.state.running} />
         <TouchableWithoutFeedback
           onPressIn={ this.playerFly }
           onPressOut={ this.playerFall }>
