@@ -44,8 +44,7 @@ const BODIES = Matter.Bodies,
       FLOOR_HEIGHT = (KEYS_HEIGHT / SCREEN_HEIGHT) + 0.05,
       ROOF_HEIGHT = 0.05,
 
-      WALL_DISTANCE = 0.20,
-      NOT_BODY = ["physics", "gravity", "wall", "distance", "wallInLastPos", "game"]; // @remind remove
+      WALL_DISTANCE = 0.20;
 
 export {
   BODIES, BODY, ENGINE, RENDER, WORLD, EVENTS, COMPOSITE,
@@ -58,5 +57,5 @@ export {
 
   GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH,
 
-  WALL_DISTANCE, NOT_BODY,
+  WALL_DISTANCE,
 };

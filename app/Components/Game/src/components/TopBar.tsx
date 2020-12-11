@@ -1,11 +1,11 @@
 import React from 'react';
-import { Button, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { NAVBAR_HEIGHT } from '../utils/world/constants';
 
 interface Props {
   score: number;
   running: string;
-  pauseOrResume(): boolean; // toggle true/false and pass to paused
+  pauseOrResume(): boolean;
 }
 interface State {}
 
@@ -14,22 +14,10 @@ export default class TopBar extends React.PureComponent<Props, State> {
     return (
       <View style={styles.rootContainer}>
         <View style={styles.subContainer}>
+
           <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} >
             <Text style={{ color: "white" }} >{ this.props.score }</Text>
           </View>
-
-          {/* alternative button */}
-          {/* <TouchableWithoutFeedback onPress={ this.props.pauseOrResume }>
-            <View 
-              style={{ 
-                width: "40%", 
-                height: "90%", 
-                backgroundColor: "black",
-                justifyContent: "center",
-                alignItems: "center", }}>
-              <Text style={{ color: "white" }}> { this.props.running } </Text>
-            </View>
-          </TouchableWithoutFeedback> */}
 
           <View style={[{ width: "40%", }]}>
             <Button

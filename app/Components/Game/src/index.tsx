@@ -43,10 +43,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   entitiesInitialized: boolean;
-  // state: { // @follow-up
-  //   // left: number, // used in orientation, i needed this because component doesn't automatically render in orientation change
-  //   // running: string, 
-  // };
 
   constructor(props: object) {
     super(props);
@@ -150,7 +146,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("RENDER()...");
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
-    return ( // @remind score
+    return (
       <View style={{ flex: 1, }}>
         <TopBar score={this.state.score} pauseOrResume={this.pauseOrResume} running={this.state.running} />
         <TouchableWithoutFeedback
@@ -165,14 +161,14 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             <GameEngine
               ref={ (ref) => { this.engine = ref; } }
               onEvent={ this.onEvent }
+              systems={ [Physics.system] }
+              entities={ this.entities } 
+              running={ !this.paused } 
               style={{ 
                 flex: 1, 
                 backgroundColor: "blue", 
                 left: this.state.left,
-              }}
-              systems={ [Physics.system] }
-              entities={ this.entities } 
-              running={ !this.paused } />
+              }}/>
             <StatusBar hidden />
           </View>
         </TouchableWithoutFeedback>

@@ -4,9 +4,7 @@ import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
 import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT } from "../../world/constants";
 import { Entities } from "../../world/Entities";
-
 import { DeviceMotion } from 'expo-sensors';
-
 import { GameDimension } from "../dimensions";
 
 export namespace Orientation {

@@ -83,7 +83,7 @@ PARENT FUNCTION wallRelativity
       ----- we decrement because we will delete wall id in index 0                  -----
       ----- that's why we have to adjust the expectation index in wall[]            -----
       IF wall id in index 0 is equal to recentWallid {
-        recentWallid = null; [simply because the object of id is unmounted]
+        recentWallid = null; [simply because the object of id is unmounted, no reason for id to exist]
       } 
     }
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
