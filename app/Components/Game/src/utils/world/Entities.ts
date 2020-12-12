@@ -32,7 +32,7 @@ export namespace Entities {
 
   export type Physical = {
     body: Body;
-    size: number[] | number | any; // @remind
+    size: number[] | number;
     borderRadius: number;
     color: String; 
     renderer: typeof Box | typeof Circle;
@@ -68,8 +68,6 @@ export namespace Entities {
       floor = Matter.getFloor(),
       roof = Matter.getRoof();
 
-      // setting initial entities with one time creation
-      // entities: Initial & System = { // @remind
       game.entities = <Initial & System >{
         physics: { 
           engine: engine, 
@@ -100,7 +98,6 @@ export namespace Entities {
         wall: [],
         game: game,
       };
-    // game.entities = entities; // @remind
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){
@@ -163,12 +160,10 @@ export namespace Entities {
                 x: wallProps ? wallProps.x : undefined,
                 y: wallProps ? wallProps.y : undefined,
                 heightPercent: (() => { // this can't be undefined
-                  try { // any of this conditions should be true, else throw error
-                    if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
-                    else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
-                    else throw "Entities.ts: heightPercent is undefined which should not be.";
-                  }
-                  catch(err) { console.log(err); }
+                  // any of if conditions should be true, else throw error
+                  if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
+                  else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
+                  else throw "Entities.ts: heightPercent is undefined which should not be.";
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
               }),

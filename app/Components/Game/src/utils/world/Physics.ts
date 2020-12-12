@@ -62,9 +62,17 @@ export namespace Physics {
         currentWallid = ent.wall[nextWall],
         currentWall = ent[currentWallid],
         currentWallX = currentWall.body.position.x, // getting latest x of currently passing wall
-        currentWallSize = currentWall.size[0], // width
+        currentWallSize = (() => {
+            if (Array.isArray(currentWall.size)) return currentWall.size[0];
+            else throw "Physics.ts: error currentWall.size is not array";            
+        })(),
         playerX = ent.player.body.position.x,
-        playerSize = ent.player.size;
+        playerSize = (() => {
+            if (typeof ent.player.size === "number") return ent.player.size;
+            else throw "Physics.ts: error ent.player.size is not number";
+        })();
+
+
       if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
         nextWall++;
         console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
