@@ -11,7 +11,7 @@ LEGEND:
 ======================================== Physics.ts ========================================
 wallRelativity() {
   let nextWall = 0,       # special var DEPENDENCY
-      recentWallid: any;  # special var DEPENDENCY
+      recentWallid = null;  # special var DEPENDENCY
 
   isWallPassedByPlayer() {  # MAIN
     IF player passed by wall {
@@ -26,7 +26,9 @@ wallRelativity() {
   removeWall() {
     IF wall is out of vision {
       nextWall-- expect incoming wall
-      set recentWallid to null
+      IF wall id being remove is recentWallid {
+        set recentWallid to null
+      }
     }
   }
 
@@ -96,7 +98,7 @@ ADDITIONAL DEBUGGING:
     let NUM_OF_OBSTALCE = 0
 
     getWall() {
-      NUM_OF_OBSTALCE++; # increment only per batch creation (whether 1 or 2 walls)
+      NUM_OF_OBSTALCE++; # increment only once per batch creation (whether 1 or 2 walls)
       console.log(NUM_OF_OBSTALCE)
 
       while(numOfWall--) {} # we create 2 | 1 wall

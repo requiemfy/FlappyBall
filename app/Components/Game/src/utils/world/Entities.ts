@@ -131,22 +131,45 @@ export namespace Entities {
       let wallPosition = "down",
           wallEachTime = [1, 2];
 
-      const randomHeight = (() => {
-        const random = () => { // @remind shorthand
-          const rand = Math.random();
-          if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = wall
-          else return rand;
+      // const randomHeight = (() => {
+      //   const random = () => { // @remind shorthand
+      //     const rand = Math.random();
+      //     if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = wall
+      //     else return rand;
+      //   }
+      //   return (n: 1 | 2) => {
+      //     if (n === 2) { // if 2 walls, random 2 height
+      //       const 
+      //         height1 = random(),  // @remind shorthand or // @audit refactor, no need for this, just subtract half of ball to each wall height
+      //         height2 = (1 - height1) - 0.3;
+      //       return [ height1, height2 ];
+      //     }
+      //     else return [ 0.7 ]; // else 1 wall, specific height
+      //   }
+      // })();
+
+      const randomHeight = (n: 1 | 2) => {
+        const playerSpace = 0.06;
+        if (n === 2) {
+          const 
+            min = 0.2, max = 0.8, // random num
+            spaceBetween = (PLAYER_SIZE / 2) + (playerSpace / 2), // between wall
+            trim = (ROOF_HEIGHT / 2) + (FLOOR_HEIGHT / 2) + spaceBetween;
+          let 
+            [ height1, height2 ] = (() => { 
+              const rand = Math.random(); 
+              // return rand < min ? min : rand > max ? max : rand; 
+              let h1 = rand < min ? min : rand > max ? max : rand,
+                  h2 = 1 - h1;
+              return [ h1, h2 ];
+            })();
+            // height2 = 1 - height1;
+          height1 -= trim;
+          height2 -= trim;
+          return [ height1, height2 ];
         }
-        return (n: 1 | 2) => {
-          if (n === 2) { // if 2 walls, random 2 height
-            const 
-              height1 = random(),  // @remind shorthand or // @audit refactor, no need for this, just subtract half of ball to each wall height
-              height2 = (1 - height1) - 0.3;
-            return [ height1, height2 ];
-          }
-          else return [ 0.7 ]; // else 1 wall, specific height
-        }
-      })();
+        else return [ 1 - ROOF_HEIGHT - FLOOR_HEIGHT - PLAYER_SIZE - playerSpace ];
+      }
 
       return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation especially
         let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall, ctrl-f: default y only
