@@ -4,9 +4,9 @@ EXPECTED:
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ======================================== Entities.ts ========================================
-OBJECT following: FollowingMethods
+OBJECT following
   METHOD getWalls
-    FUNCTION randomHeight (params are 1 or 2 height) # depending on number of wall
+    FUNCTION randomHeight (param is N = 1 or 2 -> how many height) # depending on number of wall
       IF 2 heights are required
         (1) percentage of height ONE = random number between 0 and 1 (min 0.2, max 0.8);
             percentage of height TWO = 1 - percentage of height ONE

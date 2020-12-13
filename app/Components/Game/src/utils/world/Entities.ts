@@ -6,7 +6,6 @@ import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
-import { cos } from "react-native-reanimated";
 
 export namespace Entities {
   type Physics = { 
@@ -131,23 +130,6 @@ export namespace Entities {
       let wallPosition = "down",
           wallEachTime = [1, 2];
 
-      // const randomHeight = (() => {
-      //   const random = () => { // @remind shorthand
-      //     const rand = Math.random();
-      //     if (rand > 0.4) return rand - 0.4; // 0.4 -> 0.3 = player, 0.1 = wall
-      //     else return rand;
-      //   }
-      //   return (n: 1 | 2) => {
-      //     if (n === 2) { // if 2 walls, random 2 height
-      //       const 
-      //         height1 = random(),  // @remind shorthand or // @audit refactor, no need for this, just subtract half of ball to each wall height
-      //         height2 = (1 - height1) - 0.3;
-      //       return [ height1, height2 ];
-      //     }
-      //     else return [ 0.7 ]; // else 1 wall, specific height
-      //   }
-      // })();
-
       const randomHeight = (n: 1 | 2) => {
         const playerSpace = 0.06;
         if (n === 2) {
@@ -158,15 +140,12 @@ export namespace Entities {
           let 
             [ height1, height2 ] = (() => { 
               const rand = Math.random(); 
-              // return rand < min ? min : rand > max ? max : rand; 
-              let h1 = rand < min ? min : rand > max ? max : rand,
-                  h2 = 1 - h1;
+              let h1 = rand < min ? min : rand > max ? max : rand, h2 = 1 - h1;
               return [ h1, h2 ];
             })();
-            // height2 = 1 - height1;
-          height1 -= trim;
-          height2 -= trim;
-          return [ height1, height2 ];
+          // height1 -= trim; // @remind clear
+          // height2 -= trim;
+          return [ height1 - trim, height2 - trim ];
         }
         else return [ 1 - ROOF_HEIGHT - FLOOR_HEIGHT - PLAYER_SIZE - playerSpace ];
       }
@@ -206,7 +185,7 @@ export namespace Entities {
               while (entities.wall.includes(_wallId)) { _wallId++; } // choose unique id
               if (wallLen > 0) {
                 const lastWallX = Coordinates.getEndWallX(entities);
-                if (wall.body.position.x >= lastWallX) {
+                if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
                   entities.wall.push(_wallId); // put wall id at the end
                 }
                 else {
