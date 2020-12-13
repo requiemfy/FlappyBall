@@ -4,7 +4,8 @@ EXPECTED:
   solo wall is counted as 1
 
 LEGEND:
-  special var DEPENDENCY - variable that are only created for this specific purpose
+  special var DEPENDENCY 
+    - variable that are only created for this specific purpose, but in outer scope of main function
 
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -13,7 +14,7 @@ wallRelativity() {
   let nextWall = 0,       # special var DEPENDENCY
       recentWallid = null;  # special var DEPENDENCY
 
-  isWallPassedByPlayer() {  # MAIN
+  isWallPassedByPlayer() {  # ~~~~~>>>>> MAIN
     IF player passed by wall {
       nextWall++ expect incoming wall
       IF wall is not pair {

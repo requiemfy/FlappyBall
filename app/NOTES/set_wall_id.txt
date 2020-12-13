@@ -1,0 +1,39 @@
+OBJECTIVE: Sort wall id
+EXPECTED:
+  wall ids will be sorted to ascending every creation of wall
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+======================================== Entities.ts ========================================
+
+OBJECT following
+  METHOD getWalls
+    WHILE how many walls to create -> either 1 or 2
+      SELF INVOKING FUNCTION getWall
+        
+        get wall from Matter;
+        entity is equal to wall props;
+          { implementation:
+            const wall = Matter.getWall({});
+            const entity = { wall properties... }
+          }
+
+        SELF INVOKING FUNCTION setWallId
+          get number of walls; # game.wallIds.length
+          get chosen_wall_id;
+            { implementation:
+              const usedIds = game.wallIds; # length is also number of walls
+              ----- game.wallIds is array of [ [wall id, wall x], ... ]
+              const freeIds = game.wallFreeIds;
+              ----- free ids are put to game.wallFreeIds in Physics.ts when the wall is deleted
+              ----- game is referrence of FlappyBallGame -----
+              const id = freeIds.length > 0 ? freeIds[0] : usedIds.length > 0 ? max(usedIds) + 1 : 0;
+            }
+          ----- since we are deleting wall when it's out of vision and of course it's id
+          ----- then that id will be available for new wall created
+          add chosen_wall_id and its object wall x to game's wall ids;
+          then sort the array based on wall x value ascending
+            {
+              game.wallIds.push([chosen_wall_id, entity.body.position.x]).sort((a, b) => a[1] - b[1]);
+            }

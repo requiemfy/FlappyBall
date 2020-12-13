@@ -55,8 +55,8 @@ export namespace Entities {
   export type System = {
     game: FlappyBallGame;
     physics: Physics;
-    gravity: number;
-    wall: number[]; // actually this is wall ids array
+    gravity: number; // @remind put this as game property
+    wall: number[]; // @remind as game property
   }
 
   // ====================================================================================================
@@ -143,8 +143,6 @@ export namespace Entities {
               let h1 = rand < min ? min : rand > max ? max : rand, h2 = 1 - h1;
               return [ h1, h2 ];
             })();
-          // height1 -= trim; // @remind clear
-          // height2 -= trim;
           return [ height1 - trim, height2 - trim ];
         }
         else return [ 1 - ROOF_HEIGHT - FLOOR_HEIGHT - PLAYER_SIZE - playerSpace ];
@@ -159,7 +157,7 @@ export namespace Entities {
           (function getWall(){
             const 
               wall = Matter.getWall({
-                x: wallProps ? wallProps.x : undefined,
+                x: wallProps ? wallProps.x : undefined, // @remind void 0
                 y: wallProps ? wallProps.y : undefined,
                 heightPercent: (() => { // this can't be undefined
                   // any of if conditions should be true, else throw error
@@ -179,7 +177,7 @@ export namespace Entities {
                 renderer: Box,
               };
             
-            (function setWallId() {
+            (function setWallId() { // @remind refactoring setting wall ID
               const wallLen = entities.wall.length;
               let _wallId = 0;
               while (entities.wall.includes(_wallId)) { _wallId++; } // choose unique id
@@ -192,15 +190,14 @@ export namespace Entities {
                   entities.wall.unshift(_wallId); // put wall id at front
                 }
               } 
-              else { // @remind refactor pushes
+              else { 
                 entities.wall.push(_wallId); // just put the wall id
               }
               entities[_wallId] = entity; // set id : value
             })();
 
             (function switchWallPos() {
-              if (wallPosition === "down") wallPosition = "up";
-              else wallPosition = "down";
+              (wallPosition === "down") ? wallPosition = "up" : wallPosition = "down";
             })();
           })();
         }

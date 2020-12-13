@@ -43,7 +43,7 @@ export namespace Physics {
     let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
         recentWallid: null | number | any = null;
 
-    const moveWalls = () => {
+    const moveWalls = () => { // @remind factor this into while
       let wallLen = entities.get.wall.length, wallIndex, wall;
       (function move(){
         if (wallLen > 0) {
@@ -76,9 +76,7 @@ export namespace Physics {
       if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
         nextWall++;
         console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
-        let EXEC_FN = false;
         if (recentWallid === null || !ent[recentWallid]) {
-          EXEC_FN ? console.log("FUNCTION BETWEEN DISTANCE EXECUTED") : console.log("FUNCTION BETWEEN DISTANCE NOT");
           console.log("WALL IS NOT PAIR");
           recentWallid = currentWallid;
           ent.game.setState({ score: ent.game.state.score + 1 });
@@ -91,7 +89,7 @@ export namespace Physics {
       const wallIndex = entities.get.wall[0], wall = entities.get[wallIndex]; // always the first wall
       if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
         COMPOSITE.remove(world, wall.body);
-        delete entities.get[wallIndex]; // this is necessary
+        delete entities.get[wallIndex]; 
         return true;
       }
       return false;
