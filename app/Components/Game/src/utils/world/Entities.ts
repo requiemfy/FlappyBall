@@ -194,19 +194,25 @@ export namespace Entities {
                 else return 0; // very first id in initial creation
               })();
 
-              if (usedIds.length > 0) { // @remind refactor if else
-                const lastWallX = Coordinates.getEndWallX(entities);
-                if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
-                  entities.game.wallIds.push(wallId); // put wall id at the end
-                }
-                else {
-                  entities.game.wallIds.unshift(wallId); // put wall id at front
-                }
-              } 
-              else { 
-                entities.game.wallIds.push(wallId); // just put the wall id
-              }
-
+              // if (usedIds.length > 0) { // @remind refactor if else
+                // const lastWallX = Coordinates.getEndWallX(entities);
+              //   if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
+              //     entities.game.wallIds.push(wallId); // put wall id at the end
+              //   }
+              //   else {
+              //     entities.game.wallIds.unshift(wallId); // put wall id at front
+              //   }
+              // } 
+              // else { 
+              //   entities.game.wallIds.push(wallId); // just put the wall id
+              // }
+              (function saveWallId(){
+                const lastWallX = (usedIds.length > 0) ? Coordinates.getEndWallX(entities) : void 0;
+                (lastWallX && !(wall.body.position.x >= lastWallX) || !lastWallX)
+                  ? entities.game.wallIds.unshift(wallId)
+                  : entities.game.wallIds.push(wallId);
+              })();
+              
               entities[wallId] = entity; // set id : value
               console.log("entities[wallId].body.position " + entities[wallId].body.position);
               console.log("wallId " + wallId);
