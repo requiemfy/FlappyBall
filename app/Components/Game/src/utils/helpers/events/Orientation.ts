@@ -74,7 +74,7 @@ export namespace Orientation {
   const orientWallCoords: OrientWall = (game) => {
     if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
     let wallProps: WallProps[] = [],
-        wallIds = game.wall,
+        wallIds = game.wallIds,
         wallNum = wallIds.length;
 
     while(wallNum--) {

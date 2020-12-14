@@ -30,7 +30,8 @@ interface Game {
   entities?: Entities.All;
   paused: boolean;
   over: boolean;
-  wall: number[];
+  wallIds: number[]; // [[wall id, wall x], ...]
+  wallFreedIds: number[];
   entitiesInitialized: boolean;
   
   pauseOrResume(): boolean; // toggle true/false and pass to paused
@@ -43,7 +44,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   entities?: Entities.All; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
-  wall: number[];
+  wallIds: number[];
+  wallFreedIds: number[];
   entitiesInitialized: boolean;
 
   constructor(props: object) {
@@ -54,7 +56,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
     this.paused = true; 
     this.over = false;
-    this.wall = [];
+    this.wallIds = [];
+    this.wallFreedIds = [];
     this.entitiesInitialized = false;
     this.state = { score:0, left: 0, running: "resume", };
     

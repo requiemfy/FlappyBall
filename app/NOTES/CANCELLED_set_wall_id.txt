@@ -1,6 +1,15 @@
+CANCELLED:
+  because i realized that the creation of wall is ONLY:
+  in initial creation -> right to left _=> eg. [ 2, 1, 0 ]
+  in following creation -> left to right => eg. [ 2, 1, 0, 3, 4, 5, ...]
+  SO, sorting is not necessary in most of the time, only push and unshift
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 OBJECTIVE: Sort wall id
 EXPECTED:
-  wall ids will be sorted to ascending every creation of wall
+  wall ids will be sorted to ascending order BASE on its wall position (x axis)
+  every creation of wall no matter what happen
 
 
 
@@ -25,12 +34,16 @@ OBJECT following
             { implementation:
               const usedIds = game.wallIds; # length is also number of walls
               ----- game.wallIds is array of [ [wall id, wall x], ... ]
-              const freeIds = game.wallFreeIds;
+              const freedIds = game.wallFreeIds;
               ----- free ids are put to game.wallFreeIds in Physics.ts when the wall is deleted
               ----- game is referrence of FlappyBallGame -----
-              const id = freeIds.length > 0 ? freeIds[0] : usedIds.length > 0 ? max(usedIds) + 1 : 0;
+              // const id = freedIds.length > 0 ? freedIds[0] : usedIds.length > 0 ? max(usedIds) + 1 : 0;
+              const id = (function choseId() {
+                if (freedIds.length > 0) return freedIds[0];
+                else return ++game.maxWallId;
+              })();              
             }
-          ----- since we are deleting wall when it's out of vision and of course it's id
+          ----- since we are deleting wall when it's out of vision and of course its id
           ----- then that id will be available for new wall created
           add chosen_wall_id and its object wall x to game's wall ids;
           then sort the array based on wall x value ascending

@@ -1,7 +1,7 @@
 import Box from "../../components/Box";
 import { COMPOSITE, engine, world, WALL_DISTANCE, ROOF_HEIGHT, FLOOR_HEIGHT, PLAYER_SIZE } from "./constants";
 import { Matter } from "./Matter";
-import { Body } from 'matter-js';
+import { Body, use } from 'matter-js';
 import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
 import { GameDimension } from "../helpers/dimensions";
@@ -100,14 +100,14 @@ export namespace Entities {
       };
 
     (function resetGameSystemProps() {
-      game.wall = [];
+      game.wallIds = [];
     })();
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
         for (let wallNum = 3; wallNum--;) {
-          if (game.wall.length > 0) {
+          if (game.wallIds.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
@@ -183,24 +183,55 @@ export namespace Entities {
               };
             
             (function setWallId() { // @remind refactoring setting wall ID
-              const wallLen = entities.game.wall.length;
-              let _wallId = 0;
-              while (entities.game.wall.includes(_wallId)) { _wallId++; } // choose unique id
-              if (wallLen > 0) {
+              // const wallLen = entities.game.wallIds.length;
+              // let _wallId = 0;
+              // while (entities.game.wallIds.includes(_wallId)) { _wallId++; } // choose unique id
+              // if (wallLen > 0) {
+              //   const lastWallX = Coordinates.getEndWallX(entities);
+              //   if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
+              //     entities.game.wallIds.push(_wallId); // put wall id at the end
+              //   }
+              //   else {
+              //     entities.game.wallIds.unshift(_wallId); // put wall id at front
+              //   }
+              // } 
+              // else { 
+              //   entities.game.wallIds.push(_wallId); // just put the wall id
+              // }
+              // entities[_wallId] = entity; // set id : value
+              // console.log("entities[_wallId].body.position " + entities[_wallId].body.position);
+              // console.log("_wallId " + _wallId);
+
+              const usedIds = entities.game.wallIds;
+              // const wallId = freedIds.length > 0 ? freedIds[0] : usedIds.length > 0 ? Math.max(...usedIds) + 1 : 0;
+              const wallId = (function choseWallId() {
+                const freedIds = entities.game.wallFreedIds;
+                if (freedIds.length > 0) {
+                  console.log("WALL IDDDDDDDDDDDDD FROM FREEDS");
+                  console.log(freedIds);
+                  const _id = freedIds[0];
+                  entities.game.wallFreedIds.splice(0, 1); // remove available id in INDEX 0
+                  return _id;
+                } 
+                else if (usedIds.length > 0) return Math.max(...usedIds) + 1;
+                else return 0; // very first id in initial creation
+              })();
+
+              if (usedIds.length > 0) { // @remind refactor if else
                 const lastWallX = Coordinates.getEndWallX(entities);
                 if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
-                  entities.game.wall.push(_wallId); // put wall id at the end
+                  entities.game.wallIds.push(wallId); // put wall id at the end
                 }
                 else {
-                  entities.game.wall.unshift(_wallId); // put wall id at front
+                  entities.game.wallIds.unshift(wallId); // put wall id at front
                 }
               } 
               else { 
-                entities.game.wall.push(_wallId); // just put the wall id
+                entities.game.wallIds.push(wallId); // just put the wall id
               }
-              entities[_wallId] = entity; // set id : value
-              console.log("entities[_wallId].body.position " + entities[_wallId].body.position);
-              console.log("_wallId " + _wallId);
+              entities[wallId] = entity; // set id : value
+              console.log("entities[wallId].body.position " + entities[wallId].body.position);
+              console.log("wallId " + wallId);
             })();
 
             (function switchWallPos() {
