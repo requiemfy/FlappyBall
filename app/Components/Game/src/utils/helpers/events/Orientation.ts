@@ -56,22 +56,35 @@ export namespace Orientation {
     DeviceMotion.removeAllListeners();
   }
 
-  // =============================== SPECIFIC ENTITY ===============================
+  const changeOrientation: OrientGame = (game: FlappyBallGame) => {
+    const coords = {
+      player: orientPlayerCoords(game), 
+      walls: orientWallCoords(game),
+    };
+    Entities.swap(game, coords);
+  }
+
+  // =============================== FOR SPECIFIC ENTITY ===============================
   const orientPlayerCoords: OrientPlayer = (game) => {
+    if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
   const orientWallCoords: OrientWall = (game) => {
+    if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
     let wallProps: WallProps[] = [],
-        wallIds = game.entities.wall,
+        wallIds = game.wall,
         wallNum = wallIds.length;
 
     while(wallNum--) {
       const 
         wallKey = wallIds[wallNum],
         wall = game.entities[wallKey],
-        heightPercent = { heightPercent: wall.heightPercent },
+        heightPercent = { heightPercent: (() => {
+          if (wall.heightPercent) return wall.heightPercent;
+          else throw "Orientation.ts: wall.heightPercent is undefined";
+        })()},
         { lastEntX, lastEntY } = lastEntityCoords(wall);
 
       console.log("ORIENTATION WALL " + wallKey);
@@ -82,14 +95,6 @@ export namespace Orientation {
   }
 
   // ================================ CALCULATIONS ================================
-  const changeOrientation: OrientGame = (game: FlappyBallGame) => {
-    const coords = {
-      player: orientPlayerCoords(game), 
-      walls: orientWallCoords(game),
-    };
-    Entities.swap(game, coords);
-  }
-
   const orientEntityCoords: OrientEntity = (lastEntX, lastEntY) => {
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // current screen dimensions

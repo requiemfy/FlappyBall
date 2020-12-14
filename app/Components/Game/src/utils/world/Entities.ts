@@ -34,6 +34,7 @@ export namespace Entities {
     size: number[] | number;
     borderRadius: number;
     color: String; 
+    heightPercent?: number;
     renderer: typeof Box | typeof Circle;
   }
 
@@ -56,7 +57,7 @@ export namespace Entities {
     game: FlappyBallGame;
     physics: Physics;
     gravity: number; // @remind put this as game property
-    wall: number[]; // @remind as game property
+    // wall: number[]; // @remind as game property
   }
 
   // ====================================================================================================
@@ -94,15 +95,19 @@ export namespace Entities {
           renderer: Box,
         },
         gravity: 0.1, 
-        wall: [],
+        // wall: [],
         game: game,
       };
+
+    (function resetGameSystemProps() {
+      game.wall = [];
+    })();
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
         for (let wallNum = 3; wallNum--;) {
-          if (game.entities.wall.length > 0) {
+          if (game.wall.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
               distance = GameDimension.getWidth("now") * WALL_DISTANCE,
@@ -178,22 +183,24 @@ export namespace Entities {
               };
             
             (function setWallId() { // @remind refactoring setting wall ID
-              const wallLen = entities.wall.length;
+              const wallLen = entities.game.wall.length;
               let _wallId = 0;
-              while (entities.wall.includes(_wallId)) { _wallId++; } // choose unique id
+              while (entities.game.wall.includes(_wallId)) { _wallId++; } // choose unique id
               if (wallLen > 0) {
                 const lastWallX = Coordinates.getEndWallX(entities);
                 if (wall.body.position.x >= lastWallX) { // if wall.x < last.x, means it's initial creation
-                  entities.wall.push(_wallId); // put wall id at the end
+                  entities.game.wall.push(_wallId); // put wall id at the end
                 }
                 else {
-                  entities.wall.unshift(_wallId); // put wall id at front
+                  entities.game.wall.unshift(_wallId); // put wall id at front
                 }
               } 
               else { 
-                entities.wall.push(_wallId); // just put the wall id
+                entities.game.wall.push(_wallId); // just put the wall id
               }
               entities[_wallId] = entity; // set id : value
+              console.log("entities[_wallId].body.position " + entities[_wallId].body.position);
+              console.log("_wallId " + _wallId);
             })();
 
             (function switchWallPos() {

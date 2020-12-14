@@ -27,9 +27,10 @@ interface State {
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
-  entities: Entities.All;
+  entities?: Entities.All;
   paused: boolean;
   over: boolean;
+  wall: number[];
   entitiesInitialized: boolean;
   
   pauseOrResume(): boolean; // toggle true/false and pass to paused
@@ -39,9 +40,10 @@ interface Game {
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine: any;
-  entities: Entities.All | any; // all entities (player, floor)
+  entities?: Entities.All; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
+  wall: number[];
   entitiesInitialized: boolean;
 
   constructor(props: object) {
@@ -52,6 +54,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
     this.paused = true; 
     this.over = false;
+    this.wall = [];
     this.entitiesInitialized = false;
     this.state = { score:0, left: 0, running: "resume", };
     
@@ -84,6 +87,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   // used in pause button,
   pauseOrResume() { 
+    if (!this.entities) throw "index.tsx: this.entities is undefined";
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
@@ -125,6 +129,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly() {
+    if (!this.entities) throw "index.tsx: this.entities is undefined";
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
@@ -133,6 +138,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFall() {
+    if (!this.entities) throw "index.tsx: this.entities is undefined";
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") this.entities.gravity = 0.2;
