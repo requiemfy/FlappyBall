@@ -76,10 +76,11 @@ export namespace Orientation {
     let wallProps: WallProps[] = [],
         wallIds = game.wallIds,
         wallNum = wallIds.length;
-
-    while(wallNum--) {
+    let i = 0; // @remind check
+    // while(wallNum--) {
+    while(i < wallNum) {
       const 
-        wallKey = wallIds[wallNum],
+        wallKey = wallIds[i],
         wall = game.entities[wallKey],
         heightPercent = { heightPercent: (() => {
           if (wall.heightPercent) return wall.heightPercent;
@@ -90,6 +91,7 @@ export namespace Orientation {
       console.log("ORIENTATION WALL " + wallKey);
 
       wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...heightPercent});
+      i++;
     }
     return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }

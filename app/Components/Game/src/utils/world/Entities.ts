@@ -117,6 +117,7 @@ export namespace Entities {
         game.entitiesInitialized = true;
       }
     })();
+    console.log("===================== GET INITIAL =====================");
   }
   // ====================================================================================================
   // ====================================================================================================
@@ -185,15 +186,8 @@ export namespace Entities {
 
               const wallId = (function choseWallId() {
                 const freedIds = entities.game.wallFreedIds;
-                if (freedIds.length > 0) {
-                  // const _id = freedIds[0];
-                  // entities.game.wallFreedIds.splice(0, 1); // remove available id in INDEX 0
-                  // return _id;
-                  return entities.game.wallFreedIds.splice(0, 1)[0];
-                } 
+                if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0];
                 else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
-                // else if (usedIds.length > 0) return Math.max(...usedIds) + 1;
-                // else return 0; // very first id in initial creation
               })();
 
               (function saveWallId(){
@@ -232,8 +226,8 @@ export namespace Entities {
     const removeAllEntities = () => {
       const game = params.game;
       for (let entity in game.entities) {
-        const isWall = Number.isInteger(entity);
-        if (isWall) COMPOSITE.remove(world, game.entities[entity].body);
+        const entityIsWall = Number.isInteger(entity);
+        if (entityIsWall) COMPOSITE.remove(world, game.entities[entity].body);
       }
     }
     const getFollowing = () => { // for now, following is only wall, but I may add more following entity

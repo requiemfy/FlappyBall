@@ -96,8 +96,7 @@ export namespace Physics {
         ){ // then
           nextWall--;
           if (entities.game.wallIds[0] === recentWallid) recentWallid = null;
-          entities.game.wallFreedIds.push(entities.game.wallIds[0]); // add to available id
-          entities.game.wallIds.splice(0, 1); // remove wall id in INDEX 0
+          entities.game.wallFreedIds.push(entities.game.wallIds.splice(0, 1)[0]); // add to available id
         }
       })();
 
