@@ -40,7 +40,7 @@ export namespace Physics {
   // special relativity - everything related to wall observation
   const wallRelativity: Relativity = (() => { 
     let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
-        recentWallid: null | number | any = null;
+        recentWallid: number | null;
 
     return (entities: Entities.All) => {
       (function moveWalls() {
@@ -67,14 +67,15 @@ export namespace Physics {
             else throw "Physics.ts: error ent.player.size is not number";
           })();
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
-          nextWall++;
+          recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
           if (recentWallid === null || !entities[recentWallid]) {
             console.log("WALL IS NOT PAIR");
-            recentWallid = currentWallid;
+            // recentWallid = currentWallid; // @remind clear all recent wall id
             entities.game.setState({ score: entities.game.state.score + 1 });
           }
-          else console.log("WALL IS PAIR");
+          else console.log("WALL IS PAIR"); // recent wall is not unmounted, meaning very close to the current wall
+          nextWall++;
         }
       })();
 
@@ -95,7 +96,7 @@ export namespace Physics {
           })()
         ){ // then
           nextWall--;
-          if (entities.game.wallIds[0] === recentWallid) recentWallid = null;
+          // if (entities.game.wallIds[0] === recentWallid) recentWallid = null;
           entities.game.wallFreedIds.push(entities.game.wallIds.splice(0, 1)[0]); // add to available id
         }
       })();

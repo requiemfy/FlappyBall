@@ -10,26 +10,25 @@ LEGEND:
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ======================================== Physics.ts ========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BUG FIXED ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 wallRelativity() {
   let nextWall = 0,       # special var DEPENDENCY
       recentWallid = null;  # special var DEPENDENCY
 
   isWallPassedByPlayer() {  # ~~~~~>>>>> MAIN
     IF player passed by wall {
-      nextWall++ expect incoming wall
+      update recentWallid;
       IF wall is not pair {
-        update recentWallid;
         add score;
       }
+      nextWall++ expect incoming wall
     }
   } 
 
   removeWall() {
     IF wall is out of vision {
       nextWall-- expect incoming wall
-      IF wall id being remove is recentWallid {
-        set recentWallid to null
-      }
     }
   }
 
@@ -45,7 +44,8 @@ PARENT FUNCTION wallRelativity
     ************* check if wall is passed *************
     IF current wall passing x is less than player x {
       
-      nextWall++ [expect the incoming wall]
+      recentWallId is equal to wall index [nextWall - 1]
+      ----- obviously, recent wall index is next wall - 1 LOL
 
       [DEBUGGING: console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);]
 
@@ -71,12 +71,14 @@ PARENT FUNCTION wallRelativity
           [DEBUGGING: console.log("WALL IS NOT PAIR");]
         }
         
-        ***** PAIR WALLS CONDITIONS
+        ************* PAIR WALLS CONDITIONS *************
         ELSE walls are PAIR {
           don't add score / do nothing;
 
           [DEBUGGING: console.log("WALL IS PAIR");]
         }
+      
+      nextWall++ [expect the incoming wall]
     }
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,3 +131,15 @@ ALTERNATIVE SOLUTION:
   add score after unmounting
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+======================================== Physics.ts ========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     NEW SOLUTION   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PARENT FUNCTION wallRelativity
+  ----- this function is called every ticks, meaning all nested function inside
+  ----- is also called.
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  MAIN FUNCTION isWallPassedByPlayer
