@@ -226,7 +226,7 @@ export namespace Entities {
     const removeAllEntities = () => {
       const game = params.game;
       for (let entity in game.entities) {
-        const entityIsWall = Number.isInteger(entity);
+        const entityIsWall = Number.isInteger(entity); // @remind try to use Symbol() to skip non physical entity props
         if (entityIsWall) COMPOSITE.remove(world, game.entities[entity].body);
       }
     }

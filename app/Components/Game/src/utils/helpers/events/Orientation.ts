@@ -66,18 +66,20 @@ export namespace Orientation {
 
   // =============================== FOR SPECIFIC ENTITY ===============================
   const orientPlayerCoords: OrientPlayer = (game) => {
-    if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
+    // entities is set to possibly undefined in FlappyBallGame class, because we can't initialize it
+    // but entities should NOT be undefined
+    // if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
     const { lastEntX, lastEntY } = lastEntityCoords(game.entities.player);
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
   const orientWallCoords: OrientWall = (game) => {
-    if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
+    // if (!game.entities) throw "Orientation.tsx: this.entities is undefined"; // @remind
     let wallProps: WallProps[] = [],
         wallIds = game.wallIds,
         wallNum = wallIds.length;
     let i = 0; // @remind check
-    // while(wallNum--) {
+    // while(wallNum--) { // @remind clear
     while(i < wallNum) {
       const 
         wallKey = wallIds[i],

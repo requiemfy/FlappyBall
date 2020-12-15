@@ -27,7 +27,7 @@ interface State {
 interface EventType { type: string; }
 interface Game {
   engine: GameEngine;
-  entities?: Entities.All;
+  entities: Entities.All;
   paused: boolean;
   over: boolean;
   wallIds: number[]; // [[wall id, wall x], ...]
@@ -41,7 +41,7 @@ interface Game {
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine: any;
-  entities?: Entities.All; // all entities (player, floor)
+  entities!: Entities.All; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
   wallIds: number[];
@@ -61,7 +61,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     this.entitiesInitialized = false;
     this.state = { score:0, left: 0, running: "resume", };
     
-    Entities.getInitial(this);
+    Entities.getInitial(this); // entities is initialized here
     this.pauseOrResume = this.pauseOrResume.bind(this);
     this.onEvent = this.onEvent.bind(this);
     this.playerFly = this.playerFly.bind(this);

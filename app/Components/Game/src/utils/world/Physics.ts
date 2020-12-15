@@ -85,9 +85,7 @@ export namespace Physics {
         if ( 
           entities.game.wallIds.length > 0 
           && (function isWallOutOfVision() {
-            const 
-              wallIndex = entities.game.wallIds[0], 
-              wall = entities[wallIndex]; // always the first wall
+            const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
             if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array";
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
               COMPOSITE.remove(world, wall.body);
