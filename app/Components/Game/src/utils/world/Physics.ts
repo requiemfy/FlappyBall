@@ -40,7 +40,7 @@ export namespace Physics {
   // special relativity - everything related to wall observation
   const wallRelativity: Relativity = (() => { 
     let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
-        recentWallid: number | null;
+        recentWallid: number | null; // @remind improve closure
 
     return (entities: Entities.All) => {
       (function moveWalls() {
@@ -53,6 +53,7 @@ export namespace Physics {
       })();
 
       (function isWallPassedByPlayer() {
+        // @remind closure return (() => {})();
         const 
           currentWallid = entities.game.wallIds[nextWall],
           currentWall = entities[currentWallid],
@@ -66,12 +67,13 @@ export namespace Physics {
             if (typeof entities.player.size === "number") return entities.player.size;
             else throw "Physics.ts: error ent.player.size is not number";
           })();
+
+        // @remind scope this
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
           recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
           if (recentWallid === null || !entities[recentWallid]) {
             console.log("WALL IS NOT PAIR");
-            // recentWallid = currentWallid; // @remind clear all recent wall id
             entities.game.setState({ score: entities.game.state.score + 1 });
           }
           else console.log("WALL IS PAIR"); // recent wall is not unmounted, meaning very close to the current wall
@@ -96,7 +98,6 @@ export namespace Physics {
           })()
         ){ // then
           nextWall--;
-          // if (entities.game.wallIds[0] === recentWallid) recentWallid = null;
           entities.game.wallFreedIds.push(entities.game.wallIds.splice(0, 1)[0]); // add to available id
         }
       })();
