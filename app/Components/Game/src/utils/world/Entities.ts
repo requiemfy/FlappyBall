@@ -29,9 +29,9 @@ export namespace Entities {
 
   export type All = Initial & Following & System;
 
-  export type Physical = {
+  export type Physical = { // @remind refactor this like <T>
     body: Body;
-    size: number[] | number;
+    size: number[] | number; 
     borderRadius: number;
     color: String; 
     heightPercent?: number;
@@ -61,7 +61,7 @@ export namespace Entities {
 
   // ====================================================================================================
   // ====================================================================================================
-  export const getInitial: Bodies = (game, dynamic = { player: {} }) => {
+  export const getInitial: Bodies = (game, dynamic = { player: {} }) => { // @note INSPECTED: good
     const
       player = Matter.getPlayer(dynamic.player), // player is auto extracted in Matter.ts
       floor = Matter.getFloor(),
@@ -102,7 +102,7 @@ export namespace Entities {
     })();
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
-    (function getInitialWalls(){
+    (function getInitialWalls(){ // @note INSPECTED: good
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
         for (let wallNum = 3; wallNum--;) {
           if (game.wallIds.length > 0) {
@@ -129,12 +129,12 @@ export namespace Entities {
   // i just put together methods in an object for "following entities"
   // because unlike getInitials I can't just show "following entities" at once, since it's continuous
   // soon i may add more following entities
-  export const following: FollowingMethods = {
+  export const following: FollowingMethods = { // @note INSPECTED: bad
     getWalls: (() => { // wall/s can only be 1 or 2
       let wallPosition = "down",
           wallEachTime = [1, 2];
 
-      const randomHeight = (n: 1 | 2) => {
+      const randomHeight = (n: 1 | 2) => { // @note INSPECTED: good
         const playerSpace = 0.06;
         if (n === 2) {
           const 
@@ -153,17 +153,17 @@ export namespace Entities {
       }
 
       return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation especially
-        let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall, ctrl-f: default y only
+        let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall: in this case y is only default, ctrl-f: default y only
             numOfwall = isDefault ? wallEachTime[Math.floor(Math.random()*2)] : 1, // 1 wall only if not defualt creation
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
-          (function getWall(){
+          (function getWall(){ // @note INSPECTED: bad
             const 
-              wall = Matter.getWall({
+              wall = Matter.getWall({ // @note INSPECTED: bad
                 x: wallProps ? wallProps.x : undefined, // @remind void 0
                 y: wallProps ? wallProps.y : undefined,
-                heightPercent: (() => { // this can't be undefined
+                heightPercent: (() => { // this can't be undefined @remind refactor use generic types <T>
                   // any of if conditions should be true, else throw error
                   if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
                   else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
@@ -181,20 +181,20 @@ export namespace Entities {
                 renderer: Box,
               };
             
-            (function setWallId() {
-              const usedIds = entities.game.wallIds;
+            (function setWallId() { // @note INSPECTED: bad
+              const 
+                usedIds = entities.game.wallIds,
+                wallId = (function choseWallId() { // @note INSPECTED: bad
+                  const freedIds = entities.game.wallFreedIds;
+                  if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0]; // @remind try to use ternary
+                  else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
+                })();
 
-              const wallId = (function choseWallId() {
-                const freedIds = entities.game.wallFreedIds;
-                if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0];
-                else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
-              })();
-
-              (function saveWallId(){
+              (function saveWallId(){ // @note INSPECTED: good
                 const lastWallX = (usedIds.length > 0) ? Coordinates.getEndWallX(entities) : void 0;
                 (lastWallX && !(wall.body.position.x >= lastWallX) || !lastWallX)
-                  ? entities.game.wallIds.unshift(wallId)
-                  : entities.game.wallIds.push(wallId);
+                  ? entities.game.wallIds.unshift(wallId) // right to left creation (initial creation)
+                  : entities.game.wallIds.push(wallId); // left to right creation (following / continuous creation)
               })();
               
               entities[wallId] = entity; // set id : value
@@ -202,7 +202,7 @@ export namespace Entities {
               console.log("wallId " + wallId);
             })();
 
-            (function switchWallPos() {
+            (function switchWallPos() { // @note INSPECTED: good
               (wallPosition === "down") ? wallPosition = "up" : wallPosition = "down";
             })();
           })();
@@ -219,24 +219,25 @@ export namespace Entities {
   // this swap is used in orientation
   // idea: remove all current entities, then create new ones
   //       bodies / objects created will auto adjust to current window dimension
-  export const swap: Recreation = (() => {
+  export const swap: Recreation = (() => { // @note INSPECTED: good
     type args = {game?: FlappyBallGame | any, dynamic?: InitialParams & FollowingParams | any,};
     const params: args = {};
 
-    const removeAllEntities = () => {
+    const removeAllEntities = () => { // @note INSPECTED: good
       const game = params.game;
       for (let entity in game.entities) {
         const entityIsWall = Number.isInteger(entity); // @remind try to use Symbol() to skip non physical entity props
         if (entityIsWall) COMPOSITE.remove(world, game.entities[entity].body);
       }
     }
-    const getFollowing = () => { // for now, following is only wall, but I may add more following entity
+    const getFollowing = () => { // @note INSPECTED: good
+      // for now, following is only wall, but I may add more following entity
       const [ game, walls ] = [ params.game, params.dynamic.walls ];
       for (let wall in walls) {
         following.getWalls(game.entities, walls[wall]);
       }
     }
-    return <typeof swap>function (game, dynamic) {
+    return <typeof swap>function (game, dynamic) { // @note INSPECTED: good
       Object.defineProperty(params, "game", { get() { return game }, configurable: true });
       Object.defineProperty(params, "dynamic", { get() { return dynamic }, configurable: true });
       removeAllEntities();

@@ -20,8 +20,8 @@ export namespace Physics {
   
   // this GameEngine system is called every ticks
   // that's why i didn't put collision event listener here
-  // yes 2nd param should be object
-  export const system: Physics = (entities, { time }) => {
+  // yes 2nd param should be like that
+  export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
     const { engine } = entities.physics;
     engine.world.gravity.y = entities.gravity;
 
@@ -38,21 +38,21 @@ export namespace Physics {
   };
 
   // special relativity - everything related to wall observation
-  const wallRelativity: Relativity = (() => { 
+  const wallRelativity: Relativity = (() => { // @note INSPECTED: bad
     let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
         recentWallid: number | null; // @remind improve closure
 
     return (entities: Entities.All) => {
-      (function moveWalls() {
+      (function moveWalls() { // @note INSPECTED: good
         let wallLen = entities.game.wallIds.length, wallIndex, wall;
-        while (wallLen--) {
+        while (wallLen--) { // order doesn't matter, just move all the wall
           wallIndex = entities.game.wallIds[wallLen];
           wall = entities[wallIndex];
           BODY.translate( wall.body, { x: -1.2, y: 0 } );
         }
       })();
 
-      (function isWallPassedByPlayer() {
+      (function isWallPassedByPlayer() { // @note INSPECTED: bad
         // @remind closure return (() => {})();
         const 
           currentWallid = entities.game.wallIds[nextWall],
@@ -60,12 +60,12 @@ export namespace Physics {
           currentWallX = currentWall.body.position.x, // getting latest x of currently passing wall
           currentWallSize = (() => {
             if (Array.isArray(currentWall.size)) return currentWall.size[0];
-            else throw "Physics.ts: error currentWall.size is not array";            
+            else throw "Physics.ts: error currentWall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
           })(),
           playerX = entities.player.body.position.x,
           playerSize = (() => {
             if (typeof entities.player.size === "number") return entities.player.size;
-            else throw "Physics.ts: error ent.player.size is not number";
+            else throw "Physics.ts: error ent.player.size is not number"; // @remind we could remove this: solutuion in Entities.ts <T> 
           })();
 
         // @remind scope this
@@ -81,12 +81,12 @@ export namespace Physics {
         }
       })();
 
-      (function removeWall() {
+      (function removeWall() { // @note INSPECTED: bad
         if ( 
           entities.game.wallIds.length > 0 
           && (function isWallOutOfVision() {
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
-            if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array";
+            if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
               COMPOSITE.remove(world, wall.body);
               delete entities[wallIndex]; 
@@ -100,7 +100,7 @@ export namespace Physics {
         }
       })();
 
-      (function showNextWall() {
+      (function showNextWall() { // @note INSPECTED: good
         const wallLen = entities.game.wallIds.length;
         if (wallLen > 0) {
           const 
@@ -109,7 +109,7 @@ export namespace Physics {
             gameWidth = GameDimension.getWidth("now"),
             lastDistance = gameWidth - lastPosX,
             percentLastDist = lastDistance / gameWidth;
-          if (percentLastDist >= WALL_DISTANCE) { // using recorded wall in last position
+          if (percentLastDist >= WALL_DISTANCE) { // using wall in last position
             console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastPos" + lastPosX + "gameWidth " + gameWidth);
             Entities.following.getWalls(entities);
             console.log(entities.game.wallIds);
@@ -120,7 +120,7 @@ export namespace Physics {
   })();
 
   // this is called in componentDidMount() 
-  export const collision: Event = (game) => {
+  export const collision: Event = (game) => { // @note INSPECTED: good
     EVENTS.on(engine, 'collisionStart', (event) => {
       ////////////////////////////////////////////////////////////
       console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
