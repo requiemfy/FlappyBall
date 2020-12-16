@@ -70,7 +70,7 @@ export namespace Orientation {
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
-  const orientWallCoords: OrientWall = (game) => {
+  const orientWallCoords: OrientWall = (game) => { // @note INSPECTED: bad
     let wallProps: WallProps[] = [],
         wallIds = game.wallIds,
         wallNum = wallIds.length,
@@ -79,7 +79,7 @@ export namespace Orientation {
       const 
         wallKey = wallIds[i],
         wall = game.entities[wallKey],
-        heightPercent = { heightPercent: (() => {
+        heightPercent = { heightPercent: (() => { // @remind refactor this
           if (wall.heightPercent) return wall.heightPercent;
           else throw "Orientation.ts: wall.heightPercent is undefined";
         })()},
