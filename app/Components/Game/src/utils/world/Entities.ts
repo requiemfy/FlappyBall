@@ -68,10 +68,10 @@ export namespace Entities {
       roof = Matter.getRoof();
 
       game.entities = <Initial & System>{
-        physics: { 
-          engine: engine, 
-          world: world 
-        },
+        // physics: { 
+        //   engine: engine, 
+        //   world: world 
+        // },
         player: {
           body: player.body, 
           size: player.size,
@@ -93,9 +93,31 @@ export namespace Entities {
           color: roof.color, 
           renderer: Box,
         },
-        gravity: 0.1, 
-        game: game,
+        // gravity: 0.1, // @audit 
+        // game: game,
       };
+
+    (function initNotBodyProps () {
+      Object.defineProperty(
+        game.entities, 'physics', {
+          value: { 
+            engine: engine, 
+            world: world 
+          }, 
+          enumerable: false // special purpose for swap
+      });
+      Object.defineProperty(
+        game.entities, 'gravity', {
+          value: 0.1, 
+          enumerable: false, // special purpose for swap
+          writable: true,    
+      });
+      Object.defineProperty(
+        game.entities, 'game', {
+          value: game, 
+          enumerable: false // special purpose for swap
+      });
+    })();
 
     (function resetGameSystemProps() {
       game.wallIds = [];
@@ -227,8 +249,9 @@ export namespace Entities {
     const removeAllEntities = () => { // @note INSPECTED: good
       const game = params.game;
       for (let entity in game.entities) {
-        const entityIsWall = Number.isInteger(entity); // @remind try to use Symbol() to skip non physical entity props
-        if (entityIsWall) COMPOSITE.remove(world, game.entities[entity].body);
+        // const entityIsWall = Number.isInteger(entity);
+        // if (entityIsWall) COMPOSITE.remove(world, game.entities[entity].body);
+        COMPOSITE.remove(world, game.entities[entity].body)
       }
     }
     const getFollowing = () => { // @note INSPECTED: good

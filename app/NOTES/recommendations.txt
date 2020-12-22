@@ -1,0 +1,1 @@
+try to use Symbol() key to skip non physical entity props in for

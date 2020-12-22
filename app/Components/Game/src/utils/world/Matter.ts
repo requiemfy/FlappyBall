@@ -34,7 +34,8 @@ export namespace Matter {
       size: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      static: true,
+      label: "Player Circle",
+      static: false,
     });
   }
   
@@ -60,6 +61,7 @@ export namespace Matter {
       height: floorHeight,
       borderRadius: 0,
       color: "green",
+      label: "Floor Rectangle",
       static: true,
     });
   }
@@ -76,6 +78,7 @@ export namespace Matter {
       height: roofHeight,
       borderRadius: 0,
       color: "brown",
+      label: "Roof Rectangle",
       static: true,
     });
   }
@@ -108,6 +111,7 @@ export namespace Matter {
       heightPercent: heightPercent,
       borderRadius: 0,
       color: "black",
+      label: "Wall Rectangle",
       static: true,
     });
   }
@@ -121,7 +125,7 @@ export namespace Matter {
       heightPercent: prop.heightPercent, // only useful for wall
       borderRadius: prop.borderRadius,
       color: prop.color,
-      body: BODIES.rectangle(prop.x, prop.y, prop.width, prop.height, { isStatic: prop.static })
+      body: BODIES.rectangle(prop.x, prop.y, prop.width, prop.height, { isStatic: prop.static, label: prop.label })
     }
   }
 
@@ -133,7 +137,7 @@ export namespace Matter {
       size: prop.size, // for Circle View Component
       borderRadius: prop.borderRadius,
       color: prop.color,
-      body: BODIES.circle(prop.x, prop.y, bodySize, { isStatic: prop.static })
+      body: BODIES.circle(prop.x, prop.y, bodySize, { isStatic: prop.static, label: prop.label })
     }
   }
   // ================================= Matter Bodies =================================

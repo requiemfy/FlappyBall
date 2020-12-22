@@ -115,6 +115,8 @@ export namespace Physics {
       ////////////////////////////////////////////////////////////
       console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       console.log("physics.tsx: COLLIDED... GAME OVER");
+      let pairs = event.pairs;
+      console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
       console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       ////////////////////////////////////////////////////////////
       // alternative for this is use dispatch method of GameEngine
