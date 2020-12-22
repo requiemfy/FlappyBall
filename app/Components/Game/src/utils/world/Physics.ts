@@ -52,21 +52,27 @@ export namespace Physics {
         }
       })();
 
-      (function isWallPassedByPlayer() { // @note INSPECTED: bad
+      (function isWallPassedByPlayer() { // @note INSPECTED: bad WORKING ON IT
         // @remind closure return (() => {})();
         const 
           currentWallid = entities.game.wallIds[nextWall],
-          currentWall = entities[currentWallid],
+          currentWall: Entities.Physical<number[]> = entities[currentWallid],
           currentWallX = currentWall.body.position.x, // getting latest x of currently passing wall
-          currentWallSize = (() => {
-            if (Array.isArray(currentWall.size)) return currentWall.size[0];
-            else throw "Physics.ts: error currentWall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
-          })(),
+         
+          // currentWallSize = (() => {
+          //   if (Array.isArray(currentWall.size)) return currentWall.size[0];
+          //   else throw "Physics.ts: error currentWall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
+          // })(),
+          currentWallSize = currentWall.size[0],
+         
           playerX = entities.player.body.position.x,
-          playerSize = (() => {
-            if (typeof entities.player.size === "number") return entities.player.size;
-            else throw "Physics.ts: error ent.player.size is not number"; // @remind we could remove this: solutuion in Entities.ts <T> 
-          })();
+
+          // playerSize = (() => {
+          //   if (typeof entities.player.size === "number") return entities.player.size;
+          //   else throw "Physics.ts: error ent.player.size is not number"; // @remind we could remove this: solutuion in Entities.ts <T> 
+          // })();
+          playerSize = entities.player.size;
+
 
         // @remind scope this
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {

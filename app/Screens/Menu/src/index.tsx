@@ -46,8 +46,6 @@ export namespace GameMenu {
   }
 
   const MainStack = createStackNavigator();
-  const RootStack = createStackNavigator();
-
   function BackStackScreen() {
     return (
       <MainStack.Navigator headerMode="none">
@@ -56,6 +54,7 @@ export namespace GameMenu {
     );
   }
 
+  const RootStack = createStackNavigator();
   export function StackScreen() {
     return (
       <NavigationContainer>

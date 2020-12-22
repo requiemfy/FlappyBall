@@ -29,9 +29,10 @@ export namespace Entities {
 
   export type All = Initial & Following & System;
 
-  export type Physical = { // @remind refactor this like <T>
+  export type Physical<Size> = { // @remind DONE refactor this like <T>
     body: Body;
-    size: number[] | number; 
+    // size: number[] | number; 
+    size: Size;
     borderRadius: number;
     color: String; 
     heightPercent?: number;
@@ -40,16 +41,16 @@ export namespace Entities {
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
-    [key: number]: Physical; // following wall
+    [key: number]: Physical<number[]>; // following wall
   }
 
   // ENTITIES THAT ARE INITIALIZED AT ONCE
   export type Initial = {
     // [key: string]: any; // additional
-    [key: number]: Physical; // initial wall
-    player: Physical;
-    floor: Physical;
-    roof: Physical;
+    [key: number]: Physical<number[]>; // initial wall
+    player: Physical<number>;
+    floor: Physical<number[]>;
+    roof: Physical<number[]>;
   }
 
   // SYSTEM/PHYSICS ENTITIES
@@ -67,7 +68,7 @@ export namespace Entities {
       floor = Matter.getFloor(),
       roof = Matter.getRoof();
 
-      game.entities = <Initial & System >{
+      game.entities = <Initial & System>{
         physics: { 
           engine: engine, 
           world: world 
