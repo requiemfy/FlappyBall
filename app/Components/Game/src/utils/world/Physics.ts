@@ -75,7 +75,7 @@ export namespace Physics {
       (function removeWall() { // @note INSPECTED: good
         if ( 
           entities.game.wallIds.length > 0 
-          && (function isWallOutOfVision() {
+          && (function isWallOutOfVision() { // removes the OBJECT and BODY
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
               COMPOSITE.remove(world, wall.body);
@@ -84,7 +84,7 @@ export namespace Physics {
             }
             return false;
           })()
-        ){ // then
+        ){ // then adjust the wall IDs
           nextWall--;
           entities.game.wallFreedIds.push(entities.game.wallIds.splice(0, 1)[0]); // add to available id
         }

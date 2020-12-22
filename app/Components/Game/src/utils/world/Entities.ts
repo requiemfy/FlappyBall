@@ -160,11 +160,12 @@ export namespace Entities {
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
           (function getWall(){ // @note INSPECTED: bad
             const 
-              wall = Matter.getWall({ // @note INSPECTED: bad
-                x: wallProps ? wallProps.x : undefined, // @remind void 0
-                y: wallProps ? wallProps.y : undefined,
-                heightPercent: (() => { // this can't be undefined @remind refactor use generic types <T>
+              wall = Matter.getWall({ // @note INSPECTED: bad WORKING ON IT
+                x: wallProps ? wallProps.x : void 0, // @remind void 0
+                y: wallProps ? wallProps.y : void 0,
+                heightPercent: (() => {
                   // any of if conditions should be true, else throw error
+                  // i can't find any proper way to do this, since either "wallProps" or "wallHeightsArr" is expected to be undefined
                   if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
                   else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
                   else throw "Entities.ts: heightPercent is undefined which should not be.";
