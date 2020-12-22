@@ -16,7 +16,7 @@ export namespace Orientation {
   type OrientGame = (game: FlappyBallGame) => void;
   type OrientEntity = (x: number, y: number) => Coordinates;
   type PrevGameDimensions = (width: number, height: number) => { prevGameWidth: number, prevGameHeight: number };
-  type EntityCoords = (entity: Entities.Physical<number | number[]>) => { [key: string]: number };
+  type EntityCoords = (entity: Entities.Physical<number | number[], number | undefined>) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
   let callback: Event; // Event
@@ -79,10 +79,11 @@ export namespace Orientation {
       const 
         wallKey = wallIds[i],
         wall = game.entities[wallKey],
-        heightPercent = { heightPercent: (() => { // @remind refactor this
-          if (wall.heightPercent) return wall.heightPercent;
-          else throw "Orientation.ts: wall.heightPercent is undefined";
-        })()},
+        // heightPercent = { heightPercent: (() => { // @remind refactor this
+        //   if (wall.heightPercent) return wall.heightPercent;
+        //   else throw "Orientation.ts: wall.heightPercent is undefined";
+        // })()},
+        heightPercent = { heightPercent: wall.heightPercent },
         { lastEntX, lastEntY } = lastEntityCoords(wall);
 
       console.log("ORIENTATION WALL " + wallKey);

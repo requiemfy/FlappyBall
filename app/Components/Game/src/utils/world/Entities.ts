@@ -29,27 +29,27 @@ export namespace Entities {
 
   export type All = Initial & Following & System;
 
-  export type Physical<Size> = {
+  export type Physical<Size, HeightPercent> = {
     body: Body;
     size: Size;
     borderRadius: number;
     color: String; 
-    heightPercent?: number;
+    heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
     renderer: typeof Box | typeof Circle;
   }
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
-    [key: number]: Physical<number[]>; // following wall
+    [key: number]: Physical<number[], number>; // following wall
   }
 
   // ENTITIES THAT ARE INITIALIZED AT ONCE
   export type Initial = {
     // [key: string]: any; // additional
-    [key: number]: Physical<number[]>; // initial wall
-    player: Physical<number>;
-    floor: Physical<number[]>;
-    roof: Physical<number[]>;
+    [key: number]: Physical<number[], number>; // initial wall
+    player: Physical<number, undefined>;
+    floor: Physical<number[], undefined>;
+    roof: Physical<number[], undefined>;
   }
 
   // SYSTEM/PHYSICS ENTITIES
