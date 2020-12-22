@@ -84,17 +84,17 @@ export namespace Matter {
   //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
   //    x and y are both defined -> showing walls with specific coords, triggered by orientation
   //    x and y are both undefined -> showing walls by default: coords are purely based on game dimensions
-  const createWall: StaticBody = ({ x, y, heightPercent, position }) => { // @note INSPECTED: bad
+  const createWall: StaticBody = ({ x, y, heightPercent, position }) => { // @note INSPECTED: good
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
     // i can't put these x, y default values in the function param because it also depends on some variables
     // @remind use void 0
-    if (x === undefined) { // if x undefined, then it depends on the wall width, game width
+    if (x === void 0) { // if x undefined, then it depends on the wall width, game width
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
     }
-    if (y === undefined) { // if y undefined, then it depends on the wall height, game height
+    if (y === void 0) { // if y undefined, then it depends on the wall height, game height
       if (position === "down") {
         y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
       } else if (position === "up") {
