@@ -89,7 +89,6 @@ export namespace Matter {
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
     // i can't put these x, y default values in the function param because it also depends on some variables
-    // @remind use void 0
     if (x === void 0) { // if x undefined, then it depends on the wall width, game width
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
