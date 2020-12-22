@@ -38,7 +38,7 @@ export namespace Physics {
   };
 
   // special relativity - everything related to wall observation
-  const wallRelativity: Relativity = (() => { // @note INSPECTED: bad
+  const wallRelativity: Relativity = (() => { // @note INSPECTED: good
     let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
 
     return (entities: Entities.All) => {
@@ -72,12 +72,11 @@ export namespace Physics {
         }
       })();
 
-      (function removeWall() { // @note INSPECTED: bad
+      (function removeWall() { // @note INSPECTED: good
         if ( 
           entities.game.wallIds.length > 0 
           && (function isWallOutOfVision() {
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
-            // if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array"; // @remind we could remove this throw: solutuion in Entities.ts <T> 
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
               COMPOSITE.remove(world, wall.body);
               delete entities[wallIndex]; 
