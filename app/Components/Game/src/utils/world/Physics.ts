@@ -23,7 +23,7 @@ export namespace Physics {
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
     const { engine } = entities.physics;
-    engine.world.gravity.y = entities.gravity;
+    engine.world.gravity.y = entities.game.gravity;
 
     wallRelativity(entities);
 

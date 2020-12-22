@@ -33,6 +33,7 @@ interface Game {
   wallIds: number[]; // [[wall id, wall x], ...]
   wallFreedIds: number[];
   entitiesInitialized: boolean;
+  gravity: number;
   
   pauseOrResume(): boolean; // toggle true/false and pass to paused
   onEvent(e: EventType): void;
@@ -47,6 +48,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   wallIds: number[];
   wallFreedIds: number[];
   entitiesInitialized: boolean;
+  gravity: number;
 
   constructor(props: object) {
     super(props);
@@ -59,6 +61,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     this.wallIds = [];
     this.wallFreedIds = [];
     this.entitiesInitialized = false;
+    this.gravity = 0.1;
     this.state = { score:0, left: 0, running: "resume", };
     
     Entities.getInitial(this); // entities is initialized here
@@ -136,16 +139,16 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") this.entities.gravity = -0.2;
-    else this.entities.gravity = -0.3; 
+    if (orient === "landscape") this.gravity = -0.2;
+    else this.gravity = -0.3; 
   }
 
   playerFall() {
     if (!this.entities) throw "index.tsx: this.entities is undefined";
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") this.entities.gravity = 0.2;
-    else this.entities.gravity = 0.3; 
+    if (orient === "landscape") this.gravity = 0.2;
+    else this.gravity = 0.3; 
   }
 
   render() {
