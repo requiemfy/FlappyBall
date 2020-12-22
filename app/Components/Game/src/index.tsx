@@ -135,7 +135,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly() {
-    if (!this.entities) throw "index.tsx: this.entities is undefined";
+    if (!this.entities) throw "index.tsx: this.entities is undefined"; // @remind
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);

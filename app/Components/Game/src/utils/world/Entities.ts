@@ -56,7 +56,6 @@ export namespace Entities {
   export type System = {
     game: FlappyBallGame;
     physics: Physics;
-    // gravity: number; // @remind put this as game property
   }
 
   // ====================================================================================================
@@ -100,12 +99,6 @@ export namespace Entities {
           }, 
           enumerable: false // special purpose for swap
       });
-      // Object.defineProperty(
-      //   game.entities, 'gravity', {
-      //     value: 0.1, 
-      //     enumerable: false, // special purpose for swap
-      //     writable: true,    
-      // });
       Object.defineProperty(
         game.entities, 'game', {
           value: game, 
@@ -115,6 +108,7 @@ export namespace Entities {
 
     (function resetGameSystemProps() {
       game.wallIds = [];
+      // guess why free ids is not reset? becaaaause, it's not needed, since it will be used first again
     })();
     
     // setting initial wall entities with many times creations (depending on how many "wallNum")
