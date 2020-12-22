@@ -40,7 +40,6 @@ export namespace Physics {
   // special relativity - everything related to wall observation
   const wallRelativity: Relativity = (() => { // @note INSPECTED: bad
     let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
-        // recentWallid: number | null; // @remind DONE improve closure
 
     return (entities: Entities.All) => {
       (function moveWalls() { // @note INSPECTED: good
@@ -52,8 +51,7 @@ export namespace Physics {
         }
       })();
 
-      (function isWallPassedByPlayer() { // @note INSPECTED: bad WORKING ON IT
-        // @remind closure return (() => {})();
+      (function isWallPassedByPlayer() { // @note INSPECTED: good
         const 
           currentWallid = entities.game.wallIds[nextWall],
           currentWall = entities[currentWallid],
@@ -62,7 +60,7 @@ export namespace Physics {
           playerX = entities.player.body.position.x,
           playerSize = entities.player.size;
         
-        if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) { // @remind scope this
+        if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
           let recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
           if (recentWallid === null || !entities[recentWallid]) {
@@ -79,7 +77,7 @@ export namespace Physics {
           entities.game.wallIds.length > 0 
           && (function isWallOutOfVision() {
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
-            if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
+            // if (!Array.isArray(wall.size)) throw "Physics.ts: error wall.size is not array"; // @remind we could remove this throw: solutuion in Entities.ts <T> 
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
               COMPOSITE.remove(world, wall.body);
               delete entities[wallIndex]; 
