@@ -129,7 +129,7 @@ export namespace Entities {
   // i just put together methods in an object for "following entities"
   // because unlike getInitials I can't just show "following entities" at once, since it's continuous
   // soon i may add more following entities
-  export const following: FollowingMethods = { // @note INSPECTED: bad
+  export const following: FollowingMethods = { // @note INSPECTED: good
     getWalls: (() => { // wall/s can only be 1 or 2
       let wallPosition = "down",
           wallEachTime = [1, 2];
@@ -181,13 +181,11 @@ export namespace Entities {
                 renderer: Box,
               };
             
-            (function setWallId() { // @note INSPECTED: bad
+            (function setWallId() { // @note INSPECTED: good
               const 
                 usedIds = entities.game.wallIds,
-                wallId = (function choseWallId() { // @note INSPECTED: bad
+                wallId = (function choseWallId() { // @note INSPECTED: good
                   const freedIds = entities.game.wallFreedIds;
-                  // if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0]; // @remind try to use ternary
-                  // else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
                   return (freedIds.length > 0) 
                     ? entities.game.wallFreedIds.splice(0, 1)[0] 
                     : (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
