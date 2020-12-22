@@ -158,10 +158,10 @@ export namespace Entities {
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
-          (function getWall(){ // @note INSPECTED: bad
+          (function getWall(){ // @note INSPECTED: good
             const 
-              wall = Matter.getWall({ // @note INSPECTED: bad WORKING ON IT
-                x: wallProps ? wallProps.x : void 0, // @remind void 0
+              wall = Matter.getWall({ // @note INSPECTED: good
+                x: wallProps ? wallProps.x : void 0,
                 y: wallProps ? wallProps.y : void 0,
                 heightPercent: (() => {
                   // any of if conditions should be true, else throw error
@@ -172,7 +172,6 @@ export namespace Entities {
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
               }),
-
               entity = { // extract wall props
                 body: wall.body, 
                 size: [wall.width, wall.height],
@@ -187,8 +186,11 @@ export namespace Entities {
                 usedIds = entities.game.wallIds,
                 wallId = (function choseWallId() { // @note INSPECTED: bad
                   const freedIds = entities.game.wallFreedIds;
-                  if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0]; // @remind try to use ternary
-                  else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
+                  // if (freedIds.length > 0) return entities.game.wallFreedIds.splice(0, 1)[0]; // @remind try to use ternary
+                  // else return (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
+                  return (freedIds.length > 0) 
+                    ? entities.game.wallFreedIds.splice(0, 1)[0] 
+                    : (usedIds.length > 0) ? Math.max(...usedIds) + 1 : 0;
                 })();
 
               (function saveWallId(){ // @note INSPECTED: good
