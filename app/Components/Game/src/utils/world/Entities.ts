@@ -29,9 +29,8 @@ export namespace Entities {
 
   export type All = Initial & Following & System;
 
-  export type Physical<Size> = { // @remind DONE refactor this like <T>
+  export type Physical<Size> = {
     body: Body;
-    // size: number[] | number; 
     size: Size;
     borderRadius: number;
     color: String; 

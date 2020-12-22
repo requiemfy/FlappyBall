@@ -39,8 +39,8 @@ export namespace Physics {
 
   // special relativity - everything related to wall observation
   const wallRelativity: Relativity = (() => { // @note INSPECTED: bad
-    let nextWall = 0, // we can't trust that all passing wall to player is index 0, so we increment this
-        recentWallid: number | null; // @remind improve closure
+    let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
+        // recentWallid: number | null; // @remind DONE improve closure
 
     return (entities: Entities.All) => {
       (function moveWalls() { // @note INSPECTED: good
@@ -56,27 +56,14 @@ export namespace Physics {
         // @remind closure return (() => {})();
         const 
           currentWallid = entities.game.wallIds[nextWall],
-          currentWall: Entities.Physical<number[]> = entities[currentWallid],
+          currentWall = entities[currentWallid],
           currentWallX = currentWall.body.position.x, // getting latest x of currently passing wall
-         
-          // currentWallSize = (() => {
-          //   if (Array.isArray(currentWall.size)) return currentWall.size[0];
-          //   else throw "Physics.ts: error currentWall.size is not array"; // @remind we could remove this: solutuion in Entities.ts <T> 
-          // })(),
           currentWallSize = currentWall.size[0],
-         
           playerX = entities.player.body.position.x,
-
-          // playerSize = (() => {
-          //   if (typeof entities.player.size === "number") return entities.player.size;
-          //   else throw "Physics.ts: error ent.player.size is not number"; // @remind we could remove this: solutuion in Entities.ts <T> 
-          // })();
           playerSize = entities.player.size;
-
-
-        // @remind scope this
-        if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
-          recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
+        
+        if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) { // @remind scope this
+          let recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
           if (recentWallid === null || !entities[recentWallid]) {
             console.log("WALL IS NOT PAIR");
