@@ -55,7 +55,7 @@ export namespace Entities {
   // SYSTEM/PHYSICS ENTITIES
   export type System = {
     game: FlappyBallGame;
-    physics: Physics;
+    // physics: Physics;
   }
 
   // ====================================================================================================
@@ -91,14 +91,14 @@ export namespace Entities {
       };
 
     (function initNotBodyProps () {
-      Object.defineProperty(
-        game.entities, 'physics', {
-          value: { 
-            engine: engine, 
-            world: world 
-          }, 
-          enumerable: false // special purpose for swap
-      });
+      // Object.defineProperty(
+      //   game.entities, 'physics', {
+      //     value: { 
+      //       engine: engine, 
+      //       world: world 
+      //     }, 
+      //     enumerable: false // special purpose for swap
+      // });
       Object.defineProperty(
         game.entities, 'game', {
           value: game, 

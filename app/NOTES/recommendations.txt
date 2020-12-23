@@ -1,1 +1,9 @@
 try to use Symbol() key to skip non physical entity props in for
+
+edited matter js Body.js to add gravity scaling
+https://github.com/liabru/matter-js/issues/503
+
+IN PORTRAINT: 
+floor length is only the screen width, therefore
+if you want to extend WALL_DISTANCE, since there's is falling wall which means that
+wall is dynamic (affected by gravity), you have to extend the FLOOR, to catch it.

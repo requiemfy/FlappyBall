@@ -34,8 +34,8 @@ export namespace Matter {
       size: playerBaseSize,
       borderRadius: playerBaseSize / 2,
       color: "red",
-      label: "Player Circle",
-      static: false,
+      label: "Player-Circle",
+      static: true,
     });
   }
   
@@ -61,7 +61,7 @@ export namespace Matter {
       height: floorHeight,
       borderRadius: 0,
       color: "green",
-      label: "Floor Rectangle",
+      label: "Floor-Rectangle",
       static: true,
     });
   }
@@ -78,7 +78,7 @@ export namespace Matter {
       height: roofHeight,
       borderRadius: 0,
       color: "brown",
-      label: "Roof Rectangle",
+      label: "Roof-Rectangle",
       static: true,
     });
   }
@@ -111,7 +111,7 @@ export namespace Matter {
       heightPercent: heightPercent,
       borderRadius: 0,
       color: "black",
-      label: "Wall Rectangle",
+      label: "Wall-Rectangle",
       static: true,
     });
   }

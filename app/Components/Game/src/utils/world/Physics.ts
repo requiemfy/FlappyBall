@@ -1,3 +1,4 @@
+import { Dimensions } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../..";
 import { GameAlert } from "../helpers/alerts";
@@ -17,15 +18,24 @@ export namespace Physics {
   type Physics = (entities: Entities.All, { time }: any) => Entities.All;
   type Event = (game: FlappyBallGame) => void;
   type Relativity = (entiies: Entities.All) => void;
+  type Player = { velocity: Relativity, gravity: (scale: number) => void }
   
   // this GameEngine system is called every ticks
   // that's why i didn't put collision event listener here
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
-    const { engine } = entities.physics;
-    engine.world.gravity.y = entities.game.gravity;
+    // const { engine } = entities.physics;
+    // engine.world.gravity.y = Math.abs(entities.game.gravity);
+    world.gravity.y = Math.abs(entities.game.gravity);
 
     wallRelativity(entities);
+
+    playerRelativity.velocity(entities);
+    // const player = entities.player;
+    // BODY.applyForce(player.body, player.body.velocity, {
+    //   x: 0,
+    //   y: world.gravity.y * player.body.mass  * -0.005
+    // });
 
     // //////////////////////////////////////////////////////////
     // entities.distance+=1; // this is on the entities script
@@ -37,11 +47,33 @@ export namespace Physics {
     return entities;
   };
 
-  // special relativity - everything related to wall observation
-  const wallRelativity: Relativity = (() => { // @note INSPECTED: good
-    let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
 
-    return (entities: Entities.All) => {
+  export const playerRelativity = (() => {
+    let playerGravity: number;
+    (function initGravity() {
+      let { width, height } = Dimensions.get("window"),
+        orient = GameDimension.getOrientation(width, height);
+      if (orient === "landscape") playerGravity = 0.001;
+      else playerGravity = 0.0025;
+    })();
+    return <Player>{
+      velocity: <Relativity>function (entities) {
+        const player = entities.player;
+        BODY.applyForce(player.body, player.body.velocity, {
+          x: 0,
+          y: world.gravity.y * player.body.mass * playerGravity
+        });
+      },
+      gravity: (scale) => playerGravity = scale,
+    }
+  })();
+
+  // special relativity - everything related to wall observation
+  const wallRelativity = (() => { // @note INSPECTED: good
+    let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
+    let possiblyFallingWall = false; // @remind clear
+
+    return <Relativity>function (entities) {
       (function moveWalls() { // @note INSPECTED: good
         let wallLen = entities.game.wallIds.length, wallIndex, wall;
         while (wallLen--) { // order doesn't matter, just move all the wall
@@ -66,6 +98,7 @@ export namespace Physics {
           if (recentWallid === null || !entities[recentWallid]) {
             console.log("WALL IS NOT PAIR");
             entities.game.setState({ score: entities.game.state.score + 1 });
+            possiblyFallingWall = true;
           }
           else console.log("WALL IS PAIR"); // recent wall is not unmounted, meaning very close to the current wall
           nextWall++;
@@ -103,7 +136,28 @@ export namespace Physics {
             console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastPos" + lastPosX + "gameWidth " + gameWidth);
             Entities.following.getWalls(entities);
             console.log(entities.game.wallIds);
+            possiblyFallingWall = true;
           }
+        }
+      })();
+
+      (function isWallFalling() { // only wall in wallIds index 1
+        if ((entities.game.state.score > 0) && possiblyFallingWall && Math.random() > 0.3) {
+          const roofY = entities.roof.body.position.y;
+          const floorY = entities.floor.body.position.y;
+          const wall = entities[entities.game.wallIds[1]];
+          const wallY = wall.body.position.y;
+          const roof_and_Wall = wallY - roofY;
+          const floor_and_Wall = floorY - wallY;
+          if (roof_and_Wall < floor_and_Wall) {
+            BODY.setStatic(wall.body, false);
+          }
+          possiblyFallingWall = false;
+          console.log("////////////////////////////////////////////////////////////")
+          console.log("Physics.ts")
+          console.log("roof_and_Wall " + roof_and_Wall);
+          console.log("floor_and_Wall " + floor_and_Wall);
+          console.log("////////////////////////////////////////////////////////////")
         }
       })();
     }
@@ -119,15 +173,24 @@ export namespace Physics {
       console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
       console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       ////////////////////////////////////////////////////////////
-      // alternative for this is use dispatch method of GameEngine
-      game.over = true;
-      game.paused = true; // for orientation change while game over
-      // -----------------------------------------------------------
-      // engine.stop() doesn't work here in matter EVENTS,
-      // but works with setTimeout() as callback, i donno why
-      setTimeout(() => game.engine.stop(), 0);
-      // -----------------------------------------------------------
-      GameAlert.gameOver();
+      if (pairs[0].bodyA.label === "Player-Circle") {
+        const
+          player = pairs[0].bodyA.label === "Player-Circle",
+          playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
+          playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
+          playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
+        if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
+          // alternative for this is use dispatch method of GameEngine
+          game.over = true;
+          game.paused = true; // for orientation change while game over
+          // -----------------------------------------------------------
+          // engine.stop() doesn't work here in matter EVENTS,
+          // but works with setTimeout() as callback, i donno why
+          setTimeout(() => game.engine.stop(), 0);
+          // -----------------------------------------------------------
+          GameAlert.gameOver();
+        }
+      }
     });
   }
   

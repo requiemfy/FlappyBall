@@ -4,7 +4,7 @@ import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
 import { GameAppState } from './utils/helpers/events/GameState';
 import { Orientation } from './utils/helpers/events/Orientation';
-import { COMPOSITE, NAVBAR_HEIGHT, world } from './utils/world/constants';
+import { BODY, COMPOSITE, NAVBAR_HEIGHT, world } from './utils/world/constants';
 import { Entities } from './utils/world/Entities';
 import { Matter } from './utils/world/Matter';
 import { Physics } from './utils/world/Physics';
@@ -78,7 +78,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
-    Physics.collision(this); // game over
+    // Physics.collision(this); // game over
     Orientation.addChangeListener(this); 
     GameAppState.addChangeListener(this); // run|stop game engine
     console.log("--------------------------\n")
@@ -135,20 +135,21 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly() {
-    if (!this.entities) throw "index.tsx: this.entities is undefined"; // @remind
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") this.gravity = -0.2;
-    else this.gravity = -0.3; 
+    if (orient === "landscape") Physics.playerRelativity.gravity(-0.003);
+    else Physics.playerRelativity.gravity(-0.004);
+    
+    
   }
 
   playerFall() {
-    if (!this.entities) throw "index.tsx: this.entities is undefined";
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") this.gravity = 0.2;
-    else this.gravity = 0.3; 
+    if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
+    else Physics.playerRelativity.gravity(0.0025); 
+    
   }
 
   render() {
