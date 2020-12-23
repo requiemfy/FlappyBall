@@ -24,19 +24,9 @@ export namespace Physics {
   // that's why i didn't put collision event listener here
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
-    // const { engine } = entities.physics;
-    // engine.world.gravity.y = Math.abs(entities.game.gravity);
     world.gravity.y = Math.abs(entities.game.gravity);
-
     wallRelativity(entities);
-
     playerRelativity.velocity(entities);
-    // const player = entities.player;
-    // BODY.applyForce(player.body, player.body.velocity, {
-    //   x: 0,
-    //   y: world.gravity.y * player.body.mass  * -0.005
-    // });
-
     // //////////////////////////////////////////////////////////
     // entities.distance+=1; // this is on the entities script
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -48,7 +38,7 @@ export namespace Physics {
   };
 
 
-  export const playerRelativity = (() => {
+  export const playerRelativity = (() => { // @note INSPECTED: good
     let playerGravity: number;
     (function initGravity() {
       let { width, height } = Dimensions.get("window"),
@@ -71,7 +61,7 @@ export namespace Physics {
   // special relativity - everything related to wall observation
   const wallRelativity = (() => { // @note INSPECTED: good
     let nextWall = 0; // we can't trust that all passing wall to player is index 0, so we increment this
-    let possiblyFallingWall = false; // @remind clear
+    let possiblyFallingWall = false;
 
     return <Relativity>function (entities) {
       (function moveWalls() { // @note INSPECTED: good

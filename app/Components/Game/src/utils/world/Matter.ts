@@ -35,7 +35,7 @@ export namespace Matter {
       borderRadius: playerBaseSize / 2,
       color: "red",
       label: "Player-Circle",
-      static: true,
+      static: false,
     });
   }
   
@@ -87,7 +87,7 @@ export namespace Matter {
   //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
   //    x and y are both defined -> showing walls with specific coords, triggered by orientation
   //    x and y are both undefined -> showing walls by default: coords are purely based on game dimensions
-  const createWall: StaticBody = ({ x, y, heightPercent, position }) => { // @note INSPECTED: good
+  const createWall: StaticBody = ({ x, y, heightPercent, position, isStatic=true }) => { // @note INSPECTED: good
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
@@ -112,7 +112,7 @@ export namespace Matter {
       borderRadius: 0,
       color: "black",
       label: "Wall-Rectangle",
-      static: true,
+      static: isStatic,
     });
   }
   // ==================================== Entities ===================================

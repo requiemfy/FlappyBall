@@ -24,7 +24,7 @@ export namespace Entities {
   type InitialParams = { player: Coordinates };
   type FollowingParams = { walls: Coordinates[], };
   type FollowingMethods = {
-    getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number }) => void,
+    getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number, isStatic?: boolean }) => void,
   };
 
   export type All = Initial & Following & System;
@@ -55,7 +55,6 @@ export namespace Entities {
   // SYSTEM/PHYSICS ENTITIES
   export type System = {
     game: FlappyBallGame;
-    // physics: Physics;
   }
 
   // ====================================================================================================
@@ -91,14 +90,6 @@ export namespace Entities {
       };
 
     (function initNotBodyProps () {
-      // Object.defineProperty(
-      //   game.entities, 'physics', {
-      //     value: { 
-      //       engine: engine, 
-      //       world: world 
-      //     }, 
-      //     enumerable: false // special purpose for swap
-      // });
       Object.defineProperty(
         game.entities, 'game', {
           value: game, 
@@ -139,7 +130,7 @@ export namespace Entities {
   // i just put together methods in an object for "following entities"
   // because unlike getInitials I can't just show "following entities" at once, since it's continuous
   // soon i may add more following entities
-  export const following: FollowingMethods = { // @note INSPECTED: good
+  export const following: FollowingMethods = { // @note INSPECTED: bad
     getWalls: (() => { // wall/s can only be 1 or 2
       let wallPosition = "down",
           wallEachTime = [1, 2];
@@ -168,10 +159,10 @@ export namespace Entities {
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
-          (function getWall(){ // @note INSPECTED: good
+          (function getWall(){ // @note INSPECTED: bad
             const 
-              wall = Matter.getWall({ // @note INSPECTED: good
-                x: wallProps ? wallProps.x : void 0,
+              wall = Matter.getWall({ // @note INSPECTED: bad
+                x: wallProps ? wallProps.x : void 0, // @remind
                 y: wallProps ? wallProps.y : void 0,
                 heightPercent: (() => {
                   // any of if conditions should be true, else throw error
@@ -181,6 +172,7 @@ export namespace Entities {
                   else throw "Entities.ts: heightPercent is undefined which should not be.";
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
+                isStatic: wallProps?.isStatic, // @remind wtf is this?
               }),
               entity = { // extract wall props
                 body: wall.body, 
@@ -230,7 +222,8 @@ export namespace Entities {
   // this swap is used in orientation
   // idea: remove all current entities, then create new ones
   //       bodies / objects created will auto adjust to current window dimension
-  export const swap: Recreation = (() => { // @note INSPECTED: good
+  export const swap: Recreation = (() => { // @note INSPECTED: bad
+    // @remind refactor this wtf, type not showing properly
     type args = {game?: FlappyBallGame | any, dynamic?: InitialParams & FollowingParams | any,};
     const params: args = {};
 
@@ -256,7 +249,7 @@ export namespace Entities {
       console.log("CURRENT WORLD BODIES: " + world.bodies.length);
       console.log("----------------------------------------------------\n\n");
       ////////////////////////////////////////////////////////////
-      getInitial(game, dynamic);
+      getInitial(game, dynamic); // only player, roof, floor
       getFollowing(); // following: walls, ...etc
       game.engine.swap(game.entities);
     }

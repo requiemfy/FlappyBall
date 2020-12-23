@@ -61,7 +61,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     this.wallIds = [];
     this.wallFreedIds = [];
     this.entitiesInitialized = false;
-    this.gravity = 0.1;
+    this.gravity = 0.15;
     this.state = { score:0, left: 0, running: "resume", };
     
     Entities.getInitial(this); // entities is initialized here
@@ -78,7 +78,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
-    // Physics.collision(this); // game over
+    Physics.collision(this); // game over
     Orientation.addChangeListener(this); 
     GameAppState.addChangeListener(this); // run|stop game engine
     console.log("--------------------------\n")
@@ -138,17 +138,19 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") Physics.playerRelativity.gravity(-0.003);
-    else Physics.playerRelativity.gravity(-0.004);
-    
-    
+    // if (orient === "landscape") Physics.playerRelativity.gravity(-0.003);
+    // else Physics.playerRelativity.gravity(-0.004);
+    if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
+    else Physics.playerRelativity.gravity(-0.003);
   }
 
   playerFall() {
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
-    else Physics.playerRelativity.gravity(0.0025); 
+    // if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
+    // else Physics.playerRelativity.gravity(0.0025);
+    if (orient === "landscape") Physics.playerRelativity.gravity(0.0005);
+    else Physics.playerRelativity.gravity(0.002); 
     
   }
 
