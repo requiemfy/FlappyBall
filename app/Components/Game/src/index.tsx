@@ -149,7 +149,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
         orient = GameDimension.getOrientation(width, height);
     // if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
     // else Physics.playerRelativity.gravity(0.0025);
-    if (orient === "landscape") Physics.playerRelativity.gravity(0.0005);
+    if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
     else Physics.playerRelativity.gravity(0.002); 
     
   }

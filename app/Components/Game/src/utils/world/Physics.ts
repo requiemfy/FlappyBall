@@ -126,7 +126,6 @@ export namespace Physics {
             console.log("CREATING WALL IN PHYSICS BASE ON DISTANCE: lastPos" + lastPosX + "gameWidth " + gameWidth);
             Entities.following.getWalls(entities);
             console.log(entities.game.wallIds);
-            possiblyFallingWall = true;
           }
         }
       })();
