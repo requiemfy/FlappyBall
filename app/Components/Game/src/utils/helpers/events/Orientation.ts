@@ -70,7 +70,7 @@ export namespace Orientation {
     return orientEntityCoords(lastEntX, lastEntY); // updated coords
   }
   
-  const orientWallCoords: OrientWall = (game) => { // @note INSPECTED: bad
+  const orientWallCoords: OrientWall = (game) => { // @note INSPECTED: good
     let wallProps: WallProps[] = [],
         wallIds = game.wallIds,
         wallNum = wallIds.length,
@@ -79,15 +79,11 @@ export namespace Orientation {
       const 
         wallKey = wallIds[i],
         wall = game.entities[wallKey],
-        // heightPercent = { heightPercent: wall.heightPercent },
         maintainedProps = { heightPercent: wall.heightPercent, isStatic: wall.body.isStatic },
         { lastEntX, lastEntY } = lastEntityCoords(wall);
-
-      console.log("ORIENTATION WALL " + wallKey);
-
-      // wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...heightPercent});
       wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...maintainedProps});
       i++;
+      console.log("ORIENTATION WALL " + wallKey);
     }
     return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }

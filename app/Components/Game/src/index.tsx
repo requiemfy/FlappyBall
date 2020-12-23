@@ -93,7 +93,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   // used in pause button,
   pauseOrResume() { 
-    if (!this.entities) throw "index.tsx: this.entities is undefined";
+    // if (!this.entities) throw "index.tsx: this.entities is undefined";
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
@@ -138,8 +138,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (this.paused) this.pauseOrResume();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    // if (orient === "landscape") Physics.playerRelativity.gravity(-0.003);
-    // else Physics.playerRelativity.gravity(-0.004);
     if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
     else Physics.playerRelativity.gravity(-0.003);
   }
@@ -147,8 +145,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   playerFall() {
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    // if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
-    // else Physics.playerRelativity.gravity(0.0025);
     if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
     else Physics.playerRelativity.gravity(0.002); 
     

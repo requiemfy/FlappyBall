@@ -89,7 +89,7 @@ export namespace Entities {
         },
       };
 
-    (function initNotBodyProps () {
+    (function initGameRef () {
       Object.defineProperty(
         game.entities, 'game', {
           value: game, 
@@ -162,19 +162,19 @@ export namespace Entities {
           (function getWall(){ // @note INSPECTED: bad
             const 
               wall = Matter.getWall({ // @note INSPECTED: bad
-                x: wallProps ? wallProps.x : void 0, // @remind
+                x: wallProps ? wallProps.x : void 0,
                 y: wallProps ? wallProps.y : void 0,
                 heightPercent: (() => {
                   // any of if conditions should be true, else throw error
                   // i can't find any proper way to do this, since either "wallProps" or "wallHeightsArr" is expected to be undefined
                   if (wallProps && wallProps.heightPercent) return wallProps.heightPercent; // height: number
                   else if (wallHeightsArr) return wallHeightsArr[numOfwall]; // if not null
-                  else throw "Entities.ts: heightPercent is undefined which should not be.";
+                  // else throw "Entities.ts: heightPercent is undefined which should not be.";
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
                 isStatic: wallProps?.isStatic, // @remind wtf is this?
               }),
-              entity = { // extract wall props
+              entity: Physical<number[], number> = { // extract wall props
                 body: wall.body, 
                 size: [wall.width, wall.height],
                 heightPercent: wall.heightPercent,

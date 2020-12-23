@@ -130,7 +130,7 @@ export namespace Physics {
         }
       })();
 
-      (function isWallFalling() { // only wall in wallIds index 1
+      (function isWallFalling() { // @note INSPECTED: good
         if ((entities.game.state.score > 0) && possiblyFallingWall && Math.random() > 0.3) {
           const roofY = entities.roof.body.position.y;
           const floorY = entities.floor.body.position.y;
@@ -138,9 +138,8 @@ export namespace Physics {
           const wallY = wall.body.position.y;
           const roof_and_Wall = wallY - roofY;
           const floor_and_Wall = floorY - wallY;
-          if (roof_and_Wall < floor_and_Wall) {
-            BODY.setStatic(wall.body, false);
-          }
+          // check if wall is hanging, then fall
+          if (roof_and_Wall < floor_and_Wall) BODY.setStatic(wall.body, false);
           possiblyFallingWall = false;
           console.log("////////////////////////////////////////////////////////////")
           console.log("Physics.ts")

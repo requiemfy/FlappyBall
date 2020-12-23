@@ -12,7 +12,7 @@ import {
 import { GameDimension } from "../helpers/dimensions";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 
-export namespace Matter {
+export namespace Matter { // @remind refactor types
   type Coordinates = {x?: number, y?:number};
   type MatterProps = { [key: string]: any };
   type Body = (matter: MatterProps) => MatterProps
@@ -36,7 +36,7 @@ export namespace Matter {
       borderRadius: playerBaseSize / 2,
       color: "red",
       label: "Player-Circle",
-      static: true,
+      static: false,
     });
   }
   
