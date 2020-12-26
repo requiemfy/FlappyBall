@@ -1,5 +1,6 @@
 import { 
   BODIES, 
+  BODY,
   PLAYER_SIZE, 
   FLOOR_HEIGHT, 
   ROOF_HEIGHT, 
@@ -14,15 +15,47 @@ import { getStatusBarHeight } from "react-native-status-bar-height";
 
 export namespace Matter { // @remind refactor types
   type Coordinates = {x?: number, y?:number};
-  type MatterProps = { [key: string]: any };
-  type Body = (matter: MatterProps) => MatterProps
+
+  // type Body = (matter: MatterProps) => MatterProps
+  type Body<Params, Return> = <Additional>(required: Params, addtional: Additional) => Return & Additional;
+  type BodyParams = {
+    x: number,
+    y: number,
+    borderRadius: number,
+    color: string,
+    label: string,
+    static: boolean,
+  }
+
+  // type StaticBody = (params: WallParams | any) => MatterProps; // object is required, but params are optional
+  type StaticBody<Params, Return> = (params: Params) => Return; // object is required, but params are optional
+  
+  type DynamicBody<Params, Return> = (center: Params) => Return;  // center obj is required but x, y props is optional LOL
+
+  // wall types
   type WallPos = keyof { up: string, down: string};
-  type WallParams = Coordinates & { height?: number, position?: WallPos };
-  type StaticBody = (params: WallParams | any) => MatterProps; // object is required, but params are optional
-  type DynamicBody = (center: Coordinates) => MatterProps;  // center obj is required but x, y props is optional LOL
+  type WallParams = Coordinates & { heightPercent: number, position?: WallPos, isStatic?: boolean };
+
+  // rectangle types
+  type RectangleReturn = {
+    width: number,
+    height: number,
+    borderRadius: number,
+    color: string,
+    body: any,
+  }
+
+  // circle types
+  type CircleReturn = {
+    size: number, // for Circle View Component
+    borderRadius: number,
+    color: string,
+    body: any
+  }
+
 
   // ==================================== Entities ===================================
-  const createPlayer: DynamicBody = ({ x, y }) => {
+  const createPlayer: DynamicBody<Coordinates, CircleReturn> = ({ x, y }) => {
     const
       { gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -37,10 +70,10 @@ export namespace Matter { // @remind refactor types
       color: "red",
       label: "Player-Circle",
       static: false,
-    });
+    }, {});
   }
   
-  const createFloor: StaticBody = () => {
+  const createFloor: StaticBody<{}, RectangleReturn> = () => {
     const 
       // NOTE: matter js CENTER x, y works differently.
       // Observe centerX, which is half of screen width
@@ -66,10 +99,10 @@ export namespace Matter { // @remind refactor types
       color: "green",
       label: "Floor-Rectangle",
       static: true,
-    });
+    }, {});
   }
   
-  const createRoof: StaticBody = () => {
+  const createRoof: StaticBody<{}, RectangleReturn> = () => {
     const 
       { windowWidth, gameHeight } = GameDimension.window(),
       [ roofWidth, roofHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * ROOF_HEIGHT ],
@@ -83,14 +116,14 @@ export namespace Matter { // @remind refactor types
       color: "brown",
       label: "Roof-Rectangle",
       static: true,
-    });
+    }, {});
   }
 
   // possible cases of coordinates:
   //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
   //    x and y are both defined -> showing walls with specific coords, triggered by orientation
   //    x and y are both undefined -> showing walls by default: coords are purely based on game dimensions
-  const createWall: StaticBody = ({ x, y, heightPercent, position, isStatic=true }) => { // @note INSPECTED: good
+  const createWall: StaticBody<WallParams, RectangleReturn & { heightPercent: number }> = ({ x, y, heightPercent, position, isStatic=true }) => { // @note INSPECTED: good
     const 
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
@@ -107,40 +140,43 @@ export namespace Matter { // @remind refactor types
       }
     }
     return createRectangle ({
-      x: x,
-      y: y,
-      width: wallWidth,
-      height: wallHeight,
-      heightPercent: heightPercent,
-      borderRadius: 0,
-      color: "black",
-      label: "Wall-Rectangle",
-      static: isStatic,
-    });
+        x: x,
+        y: y ? y : 0,
+        width: wallWidth,
+        height: wallHeight,
+        borderRadius: 0,
+        color: "black",
+        label: "Wall-Rectangle",
+        static: isStatic,
+      }, { 
+        heightPercent: heightPercent,
+     });
   }
   // ==================================== Entities ===================================
 
   // ================================= Matter Bodies =================================
-  const createRectangle: Body = (prop) => {
+  const createRectangle: Body<BodyParams & { width: number, height: number }, RectangleReturn> = (required, additional) => {
     return {
-      width: prop.width,
-      height: prop.height,
-      heightPercent: prop.heightPercent, // only useful for wall
-      borderRadius: prop.borderRadius,
-      color: prop.color,
-      body: BODIES.rectangle(prop.x, prop.y, prop.width, prop.height, { isStatic: prop.static, label: prop.label })
+      width: required.width,
+      height: required.height,
+      // heightPercent: prop.heightPercent, // only useful for wall
+      borderRadius: required.borderRadius,
+      color: required.color,
+      body: BODIES.rectangle(required.x, required.y, required.width, required.height, { isStatic: required.static, label: required.label }),
+      ...additional,
     }
   }
 
-  const createCircle: Body = (prop) => {
+  const createCircle: Body<BodyParams & { size: number }, CircleReturn> = (required, additional) => {
     // circle view size is effected by border radius
     // while circle body in matter js, it's size = radius
-    const bodySize = prop.size / 2; // for Circle Matterjs Body
+    const bodySize = required.size / 2; // for Circle Matterjs Body
     return {
-      size: prop.size, // for Circle View Component
-      borderRadius: prop.borderRadius,
-      color: prop.color,
-      body: BODIES.circle(prop.x, prop.y, bodySize, { isStatic: prop.static, label: prop.label })
+      size: required.size, // for Circle View Component
+      borderRadius: required.borderRadius,
+      color: required.color,
+      body: BODIES.circle(required.x, required.y, bodySize, { isStatic: required.static, label: required.label }),
+      ...additional,
     }
   }
   // ================================= Matter Bodies =================================
@@ -165,7 +201,7 @@ export namespace Matter { // @remind refactor types
     console.log("Creating Floor - world.bodies.length: " + world.bodies.length);
     return floor;
   }
-  export const getWall = (prop = {}) => {
+  export const getWall = (prop: any) => {
     const wall = createWall(prop);
     WORLD.add(world, wall.body);
     console.log("Creating Wall - world.bodies.length: " + world.bodies.length);

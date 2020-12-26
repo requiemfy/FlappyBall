@@ -8,10 +8,10 @@ import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
 
 export namespace Entities {
-  type Physics = { 
-    engine: typeof engine;
-    world: typeof world ;
-  }
+  // type Physics = { 
+  //   engine: typeof engine;
+  //   world: typeof world ;
+  // }
   type Bodies = (
     game: FlappyBallGame, 
     dynamic?: InitialParams,
@@ -27,34 +27,29 @@ export namespace Entities {
     getWalls: (entities: All, wallProps?: Coordinates & { heightPercent?: number, isStatic?: boolean }) => void,
   };
 
-  export type All = Initial & Following & System;
+  export type All = Initial & Following & { game: FlappyBallGame };
 
-  export type Physical<Size, HeightPercent> = {
+  export type Physical<Size> = {
     body: Body;
     size: Size;
     borderRadius: number;
     color: String; 
-    heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
+    // heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
     renderer: typeof Box | typeof Circle;
   }
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
-    [key: number]: Physical<number[], number>; // following wall
+    [key: number]: Physical<number[]> & { heightPercent: number }; // following wall
   }
 
   // ENTITIES THAT ARE INITIALIZED AT ONCE
   export type Initial = {
     // [key: string]: any; // additional
-    [key: number]: Physical<number[], number>; // initial wall
-    player: Physical<number, undefined>;
-    floor: Physical<number[], undefined>;
-    roof: Physical<number[], undefined>;
-  }
-
-  // SYSTEM/PHYSICS ENTITIES
-  export type System = {
-    game: FlappyBallGame;
+    [key: number]: Physical<number[]> & { heightPercent: number }; // initial wall
+    player: Physical<number>;
+    floor: Physical<number[]>;
+    roof: Physical<number[]>;
   }
 
   // ====================================================================================================
@@ -65,7 +60,7 @@ export namespace Entities {
       floor = Matter.getFloor(),
       roof = Matter.getRoof();
 
-      game.entities = <Initial & System>{
+      game.entities = {
         player: {
           body: player.body, 
           size: player.size,
@@ -87,14 +82,11 @@ export namespace Entities {
           color: roof.color, 
           renderer: Box,
         },
+        game: game,
       };
 
-    (function initGameRef () {
-      Object.defineProperty(
-        game.entities, 'game', {
-          value: game, 
-          enumerable: false // special purpose for swap
-      });
+    (function makeNotEnumerable () {
+      Object.defineProperty(game.entities, 'game', { enumerable: false });
     })();
 
     (function resetGameSystemProps() {
@@ -174,7 +166,7 @@ export namespace Entities {
                 position: wallPosition, // this is disregarded if we have wallProps
                 isStatic: wallProps?.isStatic, // @remind wtf is this?
               }),
-              entity: Physical<number[], number> = { // extract wall props
+              entity: Physical<number[]> & { heightPercent: number } = { // extract wall props
                 body: wall.body, 
                 size: [wall.width, wall.height],
                 heightPercent: wall.heightPercent,
