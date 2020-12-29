@@ -5,7 +5,7 @@ import { NAVBAR_HEIGHT } from '../utils/world/constants';
 interface Props {
   score: number;
   running: string;
-  pauseOrResume(): boolean;
+  pause(): boolean;
 }
 interface State {}
 
@@ -21,7 +21,7 @@ export default class TopBar extends React.PureComponent<Props, State> {
 
           <View style={[{ width: "40%", }]}>
             <Button
-              onPress={this.props.pauseOrResume}
+              onPress={this.props.pause}
               title={this.props.running}
               color="gray" />
           </View> 

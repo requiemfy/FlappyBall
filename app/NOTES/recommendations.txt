@@ -7,3 +7,12 @@ IN PORTRAINT:
 floor length is only the screen width, therefore
 if you want to extend WALL_DISTANCE, since there's is falling wall which means that
 wall is dynamic (affected by gravity), you have to extend the FLOOR, to catch it.
+
+SWAP:
+there are only 2 cases we use SWAP
+1) in orientation, we pass player, and wall properties
+2) in game restart, we don't pass any body properties, everything in creation should be fresh default
+
+START:
+1) play - automatic START
+2) resume or restart - manual start

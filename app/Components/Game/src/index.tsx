@@ -17,12 +17,15 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Updates from 'expo-updates';
 import { GameAlert } from './utils/helpers/alerts';
 import TopBar from './components/TopBar';
+import { NavigationParams } from 'react-navigation';
 
-interface Props {}
+interface Props { 
+  navigation: NavigationParams; 
+  route: { params: { button: keyof { play: string; resume: string; restart: string; } } } }
 interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
   score: number;
-  running: string; 
+  running: string; // use for top bar pause or resume button // @remind remove, not used anymore
 }
 interface EventType { type: string; }
 interface Game {
@@ -35,8 +38,8 @@ interface Game {
   entitiesInitialized: boolean;
   gravity: number;
   
-  pauseOrResume(): boolean; // toggle true/false and pass to paused
-  onEvent(e: EventType): void;
+  pause(): boolean; // toggle true/false and pass to paused
+  onGameEngineEvent(e: EventType): void;
 }
 
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
@@ -50,23 +53,23 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   entitiesInitialized: boolean;
   gravity: number;
 
-  constructor(props: object) {
+  constructor(props: Props) {
     super(props);
 
     // const TEST_UPDATE = 0;
     // Updates.checkForUpdateAsync().then((update) => update.isAvailable ? GameAlert.hasUpdate() : null);
 
-    this.paused = true; 
+    this.paused = false; 
     this.over = false;
     this.wallIds = [];
     this.wallFreedIds = [];
     this.entitiesInitialized = false;
     this.gravity = 0.15;
-    this.state = { score:0, left: 0, running: "resume", };
+    this.state = { score:0, left: 0, running: "pause", };
     
     Entities.getInitial(this); // entities is initialized here
-    this.pauseOrResume = this.pauseOrResume.bind(this);
-    this.onEvent = this.onEvent.bind(this);
+    // this.pauseOrResume = this.pauseOrResume.bind(this);
+    this.onGameEngineEvent = this.onGameEngineEvent.bind(this);
     this.playerFly = this.playerFly.bind(this);
     this.playerFall = this.playerFall.bind(this);
 
@@ -74,7 +77,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   // all side effects here
   componentDidMount() {
-    this.engine.stop();
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
@@ -86,13 +88,13 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   componentWillUnmount() {
-    console.log("componentWillUnmount!!")
+    console.log("FLAPPY GAME WILL UNMOUNT!!")
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
   }
 
   // used in pause button,
-  pauseOrResume() { 
+  pause = () => {  // @remind this will only be pause
     // if (!this.entities) throw "index.tsx: this.entities is undefined";
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
@@ -100,10 +102,14 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       if (!this.paused) {
         console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
         this.engine.stop();
-      } else {
-        console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
-        this.engine.start();
-      }
+        this.props.navigation.push("Menu", { button: "resume" })
+      } 
+      
+      // else { // @remind clear this
+      //   console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
+      //   this.engine.start();
+      // }
+
     } else {
       console.log("GAME OVER")
     }
@@ -118,13 +124,13 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     return false;
   }
 
-  onEvent(e: EventType) {
+  onGameEngineEvent(e: EventType) {
     if (e.type === "stopped") {
       this.paused = true;
-      this.setState({ running: "resume" });
+      // this.setState({ running: "resume" }); // @remind clear
     } else if (e.type === "started") {
       this.paused = false;
-      this.setState({ running: "pause" });
+      // this.setState({ running: "pause" }); // @remind clear
     }
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
@@ -134,8 +140,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
   }
 
+  // @remind change this to arrow
   playerFly() {
-    if (this.paused) this.pauseOrResume();
+    if (this.paused) this.engine.start();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
@@ -150,16 +157,31 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     
   }
 
+  menuAction = () => {
+    const buttonAction = this.props.route.params.button;
+    if (buttonAction === "restart") {
+      this.entitiesInitialized = false;
+      this.over = false;
+      this.paused = false;
+      this.props.route.params.button = "resume";
+      setTimeout( () => Entities.swap(this), 0);
+      setTimeout( () => this.setState({ score: 0 }), 0 );
+      setTimeout( () => Physics.collision(this), 0);
+    }
+    buttonAction !== "play" ? this.engine.start() : null;
+  }
+
   render() {
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:")
     console.log("--------------------------");
-    console.log("RENDER()...");
+    console.log("RENDER()..." + this.props.route.params.button);
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
+    this.menuAction();
     return (
       <View style={{ flex: 1, }}>
-        <TopBar score={this.state.score} pauseOrResume={this.pauseOrResume} running={this.state.running} />
+        <TopBar score={this.state.score} pause={this.pause} running="Pause"/>
         <TouchableWithoutFeedback
           onPressIn={ this.playerFly }
           onPressOut={ this.playerFall }>
@@ -171,10 +193,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             backgroundColor: "pink", }}> 
             <GameEngine
               ref={ (ref) => { this.engine = ref; } }
-              onEvent={ this.onEvent }
+              onEvent={ this.onGameEngineEvent }
               systems={ [Physics.system] }
               entities={ this.entities } 
-              running={ !this.paused } 
+              // running={ !this.paused } // @remind clear
               style={{ 
                 flex: 1, 
                 backgroundColor: "blue", 

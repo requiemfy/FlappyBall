@@ -18,9 +18,9 @@ export namespace Entities {
   ) => void;
   type Recreation = (
     game: FlappyBallGame, 
-    dynamic: InitialParams & FollowingParams, // yea, NOT optional
+    dynamic?: InitialParams & FollowingParams
   ) => void;
-  type Coordinates = { x?: number, y?: number };
+  type Coordinates = { x?: number; y?: number };
   type InitialParams = { player: Coordinates };
   type FollowingParams = { walls: Coordinates[], };
   type FollowingMethods = {
@@ -36,12 +36,12 @@ export namespace Entities {
     color: String; 
     // heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
     renderer: typeof Box | typeof Circle;
-  }
+  };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
   export type Following = {
     [key: number]: Physical<number[]> & { heightPercent: number }; // following wall
-  }
+  };
 
   // ENTITIES THAT ARE INITIALIZED AT ONCE
   export type Initial = {
@@ -50,7 +50,7 @@ export namespace Entities {
     player: Physical<number>;
     floor: Physical<number[]>;
     roof: Physical<number[]>;
-  }
+  };
 
   // ====================================================================================================
   // ====================================================================================================
@@ -242,7 +242,7 @@ export namespace Entities {
       console.log("----------------------------------------------------\n\n");
       ////////////////////////////////////////////////////////////
       getInitial(game, dynamic); // only player, roof, floor
-      getFollowing(); // following: walls, ...etc
+      dynamic ? getFollowing() : null; // following: walls, ...etc
       game.engine.swap(game.entities);
     }
   })();

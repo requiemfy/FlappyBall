@@ -1,3 +1,4 @@
+import { Events } from "matter-js";
 import { Dimensions } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../..";
@@ -44,7 +45,7 @@ export namespace Physics {
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
       if (orient === "landscape") playerGravity = 0.001;
-      else playerGravity = 0.0025;
+      else playerGravity = 0.0015;
     })();
     return <Player>{
       velocity: <Relativity>function (entities) {
@@ -152,34 +153,52 @@ export namespace Physics {
   })();
 
   // this is called in componentDidMount() 
-  export const collision: Event = (game) => { // @note INSPECTED: good
-    EVENTS.on(engine, 'collisionStart', (event) => {
-      ////////////////////////////////////////////////////////////
-      console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      console.log("physics.tsx: COLLIDED... GAME OVER");
-      let pairs = event.pairs;
-      console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
-      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      ////////////////////////////////////////////////////////////
-      if (pairs[0].bodyA.label === "Player-Circle") {
-        const
-          player = pairs[0].bodyA.label === "Player-Circle",
-          playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
-          playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
-          playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
-        if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
-          // alternative for this is use dispatch method of GameEngine
-          game.over = true;
-          game.paused = true; // for orientation change while game over
-          // -----------------------------------------------------------
-          // engine.stop() doesn't work here in matter EVENTS,
-          // but works with setTimeout() as callback, i donno why
-          setTimeout(() => game.engine.stop(), 0);
-          // -----------------------------------------------------------
-          GameAlert.gameOver();
+  export const collision: Event = (() => {
+    return function (game: FlappyBallGame) { // @note INSPECTED: good
+
+      const callback = (event: any) => {
+        ////////////////////////////////////////////////////////////
+        console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        console.log("physics.tsx: COLLIDED... GAME OVER");
+        let pairs = event.pairs;
+        console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        ////////////////////////////////////////////////////////////
+        if (pairs[0].bodyA.label === "Player-Circle") {
+          const
+            player = pairs[0].bodyA.label === "Player-Circle",
+            playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
+            playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
+            playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
+          if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
+            // alternative for this is use dispatch method of GameEngine
+            game.over = true;
+            game.paused = true; // for orientation change while game over
+            // -----------------------------------------------------------
+            // engine.stop() doesn't work here in matter EVENTS,
+            // but works with setTimeout() as callback, i donno why
+            setTimeout(() => {
+              if (game.engine) {
+                game.engine.stop();
+              }
+              Events.off(engine, 'collisionStart', callback)
+            }, 0);
+            game.props.navigation.push("Menu", { button: "restart" });
+            // -----------------------------------------------------------
+            // GameAlert.gameOver(); // @remind clear this
+            console.log("////////////////////////////////////////////////////")
+            console.log("COLLISION DETECTED")
+            console.log("////////////////////////////////////////////////////")
+          }
         }
       }
-    });
-  }
+
+      EVENTS.on(engine, 'collisionStart', callback);
+    }
+  })();
+  
+  
+  
+  
   
 }
