@@ -4,7 +4,15 @@ import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
 import { GameAppState } from './utils/helpers/events/GameState';
 import { Orientation } from './utils/helpers/events/Orientation';
-import { BODY, COMPOSITE, engine, EVENTS, NAVBAR_HEIGHT, world } from './utils/world/constants';
+import { 
+  BODY, 
+  COMPOSITE, 
+  // engine, 
+  EVENTS, 
+  NAVBAR_HEIGHT, 
+  ENGINE,
+  // world 
+} from './utils/world/constants';
 import { Entities } from './utils/world/Entities';
 import { Matter } from './utils/world/Matter';
 import { Physics } from './utils/world/Physics';
@@ -52,6 +60,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   wallFreedIds: number[];
   entitiesInitialized: boolean;
   gravity: number;
+  
+  matterEngine = ENGINE.create({ enableSleeping:false } );
+  matterWorld = this.matterEngine.world;
 
   constructor(props: Props) {
     super(props);
@@ -81,9 +92,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("\nindex.tsx:\n--------------------------");
     console.log("componentDidMount!!");
 
-    // Physics.collision(this); // game over
-    EVENTS.on(engine, 'collisionStart', this.collided);
-
+    Physics.addCollisionListener(this); // game over
+    // EVENTS.on(engine, 'collisionStart', this.collided);
 
     Orientation.addChangeListener(this); 
     GameAppState.addChangeListener(this); // run|stop game engine
@@ -95,6 +105,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("FLAPPY GAME WILL UNMOUNT!!")
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
+    Physics.removeCollisionListener(this);
   }
 
   // used in pause button,
@@ -133,8 +144,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       this.paused = true;
       // this.setState({ running: "resume" }); // @remind clear
       if(this.over) {
-        EVENTS.off(engine, 'collisionStart', this.collided)
-        this.props.navigation.push("Menu", { button: "restart" });
+        //   EVENTS.off(engine, 'collisionStart', this.collided)
+        Physics.removeCollisionListener(this);
+        this.props.navigation.replace("Menu", { button: "restart" });
       }
     } else if (e.type === "started") {
       this.paused = false;
@@ -165,56 +177,57 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     
   }
 
-  menuAction = () => {
-    const buttonAction = this.props.route.params.button;
-    if (buttonAction === "restart") {
-      this.entitiesInitialized = false;
-      this.over = false;
-      this.paused = true;
-      this.props.route.params.button = "resume";
-      // setTimeout( () => Entities.swap(this), 0);
-      // setTimeout( () => this.setState({ score: 0 }), 0 );
-      // setTimeout( () => EVENTS.on(engine, 'collisionStart', this.collided), 0);
-      // setTimeout(() => {
-      //   Entities.swap(this);
-      //   EVENTS.on(engine, 'collisionStart', this.collided)
-      //   this.setState({ score: 0 });
-      // }, 0);
-      setTimeout(() => { // finish the previous rendering first then do this stuffs
-        Entities.swap(this);
-        EVENTS.on(engine, 'collisionStart', this.collided);
-        this.setState({ score: 0 });
-      }, 0)
-    }
-    // buttonAction !== "play" ? this.engine.start() : null;
-  }
+  // menuAction = () => {
+  //   const buttonAction = this.props.route.params.button;
+  //   if (buttonAction === "restart") {
+  //     this.entitiesInitialized = false;
+  //     this.over = false;
+  //     this.paused = true;
+  //     this.props.route.params.button = "resume";
+  //     // setTimeout( () => Entities.swap(this), 0);
+  //     // setTimeout( () => this.setState({ score: 0 }), 0 );
+  //     // setTimeout( () => EVENTS.on(engine, 'collisionStart', this.collided), 0);
+  //     // setTimeout(() => {
+  //     //   Entities.swap(this);
+  //     //   EVENTS.on(engine, 'collisionStart', this.collided)
+  //     //   this.setState({ score: 0 });
+  //     // }, 0);
+  //     setTimeout(() => { // finish the previous rendering first then do this stuffs
+  //       Entities.swap(this);
+  //       EVENTS.on(engine, 'collisionStart', this.collided);
+  //       this.setState({ score: 0 });
+  //     }, 0)
+  //   }
+  //   // buttonAction !== "play" ? this.engine.start() : null;
+  // }
 
-  collided = (event: any) => {
-    ////////////////////////////////////////////////////////////
-    console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log("physics.tsx: COLLIDED... GAME OVER");
-    let pairs = event.pairs;
-    console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    ////////////////////////////////////////////////////////////
-    if (pairs[0].bodyA.label === "Player-Circle") {
-      const
-        player = pairs[0].bodyA.label === "Player-Circle",
-        playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
-        playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
-        playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
-      if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
-        // alternative for this is use dispatch method of GameEngine
-        this.over = true;
-        this.paused = true; // for orientation change while this over
-        // -----------------------------------------------------------
-        // engine.stop() doesn't work here in matter EVENTS,
-        // but works with setTimeout() as callback, i donno why
-        setTimeout(() => this.engine.stop(), 0);
-        // -----------------------------------------------------------
-      }
-    }
-  }
+  // collided = (event: any) => {
+  //   ////////////////////////////////////////////////////////////
+  //   console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  //   console.log("physics.tsx: COLLIDED... GAME OVER");
+  //   let pairs = event.pairs;
+  //   console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
+  //   console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  //   ////////////////////////////////////////////////////////////
+  //   if (pairs[0].bodyA.label === "Player-Circle") {
+  //     const
+  //       player = pairs[0].bodyA.label === "Player-Circle",
+  //       playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
+  //       playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
+  //       playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
+  //     if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
+  //       // alternative for this is use dispatch method of GameEngine
+  //       this.over = true;
+  //       this.paused = true; // for orientation change while this over
+  //       // -----------------------------------------------------------
+  //       // engine.stop() doesn't work here in matter EVENTS,
+  //       // but works with setTimeout() as callback, i donno why
+  //       setTimeout(() => this.engine.stop(), 0);
+  //       // -----------------------------------------------------------
+  //     }
+  //   }
+  // }
+
 
   render() {
     ////////////////////////////////////////////////////////////
@@ -223,7 +236,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("RENDER()..." + this.props.route.params.button);
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
-    this.menuAction();
+    // this.menuAction();
     return (
       <View style={{ flex: 1, }}>
         <TopBar score={this.state.score} pause={this.menu} running="Menu"/>

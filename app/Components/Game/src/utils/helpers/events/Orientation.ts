@@ -8,7 +8,7 @@ import { DeviceMotion } from 'expo-sensors';
 import { GameDimension } from "../dimensions";
 
 export namespace Orientation {
-  type Event = (event: object) => void;
+  // type Event = (event: object) => void;
   type WallProps = { x: number, y: number, heightPercent: number };
   type Coordinates = { x: number, y: number };
   type OrientPlayer = (game: FlappyBallGame) => Coordinates;
@@ -19,12 +19,11 @@ export namespace Orientation {
   type EntityCoords = (entity: Entities.Physical<number | number[]>) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
-  let callback: Event; // Event
-
+  let orientationCallback: Event | any; // Event
   export const addChangeListener: OrientGame = (game) => {
     console.log("\torientation.tsx: addChangeListener!!!");
 
-    callback = () => {
+    orientationCallback = () => {
       ////////////////////////////////////////////////////////////
       console.log("\n\norientation.tsx:\n````````````````````````````````````````````````````````````");
       console.log("ORIENTATION CHANGED");
@@ -33,7 +32,7 @@ export namespace Orientation {
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
     };
-    Dimensions.addEventListener('change', callback); // luckily this will not invoke in eg. landscape left to landscape right
+    Dimensions.addEventListener('change', orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
 
     // adding identation when Status bar is in the left side, because in actual devices some has something in the middle
     DeviceMotion.isAvailableAsync().then((supported) => {
@@ -52,8 +51,9 @@ export namespace Orientation {
   };
 
   export const removeChangeListener = () => {
-    Dimensions.removeEventListener('change', callback);
+    Dimensions.removeEventListener('change', orientationCallback);
     DeviceMotion.removeAllListeners();
+    orientationCallback = null;
   }
 
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {

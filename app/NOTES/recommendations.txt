@@ -16,3 +16,7 @@ there are only 2 cases we use SWAP
 START:
 1) play - automatic START
 2) resume or restart - manual start
+
+
+NOTE:
+i static player

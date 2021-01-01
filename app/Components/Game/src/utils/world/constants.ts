@@ -10,8 +10,8 @@ const BODIES = Matter.Bodies,
       WORLD = Matter.World,
       EVENTS = Matter.Events,
       COMPOSITE = Matter.Composite,
-      engine = ENGINE.create({ enableSleeping:false } ),
-      world = engine.world,
+      // engine = ENGINE.create({ enableSleeping:false } ),
+      // world = engine.world,
       
       { WINDOW_WIDTH, WINDOW_HEIGHT } = (() => { 
         const { width, height } = Dimensions.get("window");
@@ -49,7 +49,8 @@ const BODIES = Matter.Bodies,
 export {
   BODIES, BODY, ENGINE, RENDER, WORLD, EVENTS, COMPOSITE,
   
-  engine, world,
+  // engine, 
+  // world, // @remind clear this, refactored
 
   PLAYER_SIZE, FLOOR_HEIGHT, ROOF_HEIGHT, NAVBAR_HEIGHT,
 

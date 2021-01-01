@@ -17,10 +17,12 @@ export namespace GameMenu {
     }
 
     componentDidMount () {
+      console.log("MENU SCREEN WILL MOUNT");
       BackHandler.addEventListener("hardwareBackPress", this.backAction);
     }
 
     componentWillUnmount () {
+      console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
       BackHandler.removeEventListener("hardwareBackPress", this.backAction);
     }
 
@@ -34,6 +36,34 @@ export namespace GameMenu {
         { text: "YES", onPress: () => BackHandler.exitApp() }
       ]);
       return true;
+    }
+
+    navigate = () => {
+      const { button } = this.props.route.params;
+      // button !== "play" 
+      //   ? this.props.navigation.reset({ 
+      //       index: 0,
+      //       routes: [{ name: 'FlappyBall', params: { button: "play" }}],
+      //     })
+      //   : this.props.navigation.navigate("FlappyBall", { button: button })
+      if (button === "resume") {
+        this.props.navigation.goBack()
+      }
+      
+      // else if (button === "play") {
+      //   this.props.navigation.navigate('FlappyBall', { button: button })
+      // }
+      
+      else {
+        this.props.navigation.reset({ 
+          index: 0,
+          routes: [
+            { name: 'FlappyBall', params: { button: button }},
+          ],
+        })
+        // this.props.navigation.replace("FlappyBall", { button: button })
+        // this.props.navigation.navigate('FlappyBall', { button: button })
+      }
     }
 
     render () {
@@ -52,8 +82,8 @@ export namespace GameMenu {
                 <View><Text>FLAPPY BALL</Text></View>
                 <View>
                   <Button 
-                    title={ button === "play" ? "PLAY" : button === "resume" ? "RESUME" : "RESTART" }
-                    onPress={ () => this.props.navigation.navigate("FlappyBall", { button: button }) } />
+                    title={button === "play" ? "PLAY" : button === "resume" ? "RESUME" : "RESTART"}
+                    onPress={this.navigate} />
                   <Button 
                     title="QUIT" 
                     onPress={this.backAction} />
@@ -77,31 +107,14 @@ export namespace GameMenu {
     );
   }
 
-  // const GameScreen = (() => {
-  //   let restart = false;
-  //   return function ({ navigation, route }: any) {
-  //     if (route.params.button === "restart") {
-  //       restart = !restart;
-  //     } 
-  //     if (restart) {
-  //       // return <FlappyBallGame key="1" navigation={navigation} route={route}/>;
-  //       return null
-  //     } else {
-  //       return <FlappyBallGame key="0" navigation={navigation} route={route}/>;
-  //     }
-  //   }
-  // })();
-
-
-
-  const BackStack = createStackNavigator();
-  function BackStackScreen() {
-    return (
-      <BackStack.Navigator headerMode="none">
-        <BackStack.Screen name="BackGround" component={BackGroundScreen} />
-      </BackStack.Navigator>
-    );
-  }
+  // const BackStack = createStackNavigator();
+  // function BackStackScreen() {
+  //   return (
+  //     <BackStack.Navigator headerMode="none">
+  //       <BackStack.Screen name="BackGround" component={BackGroundScreen} />
+  //     </BackStack.Navigator>
+  //   );
+  // }
 
   const RootStack = createStackNavigator();
   export function StackScreen() {
@@ -132,10 +145,10 @@ export namespace GameMenu {
           }}
           mode="modal" >
 
-          <RootStack.Screen name="BackGround" component={BackStackScreen} />
+          {/* <RootStack.Screen name="BackGround" component={BackStackScreen} /> */}
+          <RootStack.Screen name="BackGround" component={BackGroundScreen} />
           <RootStack.Screen name="Menu" component={MenuScreen} />
           <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
-
         </RootStack.Navigator>
         <StatusBar hidden />
       </NavigationContainer>

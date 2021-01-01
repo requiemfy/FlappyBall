@@ -3,7 +3,7 @@ import {
   PLAYER_SIZE, 
   FLOOR_HEIGHT, 
   ROOF_HEIGHT, 
-  world, 
+  // world, 
   WORLD, 
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
@@ -11,6 +11,7 @@ import {
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
 import { getStatusBarHeight } from "react-native-status-bar-height";
+import FlappyBallGame from "../..";
 
 export namespace Matter {
   type OptionalCoordinates = {x?: number, y?:number};
@@ -47,7 +48,7 @@ export namespace Matter {
 
 
   // ==================================== Entities ===================================
-  const createPlayer: Body<OptionalCoordinates, { size: number }> = ({ x, y }) => {
+  const createPlayer: Body<OptionalCoordinates, { size: number }> = ({ x, y=400 }) => {
     const
       { gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -61,7 +62,7 @@ export namespace Matter {
       borderRadius: playerBaseSize / 2,
       color: "red",
       label: "Player-Circle",
-      static: false,
+      static: true,
     }, {});
   }
   
@@ -174,28 +175,28 @@ export namespace Matter {
 
   // =================================== Getters =====================================
   // won't work              { coords } - because we access x,y from player which is then possibly undef obj
-  export const getPlayer = (coords = {}) => {
+  export const getPlayer = (game: FlappyBallGame, coords = {}) => {
     const player = createPlayer(coords);
-    WORLD.add(world, player.body);
-    console.log("Creating Player - world.bodies.length: " + world.bodies.length);
+    WORLD.add(game.matterWorld, player.body);
+    console.log("Creating Player - world.bodies.length: " + game.matterWorld.bodies.length);
     return player;
   }
-  export const getRoof = () => {
+  export const getRoof = (game: FlappyBallGame) => {
     const roof = createRoof({});
-    WORLD.add(world, roof.body);
-    console.log("Creating Roof - world.bodies.length: " + world.bodies.length);
+    WORLD.add(game.matterWorld, roof.body);
+    console.log("Creating Roof - world.bodies.length: " + game.matterWorld.bodies.length);
     return roof;
   }
-  export const getFloor = () => {
+  export const getFloor = (game: FlappyBallGame) => {
     const floor = createFloor({});
-    WORLD.add(world, floor.body);
-    console.log("Creating Floor - world.bodies.length: " + world.bodies.length);
+    WORLD.add(game.matterWorld, floor.body);
+    console.log("Creating Floor - world.bodies.length: " + game.matterWorld.bodies.length);
     return floor;
   }
-  export const getWall = (prop: any) => {
+  export const getWall = (game: FlappyBallGame, prop: any) => {
     const wall = createWall(prop);
-    WORLD.add(world, wall.body);
-    console.log("Creating Wall - world.bodies.length: " + world.bodies.length);
+    WORLD.add(game.matterWorld, wall.body);
+    console.log("Creating Wall - world.bodies.length: " + game.matterWorld.bodies.length);
     return wall;
   }
   // =================================== Getters =====================================

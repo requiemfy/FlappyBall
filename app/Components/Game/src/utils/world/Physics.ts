@@ -6,8 +6,8 @@ import { GameAlert } from "../helpers/alerts";
 import { GameDimension } from "../helpers/dimensions";
 import { 
   BODY, 
-  engine, 
-  world, 
+  // engine, 
+  // world, 
   ENGINE, 
   EVENTS, 
   COMPOSITE, 
@@ -25,7 +25,7 @@ export namespace Physics {
   // that's why i didn't put collision event listener here
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
-    world.gravity.y = Math.abs(entities.game.gravity);
+    entities.game.matterWorld.gravity.y = Math.abs(entities.game.gravity);
     wallRelativity(entities);
     playerRelativity.velocity(entities);
     // //////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ export namespace Physics {
     // console.log("physics.tsx: distance " + entities.distance);
     // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     // //////////////////////////////////////////////////////////
-    ENGINE.update(engine, time.delta);
+    ENGINE.update(entities.game.matterEngine, time.delta);
     return entities;
   };
 
@@ -52,7 +52,7 @@ export namespace Physics {
         const player = entities.player;
         BODY.applyForce(player.body, player.body.velocity, {
           x: 0,
-          y: world.gravity.y * player.body.mass * playerGravity
+          y: entities.game.matterWorld.gravity.y * player.body.mass * playerGravity
         });
       },
       gravity: (scale) => playerGravity = scale,
@@ -102,7 +102,7 @@ export namespace Physics {
           && (function isWallOutOfVision() { // removes the OBJECT and BODY
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
             if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
-              COMPOSITE.remove(world, wall.body);
+              COMPOSITE.remove(entities.game.matterWorld, wall.body);
               delete entities[wallIndex]; 
               return true;
             }
@@ -152,52 +152,55 @@ export namespace Physics {
     }
   })();
 
-  // this is called in componentDidMount() 
-  export const collision: Event = (() => {
+
+  
+  let collisionCallback: any;
+  export const addCollisionListener: Event = (() => { // this is called in componentDidMount() 
     return function (game: FlappyBallGame) { // @note INSPECTED: good
 
-      // const callback = (event: any) => {
-      //   ////////////////////////////////////////////////////////////
-      //   console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      //   console.log("physics.tsx: COLLIDED... GAME OVER");
-      //   let pairs = event.pairs;
-      //   console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
-      //   console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      //   ////////////////////////////////////////////////////////////
-      //   if (pairs[0].bodyA.label === "Player-Circle") {
-      //     const
-      //       player = pairs[0].bodyA.label === "Player-Circle",
-      //       playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
-      //       playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
-      //       playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
-      //     if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
-      //       // alternative for this is use dispatch method of GameEngine
-      //       game.over = true;
-      //       game.paused = true; // for orientation change while game over
-      //       // -----------------------------------------------------------
-      //       // engine.stop() doesn't work here in matter EVENTS,
-      //       // but works with setTimeout() as callback, i donno why
-      //       setTimeout(() => {
-      //         if (game.engine) {
-      //           game.engine.stop();
-      //         }
-      //       }, 0);
-      //       // Events.off(engine, 'collisionStart', callback)
-      //       // game.props.navigation.push("Menu", { button: "restart" });
-      //       // -----------------------------------------------------------
-      //       // GameAlert.gameOver(); // @remind clear this
-      //       console.log("////////////////////////////////////////////////////")
-      //       console.log("COLLISION DETECTED")
-      //       console.log("////////////////////////////////////////////////////")
-      //     }
-      //   }
-      // }
-      // EVENTS.on(engine, 'collisionStart', callback);
+      collisionCallback = (event: any) => {
+        ////////////////////////////////////////////////////////////
+        console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        console.log("physics.tsx: COLLIDED... GAME OVER");
+        let pairs = event.pairs;
+        console.log("colision between " + pairs[0].bodyA.label + " - " + pairs[0].bodyB.label);
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        ////////////////////////////////////////////////////////////
+        if (pairs[0].bodyA.label === "Player-Circle") {
+          const
+            player = pairs[0].bodyA.label === "Player-Circle",
+            playerFloorCollision = player && pairs[0].bodyB.label === "Floor-Rectangle",
+            playerRoofCollision = player && pairs[0].bodyB.label === "Roof-Rectangle",
+            playerWallCollision = player && pairs[0].bodyB.label === "Wall-Rectangle";
+          if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
+            // alternative for this is use dispatch method of GameEngine
+            game.over = true;
+            game.paused = true; // for orientation change while game over
+            // -----------------------------------------------------------
+            // engine.stop() doesn't work here in matter EVENTS,
+            // but works with setTimeout() as callback, i donno why
+            setTimeout(() => {
+              if (game.engine) {
+                game.engine.stop();
+              }
+            }, 0);
+            // Events.off(engine, 'collisionStart', callback)
+            // game.props.navigation.push("Menu", { button: "restart" });
+            // -----------------------------------------------------------
+            // GameAlert.gameOver(); // @remind clear this
+            console.log("////////////////////////////////////////////////////")
+            console.log("COLLISION DETECTED")
+            console.log("////////////////////////////////////////////////////")
+          }
+        }
+      }
+      EVENTS.on(game.matterEngine, 'collisionStart', collisionCallback);
     }
   })();
-  
-  
-  
-  
+
+  export const removeCollisionListener = (game: FlappyBallGame) => {
+    EVENTS.off(game.matterEngine, 'collisionStart', collisionCallback);
+    collisionCallback = null;
+  }
   
 }

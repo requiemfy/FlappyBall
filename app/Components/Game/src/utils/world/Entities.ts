@@ -1,5 +1,13 @@
 import Box from "../../components/Box";
-import { COMPOSITE, engine, world, WALL_DISTANCE, ROOF_HEIGHT, FLOOR_HEIGHT, PLAYER_SIZE } from "./constants";
+import { 
+  COMPOSITE, 
+  // engine, 
+  // world, 
+  WALL_DISTANCE, 
+  ROOF_HEIGHT, 
+  FLOOR_HEIGHT, 
+  PLAYER_SIZE 
+} from "./constants";
 import { Matter } from "./Matter";
 import { Body, use } from 'matter-js';
 import FlappyBallGame from "../..";
@@ -56,9 +64,9 @@ export namespace Entities {
   // ====================================================================================================
   export const getInitial: Bodies = (game, dynamic = { player: {} }) => { // @note INSPECTED: good
     const
-      player = Matter.getPlayer(dynamic.player), // player is auto extracted in Matter.ts
-      floor = Matter.getFloor(),
-      roof = Matter.getRoof();
+      player = Matter.getPlayer(game, dynamic.player), // player is auto extracted in Matter.ts
+      floor = Matter.getFloor(game),
+      roof = Matter.getRoof(game);
 
       game.entities = {
         player: {
@@ -97,7 +105,7 @@ export namespace Entities {
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){ // @note INSPECTED: good
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
-        for (let wallNum = 3; wallNum--;) {
+        for (let wallNum = 4; wallNum--;) {
           if (game.wallIds.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
@@ -153,7 +161,7 @@ export namespace Entities {
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
           (function getWall(){ // @note INSPECTED: bad
             const 
-              wall = Matter.getWall({ // @note INSPECTED: bad
+              wall = Matter.getWall(entities.game, { // @note INSPECTED: bad
                 x: wallProps ? wallProps.x : void 0,
                 y: wallProps ? wallProps.y : void 0,
                 heightPercent: (() => {
@@ -221,7 +229,7 @@ export namespace Entities {
 
     const removeAllEntities = () => { // @note INSPECTED: good
       const game = params.game;
-      for (let entity in game.entities) { COMPOSITE.remove(world, game.entities[entity].body) }
+      for (let entity in game.entities) { COMPOSITE.remove(game.matterWorld, game.entities[entity].body) }
     }
     const getFollowing = () => { // @note INSPECTED: good
       // for now, following is only wall, but I may add more following entity
@@ -238,7 +246,7 @@ export namespace Entities {
       console.log("----------------------------------------------------");
       console.log("\t\tREMOVING BODIES...")
       console.log("--------------------------");
-      console.log("CURRENT WORLD BODIES: " + world.bodies.length);
+      console.log("CURRENT WORLD BODIES: " + game.matterWorld.bodies.length);
       console.log("----------------------------------------------------\n\n");
       ////////////////////////////////////////////////////////////
       getInitial(game, dynamic); // only player, roof, floor
