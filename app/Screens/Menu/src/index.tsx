@@ -40,20 +40,12 @@ export namespace GameMenu {
 
     navigate = () => {
       const { button } = this.props.route.params;
-      // button !== "play" 
-      //   ? this.props.navigation.reset({ 
-      //       index: 0,
-      //       routes: [{ name: 'FlappyBall', params: { button: "play" }}],
-      //     })
-      //   : this.props.navigation.navigate("FlappyBall", { button: button })
       if (button === "resume") {
         this.props.navigation.goBack()
       }
-      
-      // else if (button === "play") {
+      // else if (button === "play") { // @remind not needed
       //   this.props.navigation.navigate('FlappyBall', { button: button })
       // }
-      
       else {
         this.props.navigation.reset({ 
           index: 0,
@@ -61,8 +53,6 @@ export namespace GameMenu {
             { name: 'FlappyBall', params: { button: button }},
           ],
         })
-        // this.props.navigation.replace("FlappyBall", { button: button })
-        // this.props.navigation.navigate('FlappyBall', { button: button })
       }
     }
 
@@ -107,15 +97,6 @@ export namespace GameMenu {
     );
   }
 
-  // const BackStack = createStackNavigator();
-  // function BackStackScreen() {
-  //   return (
-  //     <BackStack.Navigator headerMode="none">
-  //       <BackStack.Screen name="BackGround" component={BackGroundScreen} />
-  //     </BackStack.Navigator>
-  //   );
-  // }
-
   const RootStack = createStackNavigator();
   export function StackScreen() {
     return (
@@ -144,8 +125,6 @@ export namespace GameMenu {
             }),
           }}
           mode="modal" >
-
-          {/* <RootStack.Screen name="BackGround" component={BackStackScreen} /> */}
           <RootStack.Screen name="BackGround" component={BackGroundScreen} />
           <RootStack.Screen name="Menu" component={MenuScreen} />
           <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />

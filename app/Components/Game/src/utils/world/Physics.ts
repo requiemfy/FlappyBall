@@ -38,7 +38,6 @@ export namespace Physics {
     return entities;
   };
 
-
   export const playerRelativity = (() => { // @note INSPECTED: good
     let playerGravity: number;
     (function initGravity() {
@@ -84,12 +83,16 @@ export namespace Physics {
           playerSize = entities.player.size;
         
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
-          let recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
+          const recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
           if (recentWallid === null || !entities[recentWallid]) {
             console.log("WALL IS NOT PAIR");
             entities.game.setState({ score: entities.game.state.score + 1 });
-            possiblyFallingWall = true;
+            // check if next wall is not pair, then possibly falling wall
+            const
+              playerX = entities.player.body.position.x,
+              wallX = entities[entities.game.wallIds[1]].body.position.x;
+            if (playerX < wallX) possiblyFallingWall = true;
           }
           else console.log("WALL IS PAIR"); // recent wall is not unmounted, meaning very close to the current wall
           nextWall++;
@@ -133,31 +136,31 @@ export namespace Physics {
 
       (function isWallFalling() { // @note INSPECTED: good
         if ((entities.game.state.score > 0) && possiblyFallingWall && Math.random() > 0.3) {
-          const roofY = entities.roof.body.position.y;
-          const floorY = entities.floor.body.position.y;
-          const wall = entities[entities.game.wallIds[1]];
-          const wallY = wall.body.position.y;
-          const roof_and_Wall = wallY - roofY;
-          const floor_and_Wall = floorY - wallY;
-          // check if wall is hanging, then fall
+          // calculate if wall is hanging
+          const 
+            roofY = entities.roof.body.position.y,
+            floorY = entities.floor.body.position.y,
+            wall = entities[entities.game.wallIds[1]],
+            wallY = wall.body.position.y,
+            roof_and_Wall = wallY - roofY,
+            floor_and_Wall = floorY - wallY;
+          // if wall is hanging
           if (roof_and_Wall < floor_and_Wall) BODY.setStatic(wall.body, false);
           possiblyFallingWall = false;
           console.log("////////////////////////////////////////////////////////////")
           console.log("Physics.ts")
           console.log("roof_and_Wall " + roof_and_Wall);
           console.log("floor_and_Wall " + floor_and_Wall);
+          console.log("Falling Wall ID: " + entities.game.wallIds[1])
           console.log("////////////////////////////////////////////////////////////")
         }
       })();
     }
   })();
-
-
   
   let collisionCallback: any;
   export const addCollisionListener: Event = (() => { // this is called in componentDidMount() 
     return function (game: FlappyBallGame) { // @note INSPECTED: good
-
       collisionCallback = (event: any) => {
         ////////////////////////////////////////////////////////////
         console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");

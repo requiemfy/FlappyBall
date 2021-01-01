@@ -39,7 +39,6 @@ export namespace Matter {
     body: any;
   };
 
-  // wall types
   type WallParams = OptionalCoordinates & { 
     heightPercent: number;
     position?: keyof { up: string, down: string};
