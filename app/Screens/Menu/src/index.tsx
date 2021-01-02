@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../../Components/Game/src';
 import { NavigationParams, } from 'react-navigation';
@@ -8,7 +8,7 @@ import { NavigationParams, } from 'react-navigation';
 
 export namespace GameMenu {
   type MenuButton = keyof { play: string, resume: string, restart: string };
-  type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton } } }
+  type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
   
   class MenuScreen extends React.PureComponent<MenuProps, {}> {
     
@@ -39,28 +39,56 @@ export namespace GameMenu {
     }
 
     navigate = () => {
-      const { button } = this.props.route.params;
+      const button = this.props.route.params?.button;
       if (button === "resume") {
         this.props.navigation.goBack()
       }
-      // else if (button === "play") { // @remind not needed
-      //   this.props.navigation.navigate('FlappyBall', { button: button })
+      // else if (button === "restart") {
+
+      //   // this.props.navigation.dispatch(state => {
+      //   //   // Remove the home route from the stack
+      //   //   const routes = state.routes.filter(r => r.name !== 'FlappyBall');
+      //   //   console.log(state);
+      //   //   return CommonActions.reset({
+      //   //     ...state,
+      //   //     routes,
+      //   //     index: routes.length - 1,
+      //   //   });
+      //   // });
+
       // }
       else {
+
         this.props.navigation.reset({ 
           index: 0,
           routes: [
-            { name: 'FlappyBall', params: { button: button }},
+            {name: 'FlappyBall', params: { button: button }},
           ],
-        })
+        });
       }
     }
 
     render () {
-      const { button } = this.props.route.params;
+      const button = this.props.route.params?.button;
+
 
       return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ 
+          flex: 1, 
+          alignItems: 'center', 
+          justifyContent: 'center',}}>
+
+          <View style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            height: "100%",
+            width: "100%",
+            // backgroundColor: "red",
+            zIndex: 0, }}>
+            <Text style={{ fontSize: 30 }}>BACKGROUND IMAGE HERE</Text>
+          </View>
+
           <View style={{
             backgroundColor: "yellow",
             width: "70%",
@@ -72,7 +100,7 @@ export namespace GameMenu {
                 <View><Text>FLAPPY BALL</Text></View>
                 <View>
                   <Button 
-                    title={button === "play" ? "PLAY" : button === "resume" ? "RESUME" : "RESTART"}
+                    title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "PLAY"}
                     onPress={this.navigate} />
                   <Button 
                     title="QUIT" 
@@ -80,22 +108,21 @@ export namespace GameMenu {
                 </View>
               </View>
           </View>
+
         </View>
       )
     }
     
   }
 
-  function BackGroundScreen({ navigation, route }: any) {
-    setTimeout( () => navigation.navigate("Menu", { button: "play" }))
-    return (
-      <View style={{ 
-        alignItems: 'center', 
-        justifyContent: 'center' }}>
-        <Text style={{ fontSize: 30 }}>BACKGROUND IMAGE HERE</Text>
-      </View>
-    );
-  }
+  // function GameScreen({ navigation, route }: any) {
+  //   const { gameKey } = route.params;
+  //   return (
+  //     gameKey === "1"
+  //      ? <FlappyBallGame key="1" navigation={navigation} route={route} />
+  //      : <FlappyBallGame key="2" navigation={navigation} route={route} />
+  //   )
+  // }
 
   const RootStack = createStackNavigator();
   export function StackScreen() {
@@ -125,7 +152,6 @@ export namespace GameMenu {
             }),
           }}
           mode="modal" >
-          <RootStack.Screen name="BackGround" component={BackGroundScreen} />
           <RootStack.Screen name="Menu" component={MenuScreen} />
           <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
         </RootStack.Navigator>

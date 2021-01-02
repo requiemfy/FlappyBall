@@ -81,7 +81,7 @@ export namespace Physics {
           currentWallSize = currentWall.size[0],
           playerX = entities.player.body.position.x,
           playerSize = entities.player.size;
-        
+
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
           const recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);
@@ -158,9 +158,9 @@ export namespace Physics {
     }
   })();
   
-  let collisionCallback: any;
-  export const addCollisionListener: Event = (() => { // this is called in componentDidMount() 
-    return function (game: FlappyBallGame) { // @note INSPECTED: good
+  let collisionCallback: any; // this is called in componentDidMount() 
+  export const addCollisionListener: Event = (() => { // @note INSPECTED: bad
+    return function (game: FlappyBallGame) { 
       collisionCallback = (event: any) => {
         ////////////////////////////////////////////////////////////
         console.log("\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -178,14 +178,12 @@ export namespace Physics {
           if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
             // alternative for this is use dispatch method of GameEngine
             game.over = true;
-            game.paused = true; // for orientation change while game over
+            game.paused = true; // for orientation change while game over @remind evaluate this
             // -----------------------------------------------------------
             // engine.stop() doesn't work here in matter EVENTS,
             // but works with setTimeout() as callback, i donno why
             setTimeout(() => {
-              if (game.engine) {
-                game.engine.stop();
-              }
+              game.engine ? game.engine.stop() : null;
             }, 0);
             // Events.off(engine, 'collisionStart', callback)
             // game.props.navigation.push("Menu", { button: "restart" });

@@ -26,6 +26,7 @@ import * as Updates from 'expo-updates';
 import { GameAlert } from './utils/helpers/alerts';
 import TopBar from './components/TopBar';
 import { NavigationParams } from 'react-navigation';
+import { NavigationContainer, CommonActions } from '@react-navigation/native';
 
 interface Props { 
   navigation: NavigationParams; 
@@ -87,7 +88,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   componentDidMount() {
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
-    console.log("componentDidMount!!");
+    console.log("FLAPPY GAME DID MOUNT!!");
     Physics.addCollisionListener(this); // game over
     Orientation.addChangeListener(this); 
     GameAppState.addChangeListener(this); // run|stop game engine
@@ -129,9 +130,11 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   onGameEngineEvent(e: EventType) {
     if (e.type === "stopped") {
       this.paused = true;
-      if(this.over) {
+      if (this.over) {
+        this.over = false; // this is necessary because game engine is stopping again (even already stopped) when unmounting
         Physics.removeCollisionListener(this);
-        this.props.navigation.replace("Menu", { button: "restart" });
+        console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
+        this.props.navigation.push("Menu", { button: "restart", });
       }
     } else if (e.type === "started") {
       this.paused = false;
@@ -165,7 +168,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:")
     console.log("--------------------------");
-    console.log("RENDER()..." + this.props.route.params.button);
+    console.log("RENDER()..." + this.props.route.params?.button);
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
     return (

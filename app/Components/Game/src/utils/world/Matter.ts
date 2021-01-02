@@ -47,7 +47,7 @@ export namespace Matter {
 
 
   // ==================================== Entities ===================================
-  const createPlayer: Body<OptionalCoordinates, { size: number }> = ({ x, y=400 }) => {
+  const createPlayer: Body<OptionalCoordinates, { size: number }> = ({ x, y }) => {
     const
       { gameHeight } = GameDimension.window(),
       playerBaseSize = gameHeight * PLAYER_SIZE;
@@ -61,7 +61,7 @@ export namespace Matter {
       borderRadius: playerBaseSize / 2,
       color: "red",
       label: "Player-Circle",
-      static: true,
+      static: false,
     }, {});
   }
   
