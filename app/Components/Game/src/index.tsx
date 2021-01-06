@@ -27,6 +27,7 @@ import { GameAlert } from './utils/helpers/alerts';
 import TopBar from './components/TopBar';
 import { NavigationParams } from 'react-navigation';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
+import { Engine, World } from 'matter-js';
 
 interface Props { 
   navigation: NavigationParams; 
@@ -45,6 +46,8 @@ interface Game {
   wallFreedIds: number[];
   entitiesInitialized: boolean;
   gravity: number;
+  matterEngine: Engine;
+  matterWorld: World;
   
   menu(): boolean; // toggle true/false and pass to paused
   onGameEngineEvent(e: { type: string; }): void;
@@ -54,40 +57,21 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   engine: any;
   entities!: Entities.All; // all entities (player, floor)
-  // paused: boolean; // used in pause button
-  // over: boolean; // used in pause button
-  // willUnmount: boolean;
-  // wallIds: number[];
-  // wallFreedIds: number[];
-  // entitiesInitialized: boolean;
-  // gravity: number;
   paused = false; 
   over = false;
+  wallIds: number[] = [];
+  wallFreedIds: number[] = [];
   willUnmount = false;
-  wallIds = [];
-  wallFreedIds = [];
   entitiesInitialized = false;
   gravity = 0.12;
   state = {score:0, left: 0,};
-  
   matterEngine = ENGINE.create({ enableSleeping:false } );
   matterWorld = this.matterEngine.world;
 
   constructor(props: Props) {
     super(props);
-
     // const TEST_UPDATE = 0;
     // Updates.checkForUpdateAsync().then((update) => update.isAvailable ? GameAlert.hasUpdate() : null);
-  
-    // this.paused = false; 
-    // this.over = false;
-    // this.willUnmount = false;
-    // this.wallIds = [];
-    // this.wallFreedIds = [];
-    // this.entitiesInitialized = false;
-    // this.gravity = 0.12;
-    // this.state = {score:0, left: 0,};
-
     Entities.getInitial(this); // entities is initialized here
   }
 
@@ -107,7 +91,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
     Physics.removeCollisionListener(this);
-    // this.entities.game = null; // @remind to avoid cycle reference
+    // this.entities.game = null; // @note to avoid cycle reference
   }
 
   menu = () => {
@@ -194,7 +178,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
               onEvent={ this.onGameEngineEvent }
               systems={ [Physics.system] }
               entities={ this.entities } 
-              // running={ !this.paused } // @remind clear
+              // running={ !this.paused } // @note running
               style={{ 
                 flex: 1, 
                 backgroundColor: "blue", 
