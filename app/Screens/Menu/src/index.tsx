@@ -53,7 +53,6 @@ export namespace GameMenu {
 
     render () {
       const button = this.props.route.params?.button;
-      console.log("RENDERING: MENU BUTTON PRESSED.")
       return (
         <View style={{ 
           flex: 1, 

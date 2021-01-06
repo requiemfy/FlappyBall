@@ -30,32 +30,33 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 
 interface Props { 
   navigation: NavigationParams; 
-  route: { params: { button: keyof { play: string; resume: string; restart: string; } } } }
+  route: { params: { button: keyof { play: string; resume: string; restart: string; } } } 
+}
 interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
   score: number;
 }
-interface EventType { type: string; }
-interface Game {
-  engine: GameEngine;
-  entities: Entities.All;
-  paused: boolean;
-  over: boolean;
-  wallIds: number[]; // [[wall id, wall x], ...]
-  wallFreedIds: number[];
-  entitiesInitialized: boolean;
-  gravity: number;
+// interface Game {
+//   engine: GameEngine;
+//   entities: Entities.All;
+//   paused: boolean;
+//   over: boolean;
+//   wallIds: number[]; // [[wall id, wall x], ...]
+//   wallFreedIds: number[];
+//   entitiesInitialized: boolean;
+//   gravity: number;
   
-  menu(): boolean; // toggle true/false and pass to paused
-  onGameEngineEvent(e: EventType): void;
-}
+//   menu(): boolean; // toggle true/false and pass to paused
+//   onGameEngineEvent(e: { type: string; }): void;
+// }
 
-export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
+export default class FlappyBallGame extends React.PureComponent<Props, State> {
 
   engine: any;
   entities!: Entities.All; // all entities (player, floor)
   paused: boolean; // used in pause button
   over: boolean; // used in pause button
+  willUnmount: boolean;
   wallIds: number[];
   wallFreedIds: number[];
   entitiesInitialized: boolean;
@@ -65,6 +66,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   matterWorld = this.matterEngine.world;
 
   constructor(props: Props) {
+
     super(props);
 
     // const TEST_UPDATE = 0;
@@ -72,6 +74,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
     this.paused = false; 
     this.over = false;
+    this.willUnmount = false;
     this.wallIds = [];
     this.wallFreedIds = [];
     this.entitiesInitialized = false;
@@ -122,15 +125,14 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     return false;
   }
 
-  onGameEngineEvent = (e: EventType) => {
+  onGameEngineEvent = (e: { type: string; }) => {
     if (e.type === "stopped") {
       this.paused = true;
-      if (this.over) {
-        this.over = false; // this is necessary because game engine is stopping again (even already stopped) when unmounting
+      if (this.over && !this.willUnmount) {
+        this.willUnmount = true; // this is necessary because game engine is stopping again (even already stopped) when unmounting
         Physics.removeCollisionListener(this);
         console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
         this.props.navigation.push("Menu", { button: "restart", });
-
       }
     } else if (e.type === "started") {
       this.paused = false;
@@ -139,6 +141,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("\nindex.tsx:\n--------------------------");
     console.log(e);
     console.log("this.paused " + this.paused);
+    console.log("this.over " + this.over);
     console.log("--------------------------");
     ////////////////////////////////////////////////////////////
   }

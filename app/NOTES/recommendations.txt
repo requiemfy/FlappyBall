@@ -17,6 +17,16 @@ START:
 1) play - automatic START
 2) resume or restart - manual start
 
+paused, over, willUnmount:
+  pause - for pausing and resuming
+  over - disable resume
+       - to show menu game over
+       - make 'willUnmount' true
+  willUnmount - component should be unmounted
+       - no more events or side effects should work
 
+
+
+       
 NOTE:
 i static player
