@@ -159,7 +159,7 @@ export namespace Physics {
   })();
   
   let collisionCallback: any; // this is called in componentDidMount() 
-  export const addCollisionListener: Event = (() => { // @note INSPECTED: bad
+  export const addCollisionListener: Event = (() => { // @note INSPECTED: good
     return function (game: FlappyBallGame) { 
       collisionCallback = (event: any) => {
         ////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ export namespace Physics {
           if (playerFloorCollision || playerRoofCollision || playerWallCollision) {
             // alternative for this is use dispatch method of GameEngine
             game.over = true;
-            game.paused = true; // for orientation change while game over @remind evaluate this
+            // game.paused = true; // for orientation change while game over @remind evaluate this
             // -----------------------------------------------------------
             // engine.stop() doesn't work here in matter EVENTS,
             // but works with setTimeout() as callback, i donno why
@@ -192,7 +192,6 @@ export namespace Physics {
             // Events.off(engine, 'collisionStart', callback)
             // game.props.navigation.push("Menu", { button: "restart" });
             // -----------------------------------------------------------
-            // GameAlert.gameOver(); // @remind clear this
             console.log("////////////////////////////////////////////////////")
             console.log("COLLISION DETECTED")
             console.log("////////////////////////////////////////////////////")

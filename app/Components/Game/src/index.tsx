@@ -173,8 +173,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> {
       <View style={{ flex: 1, }}>
         <TopBar score={this.state.score} pause={this.menu} running="Menu"/>
         <TouchableWithoutFeedback
-          onPressIn={ this.playerFly }
-          onPressOut={ this.playerFall }>
+          onPressIn={this.playerFly}
+          onPressOut={this.playerFall}>
            {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
           <View style={{ 

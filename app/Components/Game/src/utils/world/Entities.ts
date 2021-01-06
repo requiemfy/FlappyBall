@@ -130,7 +130,7 @@ export namespace Entities {
   // i just put together methods in an object for "following entities"
   // because unlike getInitials I can't just show "following entities" at once, since it's continuous
   // soon i may add more following entities
-  export const following: FollowingMethods = { // @note INSPECTED: bad
+  export const following: FollowingMethods = { // @note INSPECTED: good
     getWalls: (() => { // wall/s can only be 1 or 2
       let wallPosition = "down",
           wallEachTime = [1, 2];
@@ -159,11 +159,11 @@ export namespace Entities {
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
 
         while (numOfwall--) { // how many walls are shown at a time (up or down or both)
-          (function getWall(){ // @note INSPECTED: bad
+          (function getWall(){ // @note INSPECTED: good
             const 
-              wall = Matter.getWall(entities.game, { // @note INSPECTED: bad
-                x: wallProps ? wallProps.x : void 0,
-                y: wallProps ? wallProps.y : void 0,
+              wall = Matter.getWall(entities.game, { // @note INSPECTED: good
+                x: wallProps?.x,
+                y: wallProps?.y,
                 heightPercent: (() => {
                   // any of if conditions should be true, else throw error
                   // i can't find any proper way to do this, since either "wallProps" or "wallHeightsArr" is expected to be undefined
@@ -172,7 +172,7 @@ export namespace Entities {
                   // else throw "Entities.ts: heightPercent is undefined which should not be.";
                 })(),
                 position: wallPosition, // this is disregarded if we have wallProps
-                isStatic: wallProps?.isStatic, // @remind wtf is this?
+                isStatic: wallProps?.isStatic,
               }),
               entity: Physical<number[]> & { heightPercent: number } = { // extract wall props
                 body: wall.body, 
