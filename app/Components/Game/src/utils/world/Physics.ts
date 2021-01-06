@@ -182,9 +182,13 @@ export namespace Physics {
             // -----------------------------------------------------------
             // engine.stop() doesn't work here in matter EVENTS,
             // but works with setTimeout() as callback, i donno why
-            setTimeout(() => {
+            let timeOut: any;
+            let callBack: any = () => {
               game.engine ? game.engine.stop() : null;
-            }, 0);
+              clearTimeout(timeOut);
+              timeOut = null; callBack = null;
+            }
+            timeOut = setTimeout(callBack, 0);
             // Events.off(engine, 'collisionStart', callback)
             // game.props.navigation.push("Menu", { button: "restart" });
             // -----------------------------------------------------------

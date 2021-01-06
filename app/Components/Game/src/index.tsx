@@ -77,21 +77,16 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     this.entitiesInitialized = false;
     this.gravity = 0.12;
     this.state = {score:0, left: 0,};
-    
     Entities.getInitial(this); // entities is initialized here
-    this.onGameEngineEvent = this.onGameEngineEvent.bind(this);
-    this.playerFly = this.playerFly.bind(this);
-    this.playerFall = this.playerFall.bind(this);
   }
 
-  // all side effects here
   componentDidMount() {
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     console.log("FLAPPY GAME DID MOUNT!!");
-    Physics.addCollisionListener(this); // game over
+    Physics.addCollisionListener(this);
     Orientation.addChangeListener(this); 
-    GameAppState.addChangeListener(this); // run|stop game engine
+    GameAppState.addChangeListener(this);
     console.log("--------------------------\n")
     ////////////////////////////////////////////////////////////
   }
@@ -101,10 +96,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
     Physics.removeCollisionListener(this);
+    // this.entities.game = null; // @remind to avoid cycle reference
   }
 
-  // used in pause button,
-  menu = () => {  // @remind menu will only be menu
+  menu = () => {
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
@@ -127,7 +122,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     return false;
   }
 
-  onGameEngineEvent(e: EventType) {
+  onGameEngineEvent = (e: EventType) => {
     if (e.type === "stopped") {
       this.paused = true;
       if (this.over) {
@@ -135,6 +130,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
         Physics.removeCollisionListener(this);
         console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
         this.props.navigation.push("Menu", { button: "restart", });
+
       }
     } else if (e.type === "started") {
       this.paused = false;
@@ -147,8 +143,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
   }
 
-  // @remind change this to arrow
-  playerFly() {
+  playerFly = () => {
     if (this.paused && !this.over) this.engine.start();
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
@@ -156,7 +151,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     else Physics.playerRelativity.gravity(-0.003);
   }
 
-  playerFall() {
+  playerFall = () => {
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(0.001);

@@ -39,39 +39,21 @@ export namespace GameMenu {
     }
 
     navigate = () => {
+      console.log("navigate menu button pressed")
       const button = this.props.route.params?.button;
-      if (button === "resume") {
-        this.props.navigation.goBack()
-      }
-      // else if (button === "restart") {
-
-      //   // this.props.navigation.dispatch(state => {
-      //   //   // Remove the home route from the stack
-      //   //   const routes = state.routes.filter(r => r.name !== 'FlappyBall');
-      //   //   console.log(state);
-      //   //   return CommonActions.reset({
-      //   //     ...state,
-      //   //     routes,
-      //   //     index: routes.length - 1,
-      //   //   });
-      //   // });
-
-      // }
-      else {
-
-        this.props.navigation.reset({ 
-          index: 0,
-          routes: [
-            {name: 'FlappyBall', params: { button: button }},
-          ],
-        });
-      }
+      (button === "resume")
+        ? this.props.navigation.goBack()
+        : this.props.navigation.reset({ 
+            index: 0,
+            routes: [
+              {name: 'FlappyBall', params: { button: button }},
+            ],
+          });
     }
 
     render () {
       const button = this.props.route.params?.button;
-
-
+      console.log("RENDERING: MENU BUTTON PRESSED.")
       return (
         <View style={{ 
           flex: 1, 
@@ -114,15 +96,6 @@ export namespace GameMenu {
     }
     
   }
-
-  // function GameScreen({ navigation, route }: any) {
-  //   const { gameKey } = route.params;
-  //   return (
-  //     gameKey === "1"
-  //      ? <FlappyBallGame key="1" navigation={navigation} route={route} />
-  //      : <FlappyBallGame key="2" navigation={navigation} route={route} />
-  //   )
-  // }
 
   const RootStack = createStackNavigator();
   export function StackScreen() {
