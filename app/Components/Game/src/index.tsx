@@ -36,50 +36,58 @@ interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
   score: number;
 }
-// interface Game {
-//   engine: GameEngine;
-//   entities: Entities.All;
-//   paused: boolean;
-//   over: boolean;
-//   wallIds: number[]; // [[wall id, wall x], ...]
-//   wallFreedIds: number[];
-//   entitiesInitialized: boolean;
-//   gravity: number;
-  
-//   menu(): boolean; // toggle true/false and pass to paused
-//   onGameEngineEvent(e: { type: string; }): void;
-// }
-
-export default class FlappyBallGame extends React.PureComponent<Props, State> {
-
-  engine: any;
-  entities!: Entities.All; // all entities (player, floor)
-  paused: boolean; // used in pause button
-  over: boolean; // used in pause button
-  willUnmount: boolean;
-  wallIds: number[];
+interface Game {
+  engine: GameEngine;
+  entities: Entities.All;
+  paused: boolean;
+  over: boolean;
+  wallIds: number[]; // [[wall id, wall x], ...]
   wallFreedIds: number[];
   entitiesInitialized: boolean;
   gravity: number;
+  
+  menu(): boolean; // toggle true/false and pass to paused
+  onGameEngineEvent(e: { type: string; }): void;
+}
+
+export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game{
+
+  engine: any;
+  entities!: Entities.All; // all entities (player, floor)
+  // paused: boolean; // used in pause button
+  // over: boolean; // used in pause button
+  // willUnmount: boolean;
+  // wallIds: number[];
+  // wallFreedIds: number[];
+  // entitiesInitialized: boolean;
+  // gravity: number;
+  paused = false; 
+  over = false;
+  willUnmount = false;
+  wallIds = [];
+  wallFreedIds = [];
+  entitiesInitialized = false;
+  gravity = 0.12;
+  state = {score:0, left: 0,};
   
   matterEngine = ENGINE.create({ enableSleeping:false } );
   matterWorld = this.matterEngine.world;
 
   constructor(props: Props) {
-
     super(props);
 
     // const TEST_UPDATE = 0;
     // Updates.checkForUpdateAsync().then((update) => update.isAvailable ? GameAlert.hasUpdate() : null);
+  
+    // this.paused = false; 
+    // this.over = false;
+    // this.willUnmount = false;
+    // this.wallIds = [];
+    // this.wallFreedIds = [];
+    // this.entitiesInitialized = false;
+    // this.gravity = 0.12;
+    // this.state = {score:0, left: 0,};
 
-    this.paused = false; 
-    this.over = false;
-    this.willUnmount = false;
-    this.wallIds = [];
-    this.wallFreedIds = [];
-    this.entitiesInitialized = false;
-    this.gravity = 0.12;
-    this.state = {score:0, left: 0,};
     Entities.getInitial(this); // entities is initialized here
   }
 
