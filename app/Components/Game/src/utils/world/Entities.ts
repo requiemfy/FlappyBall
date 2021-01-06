@@ -223,25 +223,43 @@ export namespace Entities {
   // idea: remove all current entities, then create new ones
   //       bodies / objects created will auto adjust to current window dimension
   export const swap: Recreation = (() => { // @note INSPECTED: bad
-    // @remind refactor this wtf, type not showing properly
-    type args = {game?: FlappyBallGame | any, dynamic?: InitialParams & FollowingParams | any,};
-    const params: args = {};
+    // // @remind refactor this wtf, type not showing properly
+    // type args = {game?: FlappyBallGame | any, dynamic?: InitialParams & FollowingParams | any,};
+    // const params: args = {};
 
-    const removeAllEntities = () => { // @note INSPECTED: good
-      const game = params.game;
-      for (let entity in game.entities) { COMPOSITE.remove(game.matterWorld, game.entities[entity].body) }
-    }
-    const getFollowing = () => { // @note INSPECTED: good
-      // for now, following is only wall, but I may add more following entity
-      const [ game, walls ] = [ params.game, params.dynamic.walls ];
-      for (let wall in walls) {
-        following.getWalls(game.entities, walls[wall]);
+    // const removeAllEntities = () => { // @note INSPECTED: good
+    //   const game = params.game;
+    //   for (let entity in game.entities) { COMPOSITE.remove(game.matterWorld, game.entities[entity].body) }
+    // }
+    // const getFollowing = () => { // @note INSPECTED: good
+    //   // for now, following is only wall, but I may add more following entity
+    //   const [ game, walls ] = [ params.game, params.dynamic.walls ];
+    //   for (let wall in walls) {
+    //     following.getWalls(game.entities, walls[wall]);
+    //   }
+    // }
+
+      let game!: FlappyBallGame, dynamic: InitialParams & FollowingParams | undefined; 
+
+      const removeAllEntities = () => { // @note INSPECTED: good
+        for (let entity in game.entities) { COMPOSITE.remove(game.matterWorld, game.entities[entity].body) }
       }
-    }
-    return <typeof swap>function (game, dynamic) { // @note INSPECTED: good
-      Object.defineProperty(params, "game", { get() { return game }, configurable: true });
-      Object.defineProperty(params, "dynamic", { get() { return dynamic }, configurable: true });
+      const getFollowing = () => { // @note INSPECTED: good
+        // for now, following is only wall, but I may add more following entity
+        const walls = dynamic?.walls;
+        if (walls) for (let wall in walls) {following.getWalls(game.entities, walls[wall]);}
+      }
+
+    return <typeof swap>function (paramGame, paramDynamic) { // @note INSPECTED: good
+      // Object.defineProperty(params, "game", { get() { return game }, configurable: true });
+      // Object.defineProperty(params, "dynamic", { get() { return dynamic }, configurable: true });
+      (function getParams() {
+        game = paramGame;
+        dynamic = paramDynamic;
+      })();
+
       removeAllEntities();
+      
       ////////////////////////////////////////////////////////////
       console.log("----------------------------------------------------");
       console.log("\t\tREMOVING BODIES...")
@@ -249,8 +267,13 @@ export namespace Entities {
       console.log("CURRENT WORLD BODIES: " + game.matterWorld.bodies.length);
       console.log("----------------------------------------------------\n\n");
       ////////////////////////////////////////////////////////////
-      getInitial(game, dynamic); // only player, roof, floor
-      dynamic ? getFollowing() : null; // following: walls, ...etc
+
+      // mutate game entities object
+      (function setEntities() {
+        getInitial(game, dynamic); // only player, roof, floor
+        dynamic ? getFollowing() : null; // following: walls, ...etc
+      })();
+
       game.engine.swap(game.entities);
     }
   })();
