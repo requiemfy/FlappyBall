@@ -55,7 +55,7 @@ interface Game {
 
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game{
 
-  engine: any;
+  engine!: GameEngine;
   entities!: Entities.All; // all entities (player, floor)
   paused = false; 
   over = false;
@@ -84,6 +84,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     GameAppState.addChangeListener(this);
     console.log("--------------------------\n")
     ////////////////////////////////////////////////////////////
+    setTimeout(() => {
+      this.engine.stop();
+    }, 0)
   }
 
   componentWillUnmount() {
@@ -94,13 +97,17 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     // this.entities.game = null; // @note to avoid cycle reference
   }
 
+  setEngineRef = (ref: GameEngine) => {
+    this.engine = ref;
+  }
+
   menu = () => {
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
       if (!this.paused) {
         console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
-        this.engine.stop();
+        this.engine.stop(); // i stop() went missing, add it to GameEngine index.d.ts
       } 
       this.props.navigation.push("Menu", { button: "resume" })
     } else {
@@ -139,7 +146,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly = () => {
-    if (this.paused && !this.over) this.engine.start();
+    if (this.paused && !this.over) this.engine.start(); // i start() went missing, add it to GameEngine index.d.ts
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
@@ -174,12 +181,12 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             flexDirection: "row",
             backgroundColor: "pink", }}> 
             <GameEngine
-              ref={ (ref) => { this.engine = ref; } }
-              onEvent={ this.onGameEngineEvent }
-              systems={ [Physics.system] }
-              entities={ this.entities } 
-              // running={ !this.paused } // @note running
-              style={{ 
+              ref={this.setEngineRef}
+              onEvent={this.onGameEngineEvent}
+              systems={[Physics.system]}
+              entities={this.entities} 
+              // running={!this.paused} // @note running
+              style={{
                 flex: 1, 
                 backgroundColor: "blue", 
                 left: this.state.left,

@@ -3,18 +3,18 @@
 import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
-interface Props {
-  size:number,
-  body:any, 
-  borderRadius:number,
-  color:string
+export interface Props {
+  size: number;
+  body: any; 
+  borderRadius: number;
+  color: string;
 }
-interface State {}
+export interface State {}
 
 // PureComponent won't work
 export default class Circle extends React.Component<Props, State> {
   componentWillUnmount() {
-    console.log("UNMOUNTING....");
+    console.log("CIRCLE UNMOUNTING....");
   }
 
   render() {
@@ -31,7 +31,9 @@ export default class Circle extends React.Component<Props, State> {
           width: size,
           height: size,
           borderRadius: this.props.borderRadius,
-          backgroundColor: this.props.color || "pink", }}/>
+          backgroundColor: this.props.color || "pink", }}>
+        {this.props.children}
+      </View>
     );
   }
 }

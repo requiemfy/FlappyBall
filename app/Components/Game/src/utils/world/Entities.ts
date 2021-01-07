@@ -12,6 +12,7 @@ import { Matter } from "./Matter";
 import { Body, use } from 'matter-js';
 import FlappyBallGame from "../..";
 import Circle from "../../components/Circle";
+import Player from '../../components/Player'
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
 
@@ -43,7 +44,7 @@ export namespace Entities {
     borderRadius: number;
     color: String; 
     // heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
-    renderer: typeof Box | typeof Circle;
+    renderer: typeof Box | typeof Player;
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -74,7 +75,7 @@ export namespace Entities {
           size: player.size,
           borderRadius: player.borderRadius,
           color: player.color, 
-          renderer: Circle,
+          renderer: Player,
         },
         floor: { 
           body: floor.body, 
@@ -256,7 +257,7 @@ export namespace Entities {
         dynamic ? getFollowing() : null; // following: walls, ...etc
       })();
 
-      game.engine.swap(game.entities);
+      game.engine.swap(game.entities); // if swap() went, edit GameEngine definition file (.d.ts)
     }
   })();
   // ====================================================================================================
