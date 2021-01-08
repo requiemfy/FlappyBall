@@ -1,9 +1,9 @@
 import React, { createRef, MutableRefObject } from 'react';
 import { Image } from 'react-native';
-import SpriteSheet from 'rn-sprite-sheet';
+// import SpriteSheet from 'rn-sprite-sheet';
 import * as Circle from './Circle';
 
-// type Sprite<T> = 
+// type Sprite<T> = // @remind clear soon
 //   (T & string & React.MutableRefObject<SpriteSheet | null>) | 
 //   (T & ((instance: SpriteSheet | null) => void) & React.MutableRefObject<SpriteSheet | null>) | 
 //   (T & React.RefObject<any> & React.MutableRefObject<any>);
@@ -20,14 +20,16 @@ export default class Player extends React.Component<Circle.Props, {}> {
 
   setSpriteRef = (ref: SpriteSheet | null) => {
     this.spriteRef = ref!;
-    this.spriteRef.play({
-      type: "idle",
-      fps: 12,
-      loop: true,
-    });
+    // this.spriteRef?.play({
+    //   type: "idle",
+    //   fps: 12,
+    //   loop: true,
+    // });
   }
 
   render() {
+    const
+      size = this.props.size * 2.6;
     return (
       <Circle.default {...this.props}>
         <SpriteSheet
@@ -35,10 +37,10 @@ export default class Player extends React.Component<Circle.Props, {}> {
           source={require('../../assets/bally.png')}
           columns={3}
           rows={4}
-          width={100}
+          width={size}
           viewStyle={{
-            marginLeft: -56,
-            marginTop: -25,
+            left: -56,
+            top: -24
           }}
           animations={{
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

@@ -30,3 +30,8 @@ paused, over, willUnmount:
        
 NOTE:
 i commented 'game.paused' in collision event
+
+node module edited:
+  SpriteSheet
+    - change to React.Component (orig is PureComponent)
+    - added shouldComponentUpdate
