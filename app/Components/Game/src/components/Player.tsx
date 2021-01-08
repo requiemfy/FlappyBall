@@ -1,5 +1,5 @@
 import React, { createRef, MutableRefObject } from 'react';
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
 // import SpriteSheet from 'rn-sprite-sheet'; // @remind clear this soon
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 
@@ -20,13 +20,26 @@ export default class Player extends React.Component<Circle.Props, {}> {
   componentDidMount() {
   }
 
+  
+
   setSpriteRef = (ref: SpriteSheet | null) => {
     this.spriteRef = ref!;
-    this.spriteRef?.play({
-      type: "idle",
-      fps: 12,
-      loop: true,
-    });
+    const playSprite = () => {
+      if (Platform.OS === "web") // i donno why but animation loop doesn't work in web
+        this.spriteRef?.play({
+          type: "idle",
+          fps: 12,
+          loop: false,
+          onFinish: () => playSprite(),
+        })
+      else 
+        this.spriteRef?.play({
+          type: "idle",
+          fps: 12,
+          loop: true,
+        });
+    }
+    playSprite();
   }
 
   render() {
@@ -41,8 +54,9 @@ export default class Player extends React.Component<Circle.Props, {}> {
           rows={4}
           width={size}
           viewStyle={{
-            left: -56,
-            top: -24
+            // left: -56,
+            // top: -24
+            // backgroundColor: "green"
           }}
           animations={{
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

@@ -6,7 +6,7 @@ type AnimationConfig = {
 };
 
 export interface ISpriteSheetProps {
-  source: number | { uri: string; width: number; height: number };
+  source: string | number | { uri: string; width: number; height: number };
   columns: number;
   rows: number;
   ref: (instance: SpriteSheet | null) => void;
