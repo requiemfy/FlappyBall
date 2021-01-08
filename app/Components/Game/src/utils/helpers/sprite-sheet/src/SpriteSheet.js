@@ -20,7 +20,7 @@ function resolveAssetSource(source) {
   return NativeImage.resolveAssetSource(source);
 }
 
-export default class SpriteSheet extends React.Component {
+export default class SpriteSheet extends React.PureComponent {
   static propTypes = {
     source: sourcePropType.isRequired, // source must be required
     columns: PropTypes.number.isRequired,
@@ -105,16 +105,7 @@ export default class SpriteSheet extends React.Component {
     this.generateInterpolationRanges();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      (this.state.imageWidth !== nextState.imageWidth) |
-      (this.state.animationType !== nextState.animationType)
-    )
-  }
-
   render() {
-    console.log("SPRITESHEET RENDERING")
-
     let {
       imageHeight,
       imageWidth,
@@ -125,6 +116,7 @@ export default class SpriteSheet extends React.Component {
       offsetY,
     } = this.state;
     let { viewStyle, imageStyle, source, onLoad } = this.props;
+
     let {
       translateY = { in: [0, 0], out: [offsetY, offsetY] },
       translateX = { in: [0, 0], out: [offsetX, offsetX] },
@@ -250,5 +242,4 @@ export default class SpriteSheet extends React.Component {
       y: yAdjust,
     };
   };
-
 }

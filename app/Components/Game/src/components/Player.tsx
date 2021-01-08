@@ -1,6 +1,8 @@
 import React, { createRef, MutableRefObject } from 'react';
 import { Image } from 'react-native';
-// import SpriteSheet from 'rn-sprite-sheet';
+// import SpriteSheet from 'rn-sprite-sheet'; // @remind clear this soon
+import SpriteSheet from '../utils/helpers/sprite-sheet';
+
 import * as Circle from './Circle';
 
 // type Sprite<T> = // @remind clear soon
@@ -20,11 +22,11 @@ export default class Player extends React.Component<Circle.Props, {}> {
 
   setSpriteRef = (ref: SpriteSheet | null) => {
     this.spriteRef = ref!;
-    // this.spriteRef?.play({
-    //   type: "idle",
-    //   fps: 12,
-    //   loop: true,
-    // });
+    this.spriteRef?.play({
+      type: "idle",
+      fps: 12,
+      loop: true,
+    });
   }
 
   render() {

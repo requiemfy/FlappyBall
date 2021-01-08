@@ -1,7 +1,9 @@
 import * as React from 'react'
 import { Alert, AppState, Dimensions, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
-import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
+// import { GameEngine, GameEngineProperties } from 'react-native-game-engine'; // @remind clear this soon
+import { GameEngine } from './utils/helpers/react-native-game-engine';
+
 import { GameAppState } from './utils/helpers/events/GameState';
 import { Orientation } from './utils/helpers/events/Orientation';
 import { 
