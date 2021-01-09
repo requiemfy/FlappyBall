@@ -1,4 +1,4 @@
-import { MutableRefObject, PureComponent } from 'react';
+import { MutableRefObject, PureComponent, Component } from 'react';
 import { StyleProp, ViewStyle, ImageStyle } from 'react-native';
 
 type AnimationConfig = {
@@ -18,7 +18,7 @@ export interface ISpriteSheetProps {
   onLoad?: () => void;
 }
 
-export class SpriteSheet extends PureComponent<ISpriteSheetProps, {}> {
+export class SpriteSheet extends Component<ISpriteSheetProps, {}> {
   play: (config: {
     type: string;
     fps?: number;

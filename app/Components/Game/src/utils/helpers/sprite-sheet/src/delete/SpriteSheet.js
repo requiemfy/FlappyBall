@@ -1,5 +1,5 @@
 import { Animated, Easing, Image as NativeImage, Platform, View } from 'react-native';
-import PropTypes from 'prop-types';
+import PropTypes, { any } from 'prop-types';
 import React from 'react';
 
 const stylePropType = PropTypes.oneOfType([PropTypes.number, PropTypes.object, PropTypes.array]);
@@ -43,82 +43,144 @@ export default class SpriteSheet extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       imageHeight: 0,
       imageWidth: 0,
-      defaultFrameHeight: 0,
-      defaultFrameWidth: 0,
-      translateYInputRange: [0, 1],
-      translateYOutputRange: [0, 1],
-      translateXInputRange: [0, 1],
-      translateXOutputRange: [0, 1],
+      // defaultFrameHeight: 0,
+      // defaultFrameWidth: 0,
+      frameHeight: 0,
+      frameWidth: 0,
+      // translateYInputRange: [0, 1],
+      // translateYOutputRange: [0, 1],
+      // translateXInputRange: [0, 1],
+      // translateXOutputRange: [0, 1],
       instanceRef: this,
     };
-    this.calcImgDims(this.props);
-  }
 
-  componentWillUnmount() {
-    this.state.instanceRef = null; // prevent cycle reference
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.animationType !== nextState.animationType) || 
-      (() => {
-        if (this.props.width !== nextProps.width) {
-          this.calcImgDims(nextProps);
-          return true;
-        }
-        return false
-      })();
-  }
-
-  calcImgDims(props) {
+    this.updateWidth = false;
     this.time = new Animated.Value(0);
     this.interpolationRanges = {};
-    let {
-      source,
-      height,
-      width,
-      rows,
-      columns,
-      frameHeight,
-      frameWidth,
-      offsetY,
-      offsetX,
-    } = props;
-    let image = resolveAssetSource(source);
-    let ratio = 1;
-    let imageHeight = image.height;
-    let imageWidth = image.width;
+
+    // const memaProps = (() => {
+    //   let {
+    //     source,
+    //     height,
+    //     width,
+    //     rows,
+    //     columns,
+    //     frameHeight,
+    //     frameWidth,
+    //     offsetY,
+    //     offsetX,
+    //   } = this.props;
+  
+    //   let image = resolveAssetSource(source);
+    //   let ratio = 1;
+    //   let imageHeight = image.height;
+    //   let imageWidth = image.width;
+    //   offsetX = -offsetX;
+    //   offsetY = -offsetY;
+    //   frameHeight = frameHeight || image.height / rows;
+    //   frameWidth = frameWidth || image.width / columns;
+  
+    //   if (width) {
+    //     ratio = (width * columns) / image.width;
+    //     imageHeight = image.height * ratio;
+    //     imageWidth = width * columns;
+    //     frameHeight = (image.height / rows) * ratio;
+    //     frameWidth = width;
+    //   } else if (height) {
+    //     ratio = (height * rows) / image.height;
+    //     imageHeight = height * rows;
+    //     imageWidth = image.width * ratio;
+    //     frameHeight = height;
+    //     frameWidth = (image.width / columns) * ratio;
+    //   }
+
+    //   return {
+    //     imageHeight,
+    //     imageWidth,
+    //     frameHeight,
+    //     frameWidth,
+    //     offsetX,
+    //     offsetY,
+    //   }
+    // })();
+
+    // Object.assign(this.state, {
+    //   imageHeight,
+    //   imageWidth,
+    //   frameHeight,
+    //   frameWidth,
+    //   offsetX,
+    //   offsetY,
+    // });
+
+    let { offsetX, offsetY } = this.props;
     offsetX = -offsetX;
     offsetY = -offsetY;
-    frameHeight = frameHeight || image.height / rows;
-    frameWidth = frameWidth || image.width / columns;
-    if (width) {
-      ratio = (width * columns) / image.width;
-      imageHeight = image.height * ratio;
-      imageWidth = width * columns;
-      frameHeight = (image.height / rows) * ratio;
-      frameWidth = width;
-    } else if (height) {
-      ratio = (height * rows) / image.height;
-      imageHeight = height * rows;
-      imageWidth = image.width * ratio;
-      frameHeight = height;
-      frameWidth = (image.width / columns) * ratio;
-    }
-    Object.assign(this.state, {
-      imageHeight,
-      imageWidth,
-      frameHeight,
-      frameWidth,
-      offsetX,
-      offsetY,
-    });
+    Object.assign(this.state, {...this.calculateImageDimensions(this.props), ...{ offsetX, offsetY }});
     this.generateInterpolationRanges();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state.animationType !== nextState.animationType) ||
+      (() => {
+        if (this.updateWidth) { 
+          this.updateWidth = false;
+
+          this.time = new Animated.Value(0);
+          this.interpolationRanges = {};
+          this.generateInterpolationRanges();
+          console.log("SCP shouldComponentUpdate udpate width")
+          
+          return true;
+        } else {
+          return false;
+        }
+      })();
+  }
+
+
+  componentDidUpdate() {
+    console.log("SCP componentDidUpdate");
+    this.play({
+      type: "idle",
+      fps: 12,
+      loop: true,
+    })
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.width !== prevState.instanceRef.props.width) {
+      console.log("SCP getDerivedStateFromProps update width");
+      console.log(prevState);
+      prevState.instanceRef.updateWidth = true;
+      const {
+        imageHeight,
+        imageWidth,
+        frameHeight,
+        frameWidth,
+        // offsetX,
+        // offsetY,
+      } = prevState.instanceRef.calculateImageDimensions(nextProps);
+      
+      return {
+        imageHeight: imageHeight,
+        imageWidth: imageWidth,
+        frameHeight: frameHeight,
+        frameWidth: frameWidth,
+        // offsetX: offsetX,
+        // offsetY: offsetY,
+      }
+    }
+    return null;
+  }
+
   render() {
+    console.log("SCP SPRITE SHIT RENDERING");
+
     let {
       imageHeight,
       imageWidth,
@@ -128,11 +190,16 @@ export default class SpriteSheet extends React.Component {
       offsetX,
       offsetY,
     } = this.state;
+
+    console.log("SCP in render() imageHeight " + imageHeight)
+    
     let { viewStyle, imageStyle, source, onLoad } = this.props;
+
     let {
       translateY = { in: [0, 0], out: [offsetY, offsetY] },
       translateX = { in: [0, 0], out: [offsetX, offsetX] },
     } = this.interpolationRanges[animationType] || {};
+
     return (
       <View
         style={[
@@ -142,7 +209,8 @@ export default class SpriteSheet extends React.Component {
             width: frameWidth,
             overflow: 'hidden',
           },
-        ]}>
+        ]}
+      >
         <Animated.Image
           source={source}
           onLoad={onLoad}
@@ -173,7 +241,57 @@ export default class SpriteSheet extends React.Component {
     );
   }
 
+  calculateImageDimensions = (props) => {
+    console.log(props)
+
+    let {
+      source,
+      height,
+      width,
+      rows,
+      columns,
+      frameHeight,
+      frameWidth,
+      // offsetY,
+      // offsetX,
+    } = props;
+
+    let image = resolveAssetSource(source);
+    let ratio = 1;
+    let imageHeight = image.height;
+    let imageWidth = image.width;
+    // offsetX = -offsetX;
+    // offsetY = -offsetY;
+    frameHeight = frameHeight || image.height / rows;
+    frameWidth = frameWidth || image.width / columns;
+
+    if (width) {
+      ratio = (width * columns) / image.width;
+      imageHeight = image.height * ratio;
+      imageWidth = width * columns;
+      frameHeight = (image.height / rows) * ratio;
+      frameWidth = width;
+    } else if (height) {
+      ratio = (height * rows) / image.height;
+      imageHeight = height * rows;
+      imageWidth = image.width * ratio;
+      frameHeight = height;
+      frameWidth = (image.width / columns) * ratio;
+    }
+
+    return {
+      imageHeight,
+      imageWidth,
+      frameHeight,
+      frameWidth,
+      // offsetX,
+      // offsetY,
+    }
+  }
+
   generateInterpolationRanges = () => {
+    console.log("SCP generateInterpolationRanges")
+
     let { animations } = this.props;
 
     for (let key in animations) {

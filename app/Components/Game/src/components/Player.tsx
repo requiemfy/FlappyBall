@@ -18,9 +18,12 @@ export default class Player extends React.Component<Circle.Props, {}> {
   }
 
   componentDidMount() {
+    console.log("PLAYER DID MOUNT")
   }
 
-  
+  componentWillUnmount() {
+    console.log("PLAYER WILL UN-MOUNT")
+  }
 
   setSpriteRef = (ref: SpriteSheet | null) => {
     this.spriteRef = ref!;
