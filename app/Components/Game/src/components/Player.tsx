@@ -6,11 +6,6 @@ import SpriteSheet from '../utils/helpers/sprite-sheet';
 
 import * as Circle from './Circle';
 
-// type Sprite<T> = // @remind clear soon
-//   (T & string & React.MutableRefObject<SpriteSheet | null>) | 
-//   (T & ((instance: SpriteSheet | null) => void) & React.MutableRefObject<SpriteSheet | null>) | 
-//   (T & React.RefObject<any> & React.MutableRefObject<any>);
-
 interface State {
   left: number;
   top: number;
@@ -25,9 +20,6 @@ export default class Player extends React.Component<Circle.Props, State> {
     this.state = {
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
-
-      // left: 0,
-      // top: 0,
     }
   }
 
@@ -71,15 +63,9 @@ export default class Player extends React.Component<Circle.Props, State> {
   }
 
   render() {
-
     const
-      // { gameHeight } = GameDimension.window(),
-      // left = gameHeight * 0.077,
-      // top = gameHeight * 0.0342;
-
       left = this.state.left,
       top = this.state.top;
-
     return (
       <Circle.default {...this.props}>
         <SpriteSheet
@@ -89,19 +75,12 @@ export default class Player extends React.Component<Circle.Props, State> {
           rows={4}
           width={this.props.size * 2.7}
           viewStyle={{
-
             left: -left,
             top: -top,
-
-            // backgroundColor: "green"
           }}
-          // imageStyle={{
-          //   marginLeft: 
-          // }}
           animations={{
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-          }}
-        />
+          }} />
       </Circle.default>
     )
   }

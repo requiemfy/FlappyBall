@@ -17,10 +17,6 @@ import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
 
 export namespace Entities {
-  // type Physics = { 
-  //   engine: typeof engine;
-  //   world: typeof world ;
-  // }
   type Bodies = (
     game: FlappyBallGame, 
     dynamic?: InitialParams,
@@ -43,7 +39,6 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    // heightPercent: HeightPercent; // this is especially for wall, because e.g. floor has CONSTANT percentage
     renderer: typeof Box | typeof Player;
   };
 

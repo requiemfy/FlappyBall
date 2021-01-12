@@ -52,13 +52,8 @@ export default class SpriteSheet extends React.Component {
       translateYOutputRange: [0, 1],
       translateXInputRange: [0, 1],
       translateXOutputRange: [0, 1],
-      instanceRef: this,
     };
     this.calcImgDims(this.props);
-  }
-
-  componentWillUnmount() {
-    this.state.instanceRef = null; // prevent cycle reference
   }
 
   shouldComponentUpdate(nextProps, nextState) {

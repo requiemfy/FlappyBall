@@ -8,7 +8,6 @@ import { DeviceMotion } from 'expo-sensors';
 import { GameDimension } from "../dimensions";
 
 export namespace Orientation {
-  // type Event = (event: object) => void;
   type WallProps = { x: number, y: number, heightPercent: number };
   type Coordinates = { x: number, y: number };
   type OrientPlayer = (game: FlappyBallGame) => Coordinates;
@@ -19,7 +18,7 @@ export namespace Orientation {
   type EntityCoords = (entity: Entities.Physical<number | number[]>) => { [key: string]: number };
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
-  let orientationCallback: Event | any; // Event
+  let orientationCallback: ((event: object) => void) | null; // Event
   export const addChangeListener: OrientGame = (game) => {
     console.log("\torientation.tsx: addChangeListener!!!");
 
@@ -51,7 +50,7 @@ export namespace Orientation {
   };
 
   export const removeChangeListener = () => {
-    Dimensions.removeEventListener('change', orientationCallback);
+    Dimensions.removeEventListener('change', orientationCallback!);
     DeviceMotion.removeAllListeners();
     orientationCallback = null;
   }
