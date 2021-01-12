@@ -39,25 +39,29 @@ export default class Player extends React.Component<Circle.Props, State> {
     this.setState({
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
-    })
+    });
+    this.normalPlay();
+  }
+
+  normalPlay = () => { // usually for mobile, also triggered again in orientation change
+    this.spriteRef?.play({
+      type: "idle",
+      fps: 12,
+      loop: true,
+    });
   }
 
   setSpriteRef = (ref: SpriteSheet | null) => {
     this.spriteRef = ref!;
     const playSprite = () => {
-      if (Platform.OS === "web") // i donno why but animation loop doesn't work in web
+      if (Platform.OS === "web") // i donno why but animation loop doesn't work in web, therefore just do it recursively
         this.spriteRef?.play({
           type: "idle",
           fps: 12,
           loop: false,
           onFinish: () => playSprite(),
         })
-      else 
-        this.spriteRef?.play({
-          type: "idle",
-          fps: 12,
-          loop: true,
-        });
+      else this.normalPlay();
     }
     playSprite();
   }
