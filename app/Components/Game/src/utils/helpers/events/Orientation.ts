@@ -51,7 +51,9 @@ export namespace Orientation {
 
   export const removeChangeListener = () => {
     Dimensions.removeEventListener('change', orientationCallback!);
-    DeviceMotion.removeAllListeners();
+    DeviceMotion.isAvailableAsync().then((supported) => {
+      supported ? DeviceMotion.removeAllListeners() : null;
+    });
     orientationCallback = null;
   }
 
