@@ -63,6 +63,7 @@ export default class SpriteSheet extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (this.state.animationType !== nextState.animationType) || 
+      (this.props.viewStyle?.left !== nextProps.viewStyle?.left) ||
       (() => {
         if (this.props.width !== nextProps.width) {
           this.calcImgDims(nextProps);

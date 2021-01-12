@@ -227,7 +227,11 @@ export namespace Entities {
       let game!: FlappyBallGame, dynamic: InitialParams & FollowingParams | undefined; 
 
       const removeAllEntities = () => { // @note INSPECTED: good
-        for (let entity in game.entities) { COMPOSITE.remove(game.matterWorld, game.entities[entity].body) }
+        for (let entity in game.entities) { 
+          COMPOSITE.remove(game.matterWorld, game.entities[entity].body);
+          // delete game.entities[entity]; // i guess this is not needed, since id are still reused in creation
+          // my question is, why in swapping, entities are not getting unmounted?? even deleting it
+        }
       }
       const getFollowing = () => { // @note INSPECTED: good
         // for now, following is only wall, but I may add more following entity
@@ -257,7 +261,7 @@ export namespace Entities {
         dynamic ? getFollowing() : null; // following: walls, ...etc
       })();
 
-      game.engine.swap(game.entities); // if swap() went, edit GameEngine definition file (.d.ts)
+      game.engine.swap(game.entities); // if swap() went error, edit GameEngine definition file (.d.ts)
     }
   })();
   // ====================================================================================================

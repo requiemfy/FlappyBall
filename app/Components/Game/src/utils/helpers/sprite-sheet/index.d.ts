@@ -15,6 +15,8 @@ export interface ISpriteSheetProps {
   imageStyle?: StyleProp<ImageStyle>; // styles for the sprite sheet
   width?: number;
   height?: number;
+  frameWidth?: number;
+  frameHeight?: number;
   onLoad?: () => void;
 }
 
