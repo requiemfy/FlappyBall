@@ -75,15 +75,15 @@ export default class Player extends React.Component<Circle.Props, State> {
         <SpriteSheet
           ref={this.setSpriteRef} // if went error, i edited SpriteSheet index.d.ts
           source={require('../../assets/bally.png')}
-          columns={3}
-          rows={4}
+          columns={8}
+          rows={8}
           width={this.props.size * 2.7}
           viewStyle={{
             left: -left,
             top: -top,
           }}
           animations={{
-            idle: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            idle: [0, 1, 2, 3, 4, 5, 6, 7, 8]
           }} />
       </Circle.default>
     )
