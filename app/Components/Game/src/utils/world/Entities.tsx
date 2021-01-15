@@ -149,7 +149,7 @@ export namespace Entities {
         else return [ 1 - ROOF_HEIGHT - FLOOR_HEIGHT - PLAYER_SIZE - playerSpace ];
       }
 
-      return <typeof following.getWalls>function(entities, wallProps?) { // wallProps for orientation especially
+      return (function(entities, wallProps?) { // wallProps for orientation especially
         let isDefault = !(wallProps && wallProps.y), // if wallProps is only x, then default wall: in this case y is only default, ctrl-f: default y only
             numOfwall = isDefault ? wallEachTime[Math.floor(Math.random()*2)] : 1, // 1 wall only if not defualt creation
             wallHeightsArr = isDefault ? randomHeight(numOfwall == 2 ? 2 : 1) : null; // param conditions is neccessary, to limit vals
@@ -206,7 +206,7 @@ export namespace Entities {
             })();
           })();
         }
-      }
+      } as typeof following.getWalls)
     })(),
   }
   // ====================================================================================================
@@ -234,7 +234,7 @@ export namespace Entities {
         if (walls) for (let wall in walls) {following.getWalls(game.entities, walls[wall]);}
       }
 
-    return <typeof swap>function (paramGame, paramDynamic) { // @note INSPECTED: good
+    return (function (paramGame, paramDynamic) { // @note INSPECTED: good
       (function getParams() {
         game = paramGame;
         dynamic = paramDynamic;
@@ -257,7 +257,7 @@ export namespace Entities {
       })();
 
       game.engine.swap(game.entities); // if swap() went error, edit GameEngine definition file (.d.ts)
-    }
+    } as typeof swap)
   })();
   // ====================================================================================================
 }
