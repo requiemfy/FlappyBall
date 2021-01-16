@@ -1,3 +1,4 @@
+import React from 'react';
 import Box from "../../components/Box";
 import { 
   COMPOSITE, 
@@ -39,7 +40,8 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    renderer: typeof Box | typeof Player;
+    // renderer: typeof Box | typeof Player | JSX.Element;
+    renderer: any;
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -51,7 +53,7 @@ export namespace Entities {
   export type Initial = {
     // [key: string]: any; // additional
     [key: number]: Physical<number[]> & { heightPercent: number }; // initial wall
-    player: Physical<number>;
+    player: Physical<number> & { setRef: (ref: any) => void };
     floor: Physical<number[]>;
     roof: Physical<number[]>;
   };
@@ -70,7 +72,8 @@ export namespace Entities {
           size: player.size,
           borderRadius: player.borderRadius,
           color: player.color, 
-          renderer: Player,
+          setRef: ref => game.playerRef = ref,
+          renderer: <Player setRef={null} {...player} />
         },
         floor: { 
           body: floor.body, 

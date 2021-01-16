@@ -1,20 +1,22 @@
 import React, { createRef, MutableRefObject } from 'react';
 import { Dimensions, Image, Platform } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
-// import SpriteSheet from 'rn-sprite-sheet'; // @remind clear this soon
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 
 import * as Circle from './Circle';
+
+interface Props { setRef: ((ref: any) => void) | null; }
 
 interface State {
   left: number;
   top: number;
 }
 
-export default class Player extends React.Component<Circle.Props, State> {
+export default class Player extends React.Component<Circle.Props & Props, State> {
   spriteRef!: SpriteSheet;
+  webSprite = Platform.OS === "web" ? true : null;
 
-  constructor(props: Circle.Props) {
+  constructor(props: Circle.Props & Props) {
     super(props);
     const { gameHeight } = GameDimension.window();
     this.state = {
@@ -26,11 +28,13 @@ export default class Player extends React.Component<Circle.Props, State> {
   componentDidMount() {
     console.log("PLAYER DID MOUNT");
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
+    this.props.setRef ? this.props.setRef(this) : null;
   }
 
   componentWillUnmount() {
     console.log("PLAYER WILL UN-MOUNT")
     Dimensions.removeEventListener('change', this.orientationCallback);
+    this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
   }
 
   orientationCallback = () => {
@@ -59,7 +63,7 @@ export default class Player extends React.Component<Circle.Props, State> {
           type: "idle",
           fps: 12,
           loop: false,
-          onFinish: () => playSprite(),
+          onFinish: () => this.webSprite ? playSprite() : null,
         })
       else this.normalPlay();
     }

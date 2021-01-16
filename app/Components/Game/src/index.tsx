@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Alert, AppState, Dimensions, Text } from 'react-native'
+import { Alert, AppState, Dimensions, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 // import { GameEngine, GameEngineProperties } from 'react-native-game-engine'; // @remind clear this soon
 import { GameEngine } from './utils/helpers/react-native-game-engine';
@@ -30,6 +30,7 @@ import TopBar from './components/TopBar';
 import { NavigationParams } from 'react-navigation';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { Engine, World } from 'matter-js';
+import Player from './components/Player';
 
 interface Props { 
   navigation: NavigationParams; 
@@ -69,6 +70,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   state = {score:0, left: 0,};
   matterEngine = ENGINE.create({ enableSleeping:false } );
   matterWorld = this.matterEngine.world;
+
+  playerRef!: Player;
 
   constructor(props: Props) {
     super(props);
@@ -148,8 +151,14 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly = () => {
-    if (this.paused && !this.over) this.engine.start(); // i start() went missing, add it to GameEngine index.d.ts
-    let { width, height } = Dimensions.get("window"),
+    if (this.paused && !this.over) {
+      this.engine.start(); // i start() went missing, add it to GameEngine index.d.ts
+
+      if (Platform.OS === "web") {
+        this.playerRef.webSprite = false;
+      }
+    }
+      let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
     else Physics.playerRelativity.gravity(-0.003);
