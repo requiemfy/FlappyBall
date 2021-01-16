@@ -19,6 +19,7 @@ function resolveAssetSource(source) {
 }
 
 export default class SpriteSheet extends React.Component {
+
   static propTypes = {
     source: sourcePropType.isRequired, // source must be required
     columns: PropTypes.number.isRequired,
@@ -52,6 +53,8 @@ export default class SpriteSheet extends React.Component {
       translateYOutputRange: [0, 1],
       translateXInputRange: [0, 1],
       translateXOutputRange: [0, 1],
+      
+      stopAnimation: false,
     };
     this.calcImgDims(this.props);
   }
@@ -199,6 +202,7 @@ export default class SpriteSheet extends React.Component {
   };
 
   stop = cb => {
+    this.setState({ stopAnimation: true });
     this.time.stopAnimation(cb);
   };
 
@@ -211,7 +215,7 @@ export default class SpriteSheet extends React.Component {
     let { animations } = this.props;
     let { length } = animations[type];
 
-    this.setState({ animationType: type }, () => {
+    this.setState({ animationType: type, stopAnimation: false }, () => {
       let animation = Animated.timing(this.time, {
         toValue: length,
         duration: (length / fps) * 1000,
@@ -222,7 +226,15 @@ export default class SpriteSheet extends React.Component {
       this.time.setValue(0);
 
       if (loop) {
-        Animated.loop(animation).start();
+        if (Platform.OS === "web") {
+          (function start(ref) {
+            animation.start(() => {
+              ref.time.setValue(0);
+              !ref.state.stopAnimation ? start(ref) : null;
+            });
+          })(this);
+        }
+        else Animated.loop(animation).start();
       } else {
         animation.start(() => {
           if (resetAfterFinish) {
