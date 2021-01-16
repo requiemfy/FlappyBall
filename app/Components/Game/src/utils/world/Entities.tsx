@@ -40,8 +40,7 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    // renderer: typeof Box | typeof Player | JSX.Element;
-    renderer: any;
+    renderer: typeof Box | typeof Player;
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -73,7 +72,7 @@ export namespace Entities {
           borderRadius: player.borderRadius,
           color: player.color, 
           setRef: ref => game.playerRef = ref,
-          renderer: <Player setRef={null} {...player} />
+          renderer: Player
         },
         floor: { 
           body: floor.body, 

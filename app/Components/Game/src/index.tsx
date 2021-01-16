@@ -60,6 +60,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   engine!: GameEngine;
   entities!: Entities.All; // all entities (player, floor)
+  playerRef!: Player;
   paused = false; 
   over = false;
   wallIds: number[] = [];
@@ -71,7 +72,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   matterEngine = ENGINE.create({ enableSleeping:false } );
   matterWorld = this.matterEngine.world;
 
-  playerRef!: Player;
 
   constructor(props: Props) {
     super(props);
@@ -154,9 +154,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (this.paused && !this.over) {
       this.engine.start(); // i start() went missing, add it to GameEngine index.d.ts
 
-      if (Platform.OS === "web") {
-        this.playerRef.webSprite = false;
-      }
+      // this.playerRef.sprite.anim = "fly";
+      // this.playerRef.sprite.fps = 20;
+      this.playerRef.setState({ sprite: { anim: "fly", fps: 25 } });
     }
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);

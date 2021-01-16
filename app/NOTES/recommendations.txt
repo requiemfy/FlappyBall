@@ -35,3 +35,6 @@ node module edited:
   SpriteSheet
     - change to React.Component (orig is PureComponent)
     - added shouldComponentUpdate
+
+----------------------------------------------------------
+expect sprite won't work on mobile because i'm focusing first on web
