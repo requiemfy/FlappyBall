@@ -18,14 +18,8 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   left: number;
   top: number;
-
-  // sprite: { 
-  //   anim: keyof Animation,
-  //   fps: number,
-  // };
-  startSprite: (spriteRef: SpriteSheet | null) => void;
-  sprite: string; // @remind clear
   finish: boolean
+  startSprite: (spriteRef: SpriteSheet | null) => void;
 }
 
 export default class Player extends React.Component<Circle.Props & Props, State> {
@@ -40,10 +34,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
 
-      // sprite: { anim: "idle", fps: 12}
       startSprite: this.idle,
-      sprite: "idle", // @remind no need
-
       finish: true,
     }
   }
@@ -69,58 +60,10 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     });
   }
 
-  // initSprite = (spriteRef: SpriteSheet | null) => {
-  //   this.spriteRef = spriteRef!;
-  //   (function initSprite(playerRef: Player) {
-  //     if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
-  //       playerRef.spriteRef?.play({
-  //         type: playerRef.state.sprite.anim,
-  //         fps: playerRef.state.sprite.fps,
-
-  //         loop: false,
-  //         onFinish: () => {
-
-  //           if (playerRef.webSprite) {
-  //             console.log("playerRef.prevSprite " + playerRef.prevSprite)
-  //             // interrupt
-  //             if (playerRef.prevSprite === "fly") {
-  //               playerRef.setState({ sprite: { anim: "flyIdle", fps: 12 } }); // re-render to change sprite ASAP
-  //             } else if (playerRef.prevSprite === "fall"){
-  //               playerRef.setState({ sprite: { anim: "fallIdle", fps: 12 } }); // re-render to change sprite ASAP
-  //             }
-  //             playerRef.prevSprite = playerRef.state.sprite.anim;
-              
-  //             // // interrupt recursion
-  //             // if (playerRef.state.sprite.anim === "fly") {
-  //             //   playerRef.setState({ sprite: { anim: "flyIdle", fps: 12 } }); // re-render to change sprite ASAP
-  //             // } else if (playerRef.state.sprite.anim === "fall"){
-  //             //   playerRef.setState({ sprite: { anim: "fallIdle", fps: 12 } }); // re-render to change sprite ASAP
-  //             // }
-  //             initSprite(playerRef);
-  //           }
-  //         },
-  //       })
-  //     }
-  //     else 
-  //       playerRef.spriteRef?.play({
-  //         type: "idle",
-  //         fps: 12,
-  //         loop: true,
-  //       });
-  //   })(this);
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
+  stopCurrentAnim = () => {
+    this.setState({ finish: false });
+    this.spriteRef.stop();
+  }
 
 
 
@@ -146,34 +89,44 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   fly = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-    console.log("PLEASE FLY");
     (function initSprite(playerRef: Player) {
       if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
         playerRef.spriteRef?.play({
           type: "fly",
           fps: 25,
           loop: false,
-          onFinish: playerRef.flyIdle,
+          // onFinish: playerRef.flyIdle,
+          onFinish: () => {
+            playerRef.state.finish 
+              ? (function initSprite() {
+                  if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
+                    playerRef.spriteRef?.play({
+                      type: "flyIdle",
+                      fps: 12,
+                      loop: true,
+                    })
+                  }
+                })() 
+              : null;
+          }
         })
       }
     })(this);
   }
-  flyIdle = () => {
-    console.log("PLEASE FLY IDLE");
-    this.state.finish ? (function initSprite(playerRef: Player) {
-      if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
-        playerRef.spriteRef?.play({
-          type: "flyIdle",
-          fps: 12,
-          loop: true,
-        })
-      }
-    })(this) : null;
-  }
+  // flyIdle = () => {
+  //   this.state.finish ? (function initSprite(playerRef: Player) {
+  //     if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
+  //       playerRef.spriteRef?.play({
+  //         type: "flyIdle",
+  //         fps: 12,
+  //         loop: true,
+  //       })
+  //     }
+  //   })(this) : null;
+  // }
 
 
   fall = (spriteRef: SpriteSheet | null) => {
-    console.log("PLEASE FALL");
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
     (function initSprite(playerRef: Player) {
@@ -182,23 +135,35 @@ export default class Player extends React.Component<Circle.Props & Props, State>
           type: "fall",
           fps: 15,
           loop: false,
-          onFinish: playerRef.fallIdle,
+          // onFinish: playerRef.fallIdle,
+          onFinish: () => {
+            playerRef.state.finish 
+              ? (function initSprite() {
+                  if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
+                    playerRef.spriteRef?.play({
+                      type: "fallIdle",
+                      fps: 12,
+                      loop: true,
+                    })
+                  }
+                })() 
+              : null;
+          }
         })
       }
     })(this);
   }
-  fallIdle = () => {
-    console.log("PLEASE FALL IDLE");
-    this.state.finish ? (function initSprite(playerRef: Player) {
-      if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
-        playerRef.spriteRef?.play({
-          type: "fallIdle",
-          fps: 12,
-          loop: true,
-        })
-      }
-    })(this) : null;
-  }
+  // fallIdle = () => {
+  //   this.state.finish ? (function initSprite(playerRef: Player) {
+  //     if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
+  //       playerRef.spriteRef?.play({
+  //         type: "fallIdle",
+  //         fps: 12,
+  //         loop: true,
+  //       })
+  //     }
+  //   })(this) : null;
+  // }
 
 
 
@@ -217,7 +182,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     return (
       <Circle.default {...this.props}>
         <SpriteSheet
-          // ref={this.initSprite} // if went error, i edited SpriteSheet index.d.ts
           ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
 
           source={require('../../assets/bally.png')}

@@ -152,29 +152,23 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   playerFly = () => {
     if (this.paused && !this.over) this.engine.start(); // if start() went missing, add it to GameEngine index.d.ts
-    
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
     else Physics.playerRelativity.gravity(-0.003);
 
-    // this.playerRef.setState({ sprite: { anim: "fly", fps: 25 } }); // re-render to change sprite ASAP
-    this.playerRef.setState({ finish: false });
-    this.playerRef.spriteRef.stop();
+    this.playerRef.stopCurrentAnim(); // @remind i actually this should be in player physics depending on gravity sign ( + - )
     this.playerRef.setState({ startSprite: this.playerRef.fly });
   }
 
   playerFall = () => {
-    // this.playerRef.setState({ sprite: { anim: "fall", fps: 35 } }); // re-render to change sprite ASAP
-    this.playerRef.setState({ finish: false });
-    this.playerRef.spriteRef.stop();
-    this.playerRef.setState({ startSprite: this.playerRef.fall });
-
     let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
     if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
     else Physics.playerRelativity.gravity(0.0015); 
-    
+
+    this.playerRef.stopCurrentAnim(); // @remind i actually this should be in player physics depending on gravity sign ( + - )
+    this.playerRef.setState({ startSprite: this.playerRef.fall });
   }
 
   render() {
