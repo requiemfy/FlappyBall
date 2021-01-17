@@ -9,7 +9,7 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   left: number;
   top: number;
-  finish: boolean
+  finish: boolean; // for the purpose of forcely stop the animation ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
   startSprite: (spriteRef: SpriteSheet | null) => void;
 }
 
@@ -50,75 +50,105 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   stopCurrentAnim = () => {
-    this.setState({ finish: false });
+    this.setState({ finish: false }); // stop animation ASAP please, and don't ever try to continue no matter what
     this.spriteRef!.stop();
+  }
+
+  playSprite = (type: string, fps: number, loop: boolean, cb = () => {}) => {
+    this.spriteRef?.play({
+      type: type,
+      fps: fps,
+      loop: loop,
+      onFinish: () => this.state.finish ? cb() : null
+    })
   }
 
   idle = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
-    (function initSprite(playerRef: Player) {
-      if (Platform.OS === "web") { // i donno why but animation loop doesn't work in web, therefore just do it recursively
-        playerRef.spriteRef?.play({
-          type: "idle",
-          fps: 12,
-          loop: true,
-        })
-      }
-    })(this);
+    // (function initSprite(playerRef: Player) {
+    //   if (Platform.OS === "web") {
+    //     playerRef.spriteRef?.play({
+    //       type: "idle",
+    //       fps: 12,
+    //       loop: true,
+    //     })
+    //   }
+    // })(this);
+    this.playSprite("idle", 12, true);
   }
 
   fly = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-    (function initSprite(playerRef: Player) {
-      if (Platform.OS === "web") {
-        playerRef.spriteRef?.play({
-          type: "fly",
-          fps: 25,
-          loop: false,
-          onFinish: () => {
-            playerRef.state.finish 
-              ? (function initSprite() {
-                  if (Platform.OS === "web") { 
-                    playerRef.spriteRef?.play({
-                      type: "flyIdle",
-                      fps: 12,
-                      loop: true,
-                    })
-                  }
-                })() 
-              : null;
-          }
-        })
+    // (function initSprite(playerRef: Player) {
+    //   if (Platform.OS === "web") {
+    //     playerRef.spriteRef?.play({
+    //       type: "fly",
+    //       fps: 25,
+    //       loop: false,
+    //       onFinish: () => {
+    //         playerRef.state.finish 
+    //           ? (function initSprite() {
+    //               if (Platform.OS === "web") { 
+    //                 playerRef.spriteRef?.play({
+    //                   type: "flyIdle",
+    //                   fps: 12,
+    //                   loop: true,
+    //                 })
+    //               }
+    //             })() 
+    //           : null;
+    //       }
+    //     })
+    //   }
+    // })(this);
+    this.playSprite(
+      "fly", 25, false, 
+      () => {
+        this.spriteRef?.play({
+          type: "flyIdle",
+          fps: 12,
+          loop: true,
+        });
       }
-    })(this);
+    );
   }
 
   fall = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-    (function initSprite(playerRef: Player) {
-      if (Platform.OS === "web") { 
-        playerRef.spriteRef?.play({
-          type: "fall",
-          fps: 15,
-          loop: false,
-          onFinish: () => {
-            playerRef.state.finish 
-              ? (function initSprite() {
-                  if (Platform.OS === "web") { 
-                    playerRef.spriteRef?.play({
-                      type: "fallIdle",
-                      fps: 12,
-                      loop: true,
-                    })
-                  }
-                })() 
-              : null;
-          }
+    // (function initSprite(playerRef: Player) {
+    //   if (Platform.OS === "web") { 
+    //     playerRef.spriteRef?.play({
+    //       type: "fall",
+    //       fps: 15,
+    //       loop: false,
+    //       onFinish: () => {
+    //         playerRef.state.finish 
+    //           ? (function initSprite() {
+    //               if (Platform.OS === "web") { 
+    //                 playerRef.spriteRef?.play({
+    //                   type: "fallIdle",
+    //                   fps: 12,
+    //                   loop: true,
+    //                 })
+    //               }
+    //             })() 
+    //           : null;
+    //       }
+    //     })
+    //   }
+    // })(this);
+    this.playSprite(
+      "fall", 15, false, 
+      () => {
+        this.spriteRef?.play({
+          type: "fallIdle",
+          fps: 12,
+          loop: true,
         })
       }
-    })(this);
+    );
   }
 
   render() {
