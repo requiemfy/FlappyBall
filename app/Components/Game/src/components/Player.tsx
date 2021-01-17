@@ -73,13 +73,14 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.setState({ finish: true });
     this.playSprite(
       "fly", 25, false, 
-      () => {
-        this.spriteRef?.play({
-          type: "flyIdle",
-          fps: 12,
-          loop: true,
-        });
-      }
+      // () => {
+      //   this.spriteRef?.play({
+      //     type: "flyIdle",
+      //     fps: 12,
+      //     loop: true,
+      //   });
+      // }
+      () => this.playSprite("flyIdle", 12, true)
     );
   }
 
@@ -88,13 +89,14 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.setState({ finish: true });
     this.playSprite(
       "fall", 15, false, 
-      () => {
-        this.spriteRef?.play({
-          type: "fallIdle",
-          fps: 12,
-          loop: true,
-        })
-      }
+      // () => {
+      //   this.spriteRef?.play({
+      //     type: "fallIdle",
+      //     fps: 12,
+      //     loop: true,
+      //   })
+      // }
+      () => this.playSprite("fallIdle", 12, true)
     );
   }
 
@@ -117,8 +119,19 @@ export default class Player extends React.Component<Circle.Props & Props, State>
           }}
           animations={{
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-            fly: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+
+            fly: [
+              9, 10, 
+              11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+              21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+            ],
             flyIdle: [26, 27, 28, 29, 30],
+            flyReverse: [
+              30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 
+              20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 
+              10, 9
+            ],
+
             fall: [
               // 31, 32, 33, 34, 
 
