@@ -161,7 +161,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     
     // just choose either animation
     // this.playerRef.setState({ startSprite: this.playerRef.fly });
-    this.playerRef.setState({ startSprite: this.playerRef.reverseFall });
+    this.playerRef.setState({ startSprite: this.playerRef.reverseFallThenFly });
   }
 
   playerFall = () => {
@@ -171,10 +171,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     else Physics.playerRelativity.gravity(0.0015); 
 
     this.playerRef.stopCurrentAnim();
-    
+
     // just choose either animation
     // this.playerRef.setState({ startSprite: this.playerRef.fall });
-    this.playerRef.setState({ startSprite: this.playerRef.reverseFly });
+    this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
   }
 
   render() {

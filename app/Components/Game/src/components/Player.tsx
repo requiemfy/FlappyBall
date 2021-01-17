@@ -49,6 +49,11 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     });
   }
 
+  newSprite = (spriteRef: SpriteSheet | null) => {
+    this.spriteRef = spriteRef!;
+    this.setState({ finish: true });
+  }
+
   stopCurrentAnim = () => {
     this.setState({ finish: false }); // stop animation ASAP please, and don't ever try to continue no matter what
     this.spriteRef!.stop();
@@ -68,18 +73,23 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.playSprite("idle", 12, true);
   }
 
+  // optional animation
   fly = (spriteRef: SpriteSheet | null) => {
-    this.spriteRef = spriteRef!;
-    this.setState({ finish: true });
+    // this.spriteRef = spriteRef!;
+    // this.setState({ finish: true });
+    this.newSprite(spriteRef);
+
     this.playSprite(
       "fly", 25, false,
       () => this.playSprite("flyIdle", 12, true)
     );
   }
-
+  // optional animation
   fall = (spriteRef: SpriteSheet | null) => {
-    this.spriteRef = spriteRef!;
-    this.setState({ finish: true });
+    // this.spriteRef = spriteRef!;
+    // this.setState({ finish: true });
+    this.newSprite(spriteRef);
+
     this.playSprite(
       "flyReverse", 60, false, 
       () => this.playSprite(
@@ -89,34 +99,69 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
+  reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = () => {}) => {
+    // this.spriteRef = spriteRef!;
+    // this.setState({ finish: true });
+    this.newSprite(spriteRef);
 
-  reverseFly = (spriteRef: SpriteSheet | null) => {
-    this.spriteRef = spriteRef!;
     this.spriteRef?.reverse({
-      type: "fly",
-      fps: 200,
-      onFinish: () => {
-        this.setState({ finish: true });
-        this.playSprite(
-          "fall", 15, false,
-          () => this.playSprite("fallIdle", 12, true)
-        );
-      }})
+      type: type,
+      fps: fps,
+      onFinish: () => this.state.finish ? cb() : null
+    });
   }
 
-  reverseFall = (spriteRef: SpriteSheet | null) => {
-    this.spriteRef = spriteRef!;
-    this.spriteRef?.reverse({
-      type: "fall",
-      fps: 200,
-      onFinish: () => {
-        this.setState({ finish: true });
-        this.playSprite(
-          "fly", 25, false,
-          () => this.playSprite("flyIdle", 12, true)
-        );
-      }
-    })
+  reverseFlyThenFall = (spriteRef: SpriteSheet | null) => {
+    // this.spriteRef = spriteRef!;
+    // this.setState({ finish: true });
+    // this.spriteRef?.reverse({
+    //   type: "fly",
+    //   fps: 200,
+    //   onFinish: () => {
+    //     this.state.finish 
+    //     ? this.playSprite(
+    //         "fall", 15, false,
+    //         () => this.playSprite("fallIdle", 12, true)
+    //       )
+    //     : null;
+    //   }})
+    this.reverse(
+      spriteRef, "fly", 200,
+      () =>
+        this.state.finish 
+          ? this.playSprite(
+              "fall", 15, false,
+              () => this.playSprite("fallIdle", 12, true)
+            )
+          : null
+    );
+  }
+
+  reverseFallThenFly = (spriteRef: SpriteSheet | null) => {
+    // this.spriteRef = spriteRef!;
+    // this.setState({ finish: true });
+    // this.spriteRef?.reverse({
+    //   type: "fall",
+    //   fps: 200,
+      // onFinish: () => {
+      //   this.state.finish 
+      //   ? this.playSprite(
+      //       "fly", 25, false,
+      //       () => this.playSprite("flyIdle", 12, true)
+      //     )
+      //   : null;
+      // }
+    // })
+    this.reverse(
+      spriteRef, "fall", 200,
+      () => 
+        this.state.finish 
+          ? this.playSprite(
+              "fly", 25, false,
+              () => this.playSprite("flyIdle", 12, true)
+            )
+          : null
+    );
   }
 
   render() {
