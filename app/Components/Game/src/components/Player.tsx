@@ -65,43 +65,12 @@ export default class Player extends React.Component<Circle.Props & Props, State>
 
   idle = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
-    // (function initSprite(playerRef: Player) {
-    //   if (Platform.OS === "web") {
-    //     playerRef.spriteRef?.play({
-    //       type: "idle",
-    //       fps: 12,
-    //       loop: true,
-    //     })
-    //   }
-    // })(this);
     this.playSprite("idle", 12, true);
   }
 
   fly = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-    // (function initSprite(playerRef: Player) {
-    //   if (Platform.OS === "web") {
-    //     playerRef.spriteRef?.play({
-    //       type: "fly",
-    //       fps: 25,
-    //       loop: false,
-    //       onFinish: () => {
-    //         playerRef.state.finish 
-    //           ? (function initSprite() {
-    //               if (Platform.OS === "web") { 
-    //                 playerRef.spriteRef?.play({
-    //                   type: "flyIdle",
-    //                   fps: 12,
-    //                   loop: true,
-    //                 })
-    //               }
-    //             })() 
-    //           : null;
-    //       }
-    //     })
-    //   }
-    // })(this);
     this.playSprite(
       "fly", 25, false, 
       () => {
@@ -117,28 +86,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   fall = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-    // (function initSprite(playerRef: Player) {
-    //   if (Platform.OS === "web") { 
-    //     playerRef.spriteRef?.play({
-    //       type: "fall",
-    //       fps: 15,
-    //       loop: false,
-    //       onFinish: () => {
-    //         playerRef.state.finish 
-    //           ? (function initSprite() {
-    //               if (Platform.OS === "web") { 
-    //                 playerRef.spriteRef?.play({
-    //                   type: "fallIdle",
-    //                   fps: 12,
-    //                   loop: true,
-    //                 })
-    //               }
-    //             })() 
-    //           : null;
-    //       }
-    //     })
-    //   }
-    // })(this);
     this.playSprite(
       "fall", 15, false, 
       () => {
@@ -174,6 +121,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
             flyIdle: [26, 27, 28, 29, 30],
             fall: [
               // 31, 32, 33, 34, 
+
               35, 36, 37, 38, 39, 40, 
               41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
               51, 52, 53, 54, 55, 56
