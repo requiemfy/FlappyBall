@@ -14,7 +14,7 @@ interface State {
 }
 
 export default class Player extends React.Component<Circle.Props & Props, State> {
-  spriteRef!: SpriteSheet;
+  spriteRef: SpriteSheet | null = null;
 
   constructor(props: Circle.Props & Props) {
     super(props);
@@ -37,6 +37,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     console.log("PLAYER WILL UN-MOUNT")
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
+    this.spriteRef = null;
   }
 
   orientationCallback = () => {
@@ -50,7 +51,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
 
   stopCurrentAnim = () => {
     this.setState({ finish: false });
-    this.spriteRef.stop();
+    this.spriteRef!.stop();
   }
 
   idle = (spriteRef: SpriteSheet | null) => {
