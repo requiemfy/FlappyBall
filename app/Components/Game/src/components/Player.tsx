@@ -75,25 +75,11 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       "fly", 25, false,
       () => this.playSprite("flyIdle", 12, true)
     );
-    
-    // this.playSprite(
-    //   "fallReverse", 60, false, 
-    //   () => this.playSprite(
-    //     "fly", 25, false, 
-    //     () => this.playSprite("flyIdle", 12, true)
-    //   )
-    // );
   }
 
   fall = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
-
-    // this.playSprite(
-    //   "fall", 15, false,
-    //   () => this.playSprite("fallIdle", 12, true)
-    // );
-
     this.playSprite(
       "flyReverse", 60, false, 
       () => this.playSprite(
@@ -152,7 +138,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
           }}
           animations={{
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-
+            // -------------------------------------------
             fly: [
               // 9, 10, 11, 
               12, 13, 14, 15, 16, 17, 18, 19, 20, 
@@ -164,22 +150,14 @@ export default class Player extends React.Component<Circle.Props & Props, State>
               20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 
               10, 9
             ],
-
+            // -------------------------------------------
             fall: [
               // 31, 32, 33, 34, 
-
               35, 36, 37, 38, 39, 40, 
               41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
               51, 52, 53, 54, 55, 56
             ],
             fallIdle: [50, 51, 52, 53, 54, 55, 56],
-            fallReverse: [
-              56, 55, 54, 53, 52, 51,
-              50, 49, 48, 47, 46, 45, 44, 43, 42, 41,
-              40, 39, 38, 37, 36, 35,
-
-              // 34, 33, 32, 31
-            ],
           }} />
       </Circle.default>
     )
