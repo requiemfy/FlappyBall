@@ -202,7 +202,7 @@ export default class SpriteSheet extends React.Component {
   };
 
   stop = cb => {
-    this.setState({ stopAnimation: true });
+    this.setState({ stopAnimation: true }); // purpose is to stop the recursion
     this.time.stopAnimation(cb);
   };
 
@@ -245,6 +245,24 @@ export default class SpriteSheet extends React.Component {
       }
     });
   };
+
+  reverse = ({ type, fps = 24, onFinish = () => {} }) => {
+    let { animations } = this.props;
+    let { length } = animations[type];
+
+    this.setState({ animationType: type }, () => {
+      let animation = Animated.timing(this.time, {
+        toValue: 0,
+        duration: (length / fps) * 1000,
+        easing: Easing.linear,
+        useNativeDriver: true, // Using native animation driver instead of JS
+      });
+  
+      animation.start(() => {
+        onFinish();
+      });
+    });
+  }
 
   getFrameCoords = i => {
     let { columns, offsetX, offsetY } = this.props;

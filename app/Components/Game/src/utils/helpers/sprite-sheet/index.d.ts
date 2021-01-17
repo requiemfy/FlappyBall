@@ -30,6 +30,11 @@ export class SpriteSheet extends Component<ISpriteSheetProps, {}> {
   }) => void;
   stop: (cb?: (value: number) => void) => void;
   reset: (cb?: (value: number) => void) => void;
+  reverse: (config: {
+    type: string;
+    fps?: number;
+    onFinish?: () => void;
+  }) => void;
 }
 
 export default SpriteSheet;

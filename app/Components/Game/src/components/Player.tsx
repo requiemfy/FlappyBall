@@ -72,32 +72,65 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
     this.playSprite(
-      "fly", 25, false, 
-      // () => {
-      //   this.spriteRef?.play({
-      //     type: "flyIdle",
-      //     fps: 12,
-      //     loop: true,
-      //   });
-      // }
+      "fly", 25, false,
       () => this.playSprite("flyIdle", 12, true)
     );
+    
+    // this.playSprite(
+    //   "fallReverse", 60, false, 
+    //   () => this.playSprite(
+    //     "fly", 25, false, 
+    //     () => this.playSprite("flyIdle", 12, true)
+    //   )
+    // );
   }
 
   fall = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
     this.setState({ finish: true });
+
+    // this.playSprite(
+    //   "fall", 15, false,
+    //   () => this.playSprite("fallIdle", 12, true)
+    // );
+
     this.playSprite(
-      "fall", 15, false, 
-      // () => {
-      //   this.spriteRef?.play({
-      //     type: "fallIdle",
-      //     fps: 12,
-      //     loop: true,
-      //   })
-      // }
-      () => this.playSprite("fallIdle", 12, true)
+      "flyReverse", 60, false, 
+      () => this.playSprite(
+        "fall", 15, false, 
+        () => this.playSprite("fallIdle", 12, true)
+      )
     );
+  }
+
+
+  reverseFly = (spriteRef: SpriteSheet | null) => {
+    this.spriteRef = spriteRef!;
+    this.spriteRef?.reverse({
+      type: "fly",
+      fps: 200,
+      onFinish: () => {
+        this.setState({ finish: true });
+        this.playSprite(
+          "fall", 15, false,
+          () => this.playSprite("fallIdle", 12, true)
+        );
+      }})
+  }
+
+  reverseFall = (spriteRef: SpriteSheet | null) => {
+    this.spriteRef = spriteRef!;
+    this.spriteRef?.reverse({
+      type: "fall",
+      fps: 200,
+      onFinish: () => {
+        this.setState({ finish: true });
+        this.playSprite(
+          "fly", 25, false,
+          () => this.playSprite("flyIdle", 12, true)
+        );
+      }
+    })
   }
 
   render() {
@@ -121,8 +154,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
             idle: [0, 1, 2, 3, 4, 5, 6, 7, 8],
 
             fly: [
-              9, 10, 
-              11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+              // 9, 10, 11, 
+              12, 13, 14, 15, 16, 17, 18, 19, 20, 
               21, 22, 23, 24, 25, 26, 27, 28, 29, 30
             ],
             flyIdle: [26, 27, 28, 29, 30],
@@ -140,6 +173,13 @@ export default class Player extends React.Component<Circle.Props & Props, State>
               51, 52, 53, 54, 55, 56
             ],
             fallIdle: [50, 51, 52, 53, 54, 55, 56],
+            fallReverse: [
+              56, 55, 54, 53, 52, 51,
+              50, 49, 48, 47, 46, 45, 44, 43, 42, 41,
+              40, 39, 38, 37, 36, 35,
+
+              // 34, 33, 32, 31
+            ],
           }} />
       </Circle.default>
     )

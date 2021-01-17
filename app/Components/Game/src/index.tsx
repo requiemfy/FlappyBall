@@ -158,7 +158,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     else Physics.playerRelativity.gravity(-0.003);
 
     this.playerRef.stopCurrentAnim(); // @remind i actually this should be in player physics depending on gravity sign ( + - )
-    this.playerRef.setState({ startSprite: this.playerRef.fly });
+    
+    // this.playerRef.setState({ startSprite: this.playerRef.fly });
+    this.playerRef.setState({ startSprite: this.playerRef.reverseFall });
   }
 
   playerFall = () => {
@@ -167,8 +169,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
     else Physics.playerRelativity.gravity(0.0015); 
 
-    this.playerRef.stopCurrentAnim(); // @remind i actually this should be in player physics depending on gravity sign ( + - )
-    this.playerRef.setState({ startSprite: this.playerRef.fall });
+    this.playerRef.stopCurrentAnim();
+   
+    // this.playerRef.setState({ startSprite: this.playerRef.fall });
+    this.playerRef.setState({ startSprite: this.playerRef.reverseFly });
   }
 
   render() {
