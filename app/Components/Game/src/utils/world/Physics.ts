@@ -39,7 +39,7 @@ export namespace Physics {
   };
 
   export const playerRelativity = (() => { // @note INSPECTED: good
-    let playerGravity: number, prevPlayerY: number, number, sprite = 1; // @remind clear
+    let playerGravity: number;
     (function initGravity() {
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
@@ -50,43 +50,11 @@ export namespace Physics {
       velocity: <Relativity>function (entities) {
         const 
           player = entities.player,
-          currentPlayerY = player.body.position.y, // @remind clear this
           velocity = entities.game.matterWorld.gravity.y * player.body.mass * playerGravity;
-        
-          BODY.applyForce(player.body, player.body.velocity, {
+        BODY.applyForce(player.body, player.body.velocity, {
           x: 0,
           y: velocity
         });
-
-        // if (
-        //     currentPlayerY > prevPlayerY && // did we changed velocity? where is the vertex
-        //     sprite === 0 && // execute this once
-        //     playerGravity > 0 && // is the gravity ( + - ) agreed with the vertex?
-        //     entities.game.playerRef && // make sure ref is not null
-        //     (!entities.game.playerRef?.prevSprite || entities.game.playerRef?.prevSprite === "fly")
-        //   ) {
-        //   console.log("TIRRGER FALL")
-        //   sprite = 1;
-        //   entities.game.playerRef.stopCurrentAnim();
-        //   // just choose either one of animation methods
-        //   // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.fall });
-        //   entities.game.playerRef.setState({ startSprite: entities.game.playerRef.reverseFlyThenFall });
-        // } 
-        
-        // else if (
-        //     currentPlayerY < prevPlayerY && 
-        //     sprite === 1 && 
-        //     playerGravity < 0 &&
-        //     entities.game.playerRef
-        //   ) {
-        //   sprite = 0;
-        //   // entities.game.playerRef.stopCurrentAnim();
-        //   // // just choose either one of animation methods
-        //   // // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.fly });
-        //   // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.reverseFallThenFly });
-        // }
-
-        // prevPlayerY = currentPlayerY;
       },
       gravity: (scale) => playerGravity = scale,
     }

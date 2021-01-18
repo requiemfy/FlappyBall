@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Alert, AppState, Dimensions, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
-// import { GameEngine, GameEngineProperties } from 'react-native-game-engine'; // @remind clear this soon
 import { GameEngine } from './utils/helpers/react-native-game-engine';
 
 import { GameAppState } from './utils/helpers/events/GameState';
@@ -72,7 +71,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   state = {score:0, left: 0,};
   matterEngine = ENGINE.create({ enableSleeping:false } );
   matterWorld = this.matterEngine.world;
-
 
   constructor(props: Props) {
     super(props);
@@ -174,8 +172,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     // just choose either animation
     // this.playerRef.setState({ startSprite: this.playerRef.fall });
     this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
-
-    // this.playerRef.setState({ startSprite: this.playerRef.doNothing }); // @remind clear this
   }
 
   render() {

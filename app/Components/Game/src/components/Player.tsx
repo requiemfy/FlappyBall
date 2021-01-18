@@ -9,13 +9,12 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   left: number;
   top: number;
-  finish: boolean; // for the purpose of forcely stop the animation ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
+  finish: boolean; // for the purpose of forcely stop the onFinish callBack ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
   startSprite: (spriteRef: SpriteSheet | null) => void;
 }
 
 export default class Player extends React.Component<Circle.Props & Props, State> {
   spriteRef: SpriteSheet | null = null;
-  prevSprite: string | null = null; // @remind clear
 
   constructor(props: Circle.Props & Props) {
     super(props);
@@ -103,7 +102,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   reverseFlyThenFall = (spriteRef: SpriteSheet | null) => {
-    // this.prevSprite = "fall"; // @remind clear
     this.reverse(
       spriteRef, "fly", 200,
       () =>
@@ -117,7 +115,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   reverseFallThenFly = (spriteRef: SpriteSheet | null) => {
-    // this.prevSprite = "fly"; // @remind clear
     this.reverse(
       spriteRef, "fall", 200,
       () => 
@@ -130,7 +127,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
-  doNothing = (spriteRef: SpriteSheet | null) => this.spriteRef = spriteRef!; // @remind clear this
 
   render() {
     const
