@@ -15,6 +15,7 @@ interface State {
 
 export default class Player extends React.Component<Circle.Props & Props, State> {
   spriteRef: SpriteSheet | null = null;
+  prevSprite: string | null = null; // @remind clear
 
   constructor(props: Circle.Props & Props) {
     super(props);
@@ -72,13 +73,9 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = spriteRef!;
     this.playSprite("idle", 12, true);
   }
-
   // optional animation
   fly = (spriteRef: SpriteSheet | null) => {
-    // this.spriteRef = spriteRef!;
-    // this.setState({ finish: true });
     this.newSprite(spriteRef);
-
     this.playSprite(
       "fly", 25, false,
       () => this.playSprite("flyIdle", 12, true)
@@ -86,10 +83,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
   // optional animation
   fall = (spriteRef: SpriteSheet | null) => {
-    // this.spriteRef = spriteRef!;
-    // this.setState({ finish: true });
     this.newSprite(spriteRef);
-
     this.playSprite(
       "flyReverse", 60, false, 
       () => this.playSprite(
@@ -100,10 +94,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = () => {}) => {
-    // this.spriteRef = spriteRef!;
-    // this.setState({ finish: true });
     this.newSprite(spriteRef);
-
     this.spriteRef?.reverse({
       type: type,
       fps: fps,
@@ -112,19 +103,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   reverseFlyThenFall = (spriteRef: SpriteSheet | null) => {
-    // this.spriteRef = spriteRef!;
-    // this.setState({ finish: true });
-    // this.spriteRef?.reverse({
-    //   type: "fly",
-    //   fps: 200,
-    //   onFinish: () => {
-    //     this.state.finish 
-    //     ? this.playSprite(
-    //         "fall", 15, false,
-    //         () => this.playSprite("fallIdle", 12, true)
-    //       )
-    //     : null;
-    //   }})
+    // this.prevSprite = "fall"; // @remind clear
     this.reverse(
       spriteRef, "fly", 200,
       () =>
@@ -138,20 +117,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   reverseFallThenFly = (spriteRef: SpriteSheet | null) => {
-    // this.spriteRef = spriteRef!;
-    // this.setState({ finish: true });
-    // this.spriteRef?.reverse({
-    //   type: "fall",
-    //   fps: 200,
-      // onFinish: () => {
-      //   this.state.finish 
-      //   ? this.playSprite(
-      //       "fly", 25, false,
-      //       () => this.playSprite("flyIdle", 12, true)
-      //     )
-      //   : null;
-      // }
-    // })
+    // this.prevSprite = "fly"; // @remind clear
     this.reverse(
       spriteRef, "fall", 200,
       () => 
@@ -164,6 +130,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
+  doNothing = (spriteRef: SpriteSheet | null) => this.spriteRef = spriteRef!; // @remind clear this
+
   render() {
     const
       left = this.state.left,
@@ -172,7 +140,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       <Circle.default {...this.props}>
         <SpriteSheet
           ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
-
           source={require('../../assets/bally.png')}
           columns={8}
           rows={8}
@@ -197,7 +164,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
             ],
             // -------------------------------------------
             fall: [
-              // 31, 32, 33, 34, 
+              // 31, 32, 
+              33, 34, 
               35, 36, 37, 38, 39, 40, 
               41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
               51, 52, 53, 54, 55, 56

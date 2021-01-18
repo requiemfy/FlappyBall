@@ -26,7 +26,7 @@ export namespace Physics {
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
     entities.game.matterWorld.gravity.y = Math.abs(entities.game.gravity);
-    wallRelativity(entities);
+    // wallRelativity(entities); // @remind
     playerRelativity.velocity(entities);
     // //////////////////////////////////////////////////////////
     // entities.distance+=1; // this is on the entities script
@@ -39,7 +39,7 @@ export namespace Physics {
   };
 
   export const playerRelativity = (() => { // @note INSPECTED: good
-    let playerGravity: number;
+    let playerGravity: number, prevPlayerY: number, number, sprite = 1; // @remind clear
     (function initGravity() {
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
@@ -48,11 +48,45 @@ export namespace Physics {
     })();
     return <Player>{
       velocity: <Relativity>function (entities) {
-        const player = entities.player;
-        BODY.applyForce(player.body, player.body.velocity, {
+        const 
+          player = entities.player,
+          currentPlayerY = player.body.position.y, // @remind clear this
+          velocity = entities.game.matterWorld.gravity.y * player.body.mass * playerGravity;
+        
+          BODY.applyForce(player.body, player.body.velocity, {
           x: 0,
-          y: entities.game.matterWorld.gravity.y * player.body.mass * playerGravity
+          y: velocity
         });
+
+        // if (
+        //     currentPlayerY > prevPlayerY && // did we changed velocity? where is the vertex
+        //     sprite === 0 && // execute this once
+        //     playerGravity > 0 && // is the gravity ( + - ) agreed with the vertex?
+        //     entities.game.playerRef && // make sure ref is not null
+        //     (!entities.game.playerRef?.prevSprite || entities.game.playerRef?.prevSprite === "fly")
+        //   ) {
+        //   console.log("TIRRGER FALL")
+        //   sprite = 1;
+        //   entities.game.playerRef.stopCurrentAnim();
+        //   // just choose either one of animation methods
+        //   // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.fall });
+        //   entities.game.playerRef.setState({ startSprite: entities.game.playerRef.reverseFlyThenFall });
+        // } 
+        
+        // else if (
+        //     currentPlayerY < prevPlayerY && 
+        //     sprite === 1 && 
+        //     playerGravity < 0 &&
+        //     entities.game.playerRef
+        //   ) {
+        //   sprite = 0;
+        //   // entities.game.playerRef.stopCurrentAnim();
+        //   // // just choose either one of animation methods
+        //   // // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.fly });
+        //   // entities.game.playerRef.setState({ startSprite: entities.game.playerRef.reverseFallThenFly });
+        // }
+
+        // prevPlayerY = currentPlayerY;
       },
       gravity: (scale) => playerGravity = scale,
     }

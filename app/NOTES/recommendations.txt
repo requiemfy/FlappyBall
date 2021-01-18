@@ -40,3 +40,7 @@ node module edited:
 expect sprite won't work on mobile because i'm focusing first on web
 
 edit sprite shit a lot: make loop work on web
+
+----------------------------------------------------------
+
+i remove all walls for now
