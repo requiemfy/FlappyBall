@@ -196,8 +196,6 @@ export namespace Physics {
               timeOut = null; callBack = null;
             }
             timeOut = setTimeout(callBack, 0);
-            // Events.off(engine, 'collisionStart', callback)
-            // game.props.navigation.push("Menu", { button: "restart" });
             // -----------------------------------------------------------
             console.log("////////////////////////////////////////////////////")
             console.log("COLLISION DETECTED")

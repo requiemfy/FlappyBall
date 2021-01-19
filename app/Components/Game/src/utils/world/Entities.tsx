@@ -1,5 +1,5 @@
 import React from 'react';
-import Box from "../../components/Box";
+import Box from "../../components/shapes/Box";
 import { 
   COMPOSITE, 
   // engine, 
@@ -12,7 +12,7 @@ import {
 import { Matter } from "./Matter";
 import { Body, use } from 'matter-js';
 import FlappyBallGame from "../..";
-import Circle from "../../components/Circle";
+import Circle from "../../components/shapes/Circle";
 import Player from '../../components/Player'
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";

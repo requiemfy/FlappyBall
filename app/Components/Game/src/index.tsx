@@ -5,12 +5,12 @@ import { GameEngine } from './utils/helpers/react-native-game-engine';
 
 import { GameAppState } from './utils/helpers/events/GameState';
 import { Orientation } from './utils/helpers/events/Orientation';
-import { 
-  BODY, 
-  COMPOSITE, 
+import {
+  BODY,
+  COMPOSITE,
   // engine, 
-  EVENTS, 
-  NAVBAR_HEIGHT, 
+  EVENTS,
+  NAVBAR_HEIGHT,
   ENGINE,
   // world 
 } from './utils/world/constants';
@@ -32,9 +32,9 @@ import { Engine, World } from 'matter-js';
 import Player from './components/Player';
 import SpriteSheet from './utils/helpers/sprite-sheet';
 
-interface Props { 
-  navigation: NavigationParams; 
-  route: { params: { button: keyof { play: string; resume: string; restart: string; } } } 
+interface Props {
+  navigation: NavigationParams;
+  route: { params: { button: keyof { play: string; resume: string; restart: string; } } }
 }
 interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
@@ -51,25 +51,25 @@ interface Game {
   gravity: number;
   matterEngine: Engine;
   matterWorld: World;
-  
+
   menu(): boolean; // toggle true/false and pass to paused
   onGameEngineEvent(e: { type: string; }): void;
 }
 
-export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game{
+export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine!: GameEngine;
   entities!: Entities.All; // all entities (player, floor)
   playerRef!: Player;
-  paused = false; 
+  paused = false;
   over = false;
   wallIds: number[] = [];
   wallFreedIds: number[] = [];
   willUnmount = false;
   entitiesInitialized = false;
   gravity = 0.12;
-  state = {score:0, left: 0,};
-  matterEngine = ENGINE.create({ enableSleeping:false } );
+  state = { score: 0, left: 0, };
+  matterEngine = ENGINE.create({ enableSleeping: false });
   matterWorld = this.matterEngine.world;
 
   constructor(props: Props) {
@@ -84,7 +84,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("\nindex.tsx:\n--------------------------");
     console.log("FLAPPY GAME DID MOUNT!!");
     Physics.addCollisionListener(this);
-    Orientation.addChangeListener(this); 
+    Orientation.addChangeListener(this);
     GameAppState.addChangeListener(this);
     console.log("--------------------------\n")
     ////////////////////////////////////////////////////////////
@@ -112,17 +112,17 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       if (!this.paused) {
         console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
         this.engine.stop(); // i stop() went missing, add it to GameEngine index.d.ts
-      } 
+      }
       this.props.navigation.push("Menu", { button: "resume" })
     } else {
       console.log("GAME OVER")
     }
-    const 
+    const
       lastPlayerX = this.entities.player.body.position.x,
       lastPlayerY = this.entities.player.body.position.y;
     console.log("this.over: " + this.over);
     console.log("this.paused: " + this.paused);
-    console.log("lastPlayer x,y: " + lastPlayerX + ", " + lastPlayerY );
+    console.log("lastPlayer x,y: " + lastPlayerX + ", " + lastPlayerY);
     console.log("--------------------------");
     ////////////////////////////////////////////////////////////
     return false;
@@ -150,28 +150,33 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   playerFly = () => {
-    if (this.paused && !this.over) this.engine.start(); // if start() went missing, add it to GameEngine index.d.ts
-    let { width, height } = Dimensions.get("window"),
-        orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
-    else Physics.playerRelativity.gravity(-0.003);
+    if (!this.over) {
+      if (this.paused) this.engine.start(); // if start() went missing, add it to GameEngine index.d.ts
 
-    this.playerRef.stopCurrentAnim();
-    // just choose either animation
-    // this.playerRef.setState({ startSprite: this.playerRef.fly });
-    this.playerRef.setState({ startSprite: this.playerRef.reverseFallThenFly });
+      let { width, height } = Dimensions.get("window"),
+        orient = GameDimension.getOrientation(width, height);
+      if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
+      else Physics.playerRelativity.gravity(-0.003);
+
+      this.playerRef.stopCurrentAnim();
+      // just choose either animation
+      // this.playerRef.setState({ startSprite: this.playerRef.fly });
+      this.playerRef.setState({ startSprite: this.playerRef.reverseFallThenFly });
+    }
   }
 
   playerFall = () => {
-    let { width, height } = Dimensions.get("window"),
+    if (!this.over) {
+      let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-    if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
-    else Physics.playerRelativity.gravity(0.0015); 
+      if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
+      else Physics.playerRelativity.gravity(0.0015);
 
-    this.playerRef.stopCurrentAnim();
-    // just choose either animation
-    // this.playerRef.setState({ startSprite: this.playerRef.fall });
-    this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
+      this.playerRef.stopCurrentAnim();
+      // just choose either animation
+      // this.playerRef.setState({ startSprite: this.playerRef.fall });
+      this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
+    }
   }
 
   render() {
@@ -183,27 +188,28 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     return (
       <View style={{ flex: 1, }}>
-        <TopBar score={this.state.score} pause={this.menu} running="Menu"/>
+        <TopBar score={this.state.score} pause={this.menu} running="Menu" />
         <TouchableWithoutFeedback
           onPressIn={this.playerFly}
           onPressOut={this.playerFall}>
-           {/* this view is necessary, because GameEngine return many components
+          {/* this view is necessary, because GameEngine return many components
           and TouchableWithoutFeedback only works with 1 component */}
-          <View style={{ 
-            flex: 1, 
+          <View style={{
+            flex: 1,
             flexDirection: "row",
-            backgroundColor: "pink", }}> 
+            backgroundColor: "pink",
+          }}>
             <GameEngine
               ref={this.setEngineRef}
               onEvent={this.onGameEngineEvent}
               systems={[Physics.system]}
-              entities={this.entities} 
+              entities={this.entities}
               // running={!this.paused} // @note running
               style={{
-                flex: 1, 
-                backgroundColor: "blue", 
+                flex: 1,
+                backgroundColor: "blue",
                 left: this.state.left,
-              }}/>
+              }} />
             <StatusBar hidden />
           </View>
         </TouchableWithoutFeedback>
