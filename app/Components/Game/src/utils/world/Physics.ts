@@ -188,6 +188,10 @@ export namespace Physics {
             let timeOut: any;
             let callBack: any = () => {
               game.engine ? game.engine.stop() : null;
+              (function collidedSprite() {
+                game.playerRef.stopCurrentAnim();
+                game.playerRef.setState({ startSprite: game.playerRef.collided });
+              })()
               clearTimeout(timeOut);
               timeOut = null; callBack = null;
             }

@@ -72,7 +72,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = spriteRef!;
     this.playSprite("idle", 12, true);
   }
-  // optional animation
+  // optional animation, not really used for now
   fly = (spriteRef: SpriteSheet | null) => {
     this.newSprite(spriteRef);
     this.playSprite(
@@ -127,6 +127,10 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
+  collided = (spriteRef: SpriteSheet | null) => {
+    this.spriteRef = spriteRef!;
+    this.playSprite("collided", 12, false);
+  }
 
   render() {
     const
@@ -137,8 +141,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
         <SpriteSheet
           ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
           source={require('../../assets/bally.png')}
-          columns={8}
-          rows={8}
+          columns={9}
+          rows={10}
           width={this.props.size * 2.7}
           viewStyle={{
             left: -left,
@@ -167,6 +171,12 @@ export default class Player extends React.Component<Circle.Props & Props, State>
               51, 52, 53, 54, 55, 56
             ],
             fallIdle: [50, 51, 52, 53, 54, 55, 56],
+
+            collided: [
+              57, 58, 59, 60, 
+              61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+              71, 72, 73, 74, 75, 76, 77, 78, 79, 80
+            ]
           }} />
       </Circle.default>
     )
