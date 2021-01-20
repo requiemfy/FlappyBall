@@ -36,12 +36,14 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   componentWillUnmount() {
     console.log("PLAYER WILL UN-MOUNT")
     Dimensions.removeEventListener('change', this.orientationCallback);
+    this.stopCurrentAnim();
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     this.spriteRef = null;
   }
 
   orientationCallback = () => {
     console.log("PLAYER ORIENT")
+    this.stopCurrentAnim();
     const { gameHeight } = GameDimension.window();
     this.setState({
       left: gameHeight * 0.077,
@@ -129,7 +131,10 @@ export default class Player extends React.Component<Circle.Props & Props, State>
 
   collided = (spriteRef: SpriteSheet | null) => {
     this.spriteRef = spriteRef!;
-    this.playSprite("collided", 10, false);
+    this.playSprite(
+      "collided", 10, false,
+      () => this.playSprite("dead", 1, false) // this is for the purpose of not going to reset the frame, since if we change orientation, frame will render again from 1st
+    );
   }
 
   render() {
@@ -176,7 +181,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
               57, 58, 59, 60, 
               61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
               71, 72, 73, 74, 75, 76, 77, 78, 79, 80
-            ]
+            ],
+            dead: [80]
           }} />
       </Circle.default>
     )

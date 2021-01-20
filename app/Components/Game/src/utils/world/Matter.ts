@@ -72,7 +72,7 @@ export namespace Matter {
       // but we didn't explicity minus the half of floor width to it to fit the floor
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
       // [ floorWidth, floorHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
-      // gonna maximize the floor width, for falling wall to be caught in portrait
+      // ^ is optional, in bottom gonna maximize the floor width, for falling wall to be caught in portrait
       [ floorWidth, floorHeight ] = [ SCREEN_HEIGHT + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
       [ centerX, centerY ] = [ windowWidth / 2, gameHeight - (floorHeight / 2) ]
     ////////////////////////////////////////////////////////////

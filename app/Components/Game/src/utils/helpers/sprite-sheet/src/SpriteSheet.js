@@ -71,52 +71,6 @@ export default class SpriteSheet extends React.Component {
       })();
   }
 
-  calcImgDims(props) {
-    this.time = new Animated.Value(0);
-    this.interpolationRanges = {};
-    let {
-      source,
-      height,
-      width,
-      rows,
-      columns,
-      frameHeight,
-      frameWidth,
-      offsetY,
-      offsetX,
-    } = props;
-    let image = resolveAssetSource(source);
-    let ratio = 1;
-    let imageHeight = image.height;
-    let imageWidth = image.width;
-    offsetX = -offsetX;
-    offsetY = -offsetY;
-    frameHeight = frameHeight || image.height / rows;
-    frameWidth = frameWidth || image.width / columns;
-    if (width) {
-      ratio = (width * columns) / image.width;
-      imageHeight = image.height * ratio;
-      imageWidth = width * columns;
-      frameHeight = (image.height / rows) * ratio;
-      frameWidth = width;
-    } else if (height) {
-      ratio = (height * rows) / image.height;
-      imageHeight = height * rows;
-      imageWidth = image.width * ratio;
-      frameHeight = height;
-      frameWidth = (image.width / columns) * ratio;
-    }
-    Object.assign(this.state, {
-      imageHeight,
-      imageWidth,
-      frameHeight,
-      frameWidth,
-      offsetX,
-      offsetY,
-    });
-    this.generateInterpolationRanges();
-  }
-
   render() {
     let {
       imageHeight,
@@ -170,6 +124,52 @@ export default class SpriteSheet extends React.Component {
         />
       </View>
     );
+  }
+
+  calcImgDims(props) {
+    this.time = new Animated.Value(0);
+    this.interpolationRanges = {};
+    let {
+      source,
+      height,
+      width,
+      rows,
+      columns,
+      frameHeight,
+      frameWidth,
+      offsetY,
+      offsetX,
+    } = props;
+    let image = resolveAssetSource(source);
+    let ratio = 1;
+    let imageHeight = image.height;
+    let imageWidth = image.width;
+    offsetX = -offsetX;
+    offsetY = -offsetY;
+    frameHeight = frameHeight || image.height / rows;
+    frameWidth = frameWidth || image.width / columns;
+    if (width) {
+      ratio = (width * columns) / image.width;
+      imageHeight = image.height * ratio;
+      imageWidth = width * columns;
+      frameHeight = (image.height / rows) * ratio;
+      frameWidth = width;
+    } else if (height) {
+      ratio = (height * rows) / image.height;
+      imageHeight = height * rows;
+      imageWidth = image.width * ratio;
+      frameHeight = height;
+      frameWidth = (image.width / columns) * ratio;
+    }
+    Object.assign(this.state, {
+      imageHeight,
+      imageWidth,
+      frameHeight,
+      frameWidth,
+      offsetX,
+      offsetY,
+    });
+    this.generateInterpolationRanges();
   }
 
   generateInterpolationRanges = () => {

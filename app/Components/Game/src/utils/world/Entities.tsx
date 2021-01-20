@@ -1,5 +1,6 @@
 import React from 'react';
 import Box from "../../components/shapes/Box";
+import Grass from "../../components/Grass";
 import { 
   COMPOSITE, 
   // engine, 
@@ -40,7 +41,7 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    renderer: typeof Box | typeof Player;
+    renderer: typeof Box | typeof Player; // @remind update (grass roof)
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -79,7 +80,7 @@ export namespace Entities {
           size: [floor.width, floor.height], 
           borderRadius: floor.borderRadius,
           color: floor.color, 
-          renderer: Box,
+          renderer: Grass,
         },
         roof: { 
           body: roof.body, 

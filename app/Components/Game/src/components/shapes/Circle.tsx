@@ -1,15 +1,16 @@
 // quadrilateral matter template
 
+import { Body } from 'matter-js';
 import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
 export interface Props {
   size: number;
-  body: any; 
+  body: Body;
   borderRadius: number;
   color: string;
 }
-export interface State {}
+export interface State { }
 
 // PureComponent won't work
 export default class Circle extends React.Component<Props, State> {
@@ -18,7 +19,7 @@ export default class Circle extends React.Component<Props, State> {
   }
 
   render() {
-    const 
+    const
       size = this.props.size,
       x = this.props.body.position.x - (size / 2),
       y = this.props.body.position.y - (size / 2);
@@ -31,7 +32,8 @@ export default class Circle extends React.Component<Props, State> {
           width: size,
           height: size,
           borderRadius: this.props.borderRadius,
-          backgroundColor: this.props.color || "pink", }}>
+          backgroundColor: this.props.color || "pink",
+        }}>
         {this.props.children}
       </View>
     );

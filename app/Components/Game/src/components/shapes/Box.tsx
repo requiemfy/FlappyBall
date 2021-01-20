@@ -1,24 +1,25 @@
 // quadrilateral matter template
 
+import { Body } from 'matter-js';
 import * as React from 'react'
 import { TouchableWithoutFeedback, View } from "react-native";
 
-interface Props {
-  size:number[];
-  body:any; 
-  borderRadius:number;
-  color:string;
+export interface Props {
+  size: number[];
+  body: Body;
+  borderRadius: number;
+  color: string;
 }
-interface State {}
+export interface State { }
 
 // PureComponent won't work
 export default class Box extends React.Component<Props, State> {
   componentWillUnmount() {
-    console.log("UNMOUNTING....");
+    console.log("UNMOUNTING.... BOX");
   }
 
   render() {
-    const 
+    const
       width = this.props.size[0],
       height = this.props.size[1],
       x = this.props.body.position.x - (width / 2),
@@ -42,7 +43,10 @@ export default class Box extends React.Component<Props, State> {
           width: width,
           height: height,
           borderRadius: this.props.borderRadius,
-          backgroundColor: this.props.color || "pink", }} />
+          backgroundColor: this.props.color || "pink",
+        }}>
+        {this.props.children}
+      </View>
     );
   }
 }
