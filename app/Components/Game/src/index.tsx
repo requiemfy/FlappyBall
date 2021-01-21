@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Alert, AppState, Dimensions, Platform, Text } from 'react-native'
+import { Alert, Animated, AppState, Dimensions, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine } from './utils/helpers/react-native-game-engine';
 
@@ -31,6 +31,7 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { Engine, World } from 'matter-js';
 import Player from './components/Player';
 import SpriteSheet from './utils/helpers/sprite-sheet';
+import Grass from './components/Grass';
 
 interface Props {
   navigation: NavigationParams;
@@ -61,6 +62,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   engine!: GameEngine;
   entities!: Entities.All; // all entities (player, floor)
   playerRef!: Player;
+  grassRef!: Grass;
   paused = false;
   over = false;
   wallIds: number[] = [];
@@ -111,8 +113,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (!this.over) {
       if (!this.paused) {
         console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
-        this.engine.stop(); // i stop() went missing, add it to GameEngine index.d.ts
+        this.engine.stop(); // if stop() went missing, add it to GameEngine index.d.ts
       }
+      this.grassRef.stop();
       this.props.navigation.push("Menu", { button: "resume" })
     } else {
       console.log("GAME OVER")
@@ -149,9 +152,14 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
   }
 
+  play = () => {
+    this.engine.start();
+    this.grassRef.move();
+  }
+
   playerFly = () => {
     if (!this.over) {
-      if (this.paused) this.engine.start(); // if start() went missing, add it to GameEngine index.d.ts
+      if (this.paused) this.play(); // if start() went missing, add it to GameEngine index.d.ts
 
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);

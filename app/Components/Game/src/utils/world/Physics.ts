@@ -186,15 +186,20 @@ export namespace Physics {
             // engine.stop() doesn't work here in matter EVENTS,
             // but works with setTimeout() as callback, i donno why
             let timeOut: any;
+            
             let callBack: any = () => {
               game.engine ? game.engine.stop() : null;
+
               (function collidedSprite() {
+                game.grassRef.stop();
                 game.playerRef.stopCurrentAnim();
                 game.playerRef.setState({ startSprite: game.playerRef.collided });
-              })()
+              })();
+
               clearTimeout(timeOut);
               timeOut = null; callBack = null;
             }
+
             timeOut = setTimeout(callBack, 0);
             // -----------------------------------------------------------
             console.log("////////////////////////////////////////////////////")

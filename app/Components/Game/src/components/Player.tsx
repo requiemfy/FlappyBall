@@ -9,7 +9,7 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   left: number;
   top: number;
-  finish: boolean; // for the purpose of forcely stop the onFinish callBack ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
+  // finish: boolean; // for the purpose of forcely stop the onFinish callBack ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
   startSprite: (spriteRef: SpriteSheet | null) => void;
 }
 
@@ -22,7 +22,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.state = {
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
-      finish: true,
+      // finish: true,
       startSprite: this.idle,
     }
   }
@@ -41,8 +41,8 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = null;
   }
 
-  orientationCallback = () => {
-    console.log("PLAYER ORIENT")
+  private orientationCallback = () => {
+    console.log("PLAYER ORIENT");
     this.stopCurrentAnim();
     const { gameHeight } = GameDimension.window();
     this.setState({
@@ -51,22 +51,26 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     });
   }
 
-  newSprite = (spriteRef: SpriteSheet | null) => {
-    this.spriteRef = spriteRef!;
-    this.setState({ finish: true });
-  }
+  // setSpriteRef = (spriteRef: SpriteSheet | null) => {
+  //   this.spriteRef = spriteRef!;
+  //   // this.setState({ finish: true });
+  // }
 
   stopCurrentAnim = () => {
-    this.setState({ finish: false }); // stop animation ASAP please, and don't ever try to continue no matter what
+    // this.setState({ finish: false }); // stop animation ASAP please, and don't ever try to continue no matter what
     this.spriteRef!.stop();
+    this.spriteRef!.time.setValue(0); // this nigga here is needed for idle sprite, index 0 of idle causes error when using loop
   }
 
-  playSprite = (type: string, fps: number, loop: boolean, cb = () => {}) => {
+  playSprite = (type: string, fps: number, loop: boolean, cb = ({ finished }: { finished: boolean }) => {}) => {
     this.spriteRef?.play({
       type: type,
       fps: fps,
       loop: loop,
-      onFinish: () => this.state.finish ? cb() : null
+      // onFinish: () => this.state.finish ? cb() : null
+      // onFinish: ({ finished }: { finished: boolean }) => finished ? cb(finished) : null
+      onFinish: cb
+
     })
   }
 
@@ -74,43 +78,48 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = spriteRef!;
     this.playSprite("idle", 12, true);
   }
-  // optional animation, not really used for now
-  fly = (spriteRef: SpriteSheet | null) => {
-    this.newSprite(spriteRef);
-    this.playSprite(
-      "fly", 25, false,
-      () => this.playSprite("flyIdle", 12, true)
-    );
-  }
-  // optional animation
-  fall = (spriteRef: SpriteSheet | null) => {
-    this.newSprite(spriteRef);
-    this.playSprite(
-      "flyReverse", 60, false, 
-      () => this.playSprite(
-        "fall", 15, false, 
-        () => this.playSprite("fallIdle", 12, true)
-      )
-    );
-  }
+  // // optional animation, not really used for now
+  // fly = (spriteRef: SpriteSheet | null) => {
+  //   this.setSpriteRef(spriteRef);
+  //   this.playSprite(
+  //     "fly", 25, false,
+  //     ({ finished }) => finished ? this.playSprite("flyIdle", 12, true) : null
+  //   );
+  // }
+  // // optional animation
+  // fall = (spriteRef: SpriteSheet | null) => {
+  //   this.setSpriteRef(spriteRef);
+  //   this.playSprite(
+  //     "flyReverse", 60, false, 
+  //     ({ finished }) => 
+  //       finished 
+  //         ? this.playSprite(
+  //             "fall", 15, false, 
+  //             ({ finished }) => finished ? this.playSprite("fallIdle", 12, true) : null
+  //           )
+  //         : null
+  //   );
+  // }
 
-  reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = () => {}) => {
-    this.newSprite(spriteRef);
+  reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = ({ finished }: { finished: boolean }) => {}) => {
+    // this.setSpriteRef(spriteRef);
+    this.spriteRef = spriteRef!;
+
     this.spriteRef?.reverse({
       type: type,
       fps: fps,
-      onFinish: () => this.state.finish ? cb() : null
+      onFinish: cb
     });
   }
 
   reverseFlyThenFall = (spriteRef: SpriteSheet | null) => {
     this.reverse(
       spriteRef, "fly", 200,
-      () =>
-        this.state.finish 
+      ({ finished }) =>
+        finished
           ? this.playSprite(
               "fall", 15, false,
-              () => this.playSprite("fallIdle", 12, true)
+              ({ finished }) => finished ? this.playSprite("fallIdle", 12, true) : null
             )
           : null
     );
@@ -119,11 +128,11 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   reverseFallThenFly = (spriteRef: SpriteSheet | null) => {
     this.reverse(
       spriteRef, "fall", 200,
-      () => 
-        this.state.finish 
+      ({ finished }) => 
+        finished 
           ? this.playSprite(
               "fly", 25, false,
-              () => this.playSprite("flyIdle", 12, true)
+              ({ finished }) => finished? this.playSprite("flyIdle", 12, true) : null
             )
           : null
     );

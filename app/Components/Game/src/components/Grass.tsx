@@ -1,6 +1,6 @@
 import React, { createRef, MutableRefObject } from 'react';
-import { Animated, Easing, Dimensions, Image, Platform } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
+// import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { GameDimension } from '../utils/helpers/dimensions';
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Box from './shapes/Box';
@@ -12,174 +12,271 @@ interface State {
   top: number;
 }
 
-export default class Grass extends React.PureComponent<Box.Props & Props, any> {
-  // spriteRef: SpriteSheet | null = null;
+type GrassObject = {
+  animation: any;
+  leftVal: number;
+};
+
+export default class Grass extends React.PureComponent<Box.Props & Props, any> { // @remind update state here
+  // stopAnimCallBack = false; // @remind clear
+
+  // grassALeftVal = 0;
+  // grassBLeftVal = this.props.size[0];
+
+  private static readonly BASE_DURATION = 1000;
+
+  private grassA: GrassObject = {
+    animation: null,
+    leftVal: 0,
+  } 
+
+  private grassB: GrassObject = {
+    animation: null,
+    leftVal: this.props.size[0],
+  } 
+
+  private grassWidth = this.props.size[0];
+
+  // grassB = {
+  //   animation: Animated.timing(this.state.grassAleft, {
+  //     toValue: -this.props.size[0],
+  //     duration: 5000,
+  //     easing: Easing.linear,
+  //     useNativeDriver: !(Platform.OS === 'web'),
+  //   }),
+  //   leftVal: this.props.size[0],
+  // }
 
   constructor(props: Box.Props & Props) {
     super(props);
     const { gameHeight } = GameDimension.window();
     this.state = {
+      // grassAleft: new Animated.Value(this.grassALeftVal),
+      // grassBleft: new Animated.Value(this.grassBLeftVal),
 
-      // left: gameHeight * 0.077,
-      // top: gameHeight * 0.0342,
-
-      grassAleft: new Animated.Value(0),
-      grassBleft: new Animated.Value(this.props.size[0]),
-
-      // top: 0,
-
+      grassAleft: new Animated.Value(this.grassA.leftVal),
+      grassBleft: new Animated.Value(this.grassB.leftVal),
+      grassAheight: 0.3,
+      grassBheight: 0.3,
     }
   }
 
   componentDidMount() {
     console.log("GRASS DID MOUNT");
-    // Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.props.setRef ? this.props.setRef(this) : null;
-    this.move();
+    Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
+  
+    this.move(); // @remind clear
   }
 
   componentWillUnmount() {
     console.log("PLAYER WILL UN-MOUNT")
-    // Dimensions.removeEventListener('change', this.orientationCallback);
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
-    // this.spriteRef = null;
+    Dimensions.removeEventListener('change', this.orientationCallback);
   }
 
-  // orientationCallback = () => {
-  //   console.log("PLAYER ORIENT")
-  //   const { gameHeight } = GameDimension.window();
-  //   this.setState({
-  //     left: gameHeight * 0.077,
-  //     top: gameHeight * 0.0342,
-  //   });
-  // }
+  private orientationCallback = () => {
+    console.log("PLAYER ORIENT");
+    this.stop();
+  }
+
+  private static calcDuration(width: number, left: number) {
+    const 
+      distance = width + left,
+      percentage = distance / width;
+    return Grass.BASE_DURATION * percentage;
+  }
+
+  private animate(animatedVal: any, duration: number) {
+    return Animated.timing(animatedVal, {
+      toValue: -this.grassWidth,
+      duration: duration,
+      easing: Easing.linear,
+      useNativeDriver: !(Platform.OS === 'web'),
+    });
+  }
 
   move = () => {
-    const moveGrassA = (toValue: number, duration: number) => {
-      Animated.timing(this.state.grassAleft, {
-        toValue: toValue,
-        duration: duration,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start(() => {
-        console.log("WTF")
-        this.setState({ grassAleft: new Animated.Value(this.props.size[0]) });
-        moveGrassA(-(this.props.size[0]), 10000)
-      });
-    }
-    moveGrassA(-this.props.size[0], 5000);
 
-    const moveGrassB = (toValue: number) => {
-      Animated.timing(this.state.grassBleft, {
-        toValue: toValue,
-        duration: 10000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start(() => {
-        this.setState({ grassBleft: new Animated.Value(this.props.size[0]) });
-        moveGrassB(-(this.props.size[0]))
-      })
-    }
-    moveGrassB(-(this.props.size[0]));
+    // const moveGrassA = (toValue: number, duration: number) => {
+    //   Animated.timing(this.state.grassAleft, {
+    //     toValue: toValue,
+    //     duration: duration,
+    //     easing: Easing.linear,
+    //     useNativeDriver: true,
+    //   }).start(({ finished }) => { // @remind refactore
+    //     // if (!this.stopAnimCallBack) {
+    //     //   // this.setState({ grassAleft: new Animated.Value(this.props.size[0]) });
+    //     //   this.state.grassAleft.setValue(this.props.size[0])
+    //     //   moveGrassA(-(this.props.size[0]), 10000);
+    //     // }
+    //     if (finished) {
+    //       this.state.grassAleft.setValue(this.props.size[0]) // start to the right most blind spot of the screen
+    //       moveGrassA(-this.props.size[0], 10000);
+    //     }
+    //   });
+    // }
+    // moveGrassA(-this.props.size[0], 5000);
+
+    this.grassA.animation = this.animate(
+      this.state.grassAleft,
+      // (() => {
+      //   const 
+      //     distance = this.grassWidth + this.grassA.leftVal,
+      //     percentage = distance / this.grassWidth;
+      //   return 5000 * percentage;
+      // })()
+      Grass.calcDuration(this.grassWidth, this.grassA.leftVal)
+    );
+    this.grassA.animation.start(({ finished }: { finished: boolean }) => {
+      if (finished) {
+        Platform.OS === 'web'
+          ? this.setState({ grassAleft: new Animated.Value(this.grassWidth) })
+          : this.state.grassAleft.setValue(this.grassWidth); // for native driver
+        this.grassA.animation = this.animate(this.state.grassAleft, Grass.BASE_DURATION * 2);
+
+        // this.state.grassAleft.addListener(({ value }: any) => {
+        //   console.log("X " + value)
+        //   if (value <= -this.grassWidth) {
+        //     this.stop()
+        //     const rand = Math.random();
+        //     this.setState({ grassAheight: (rand > 0.7 ? 0.7 : (rand < 0.3 ? 0.3 : rand)) });
+        //     console.log("RENDER GRASS A HEIGHT please")
+        //     // this.move()
+        //   }
+        // });
+
+        Animated.loop(this.grassA.animation).start();
+      }
+    });
+
+
+
+
+    // const moveGrassB = (toValue: number, duration: number) => {
+    //   Animated.timing(this.state.grassBleft, {
+    //     toValue: toValue,
+    //     duration: duration,
+    //     easing: Easing.linear,
+    //     useNativeDriver: true,
+    //   }).start(({ finished }) => {  // @remind refactore
+    //     // if (!this.stopAnimCallBack) {
+    //     //   // this.setState({ grassBleft: new Animated.Value(this.props.size[0]) });
+    //     //   this.state.grassBleft.setValue(this.props.size[0])
+    //     //   moveGrassB(-(this.props.size[0]));
+    //     // }
+    //     if (finished) {
+    //       this.state.grassBleft.setValue(this.props.size[0]) // start to the right most blind spot of the screen
+    //       moveGrassB(-this.props.size[0], 10000);
+    //     }
+    //   })
+    // }
+    // moveGrassB(-this.props.size[0], 10000);
+
+    this.grassB.animation = this.animate(
+      this.state.grassBleft,
+      Grass.calcDuration(this.grassWidth, this.grassB.leftVal)
+    );
+    this.grassB.animation.start(({ finished }: { finished: boolean }) => {
+      if (finished) {
+        Platform.OS === 'web'
+          ? this.setState({ grassBleft: new Animated.Value(this.grassWidth) })
+          : this.state.grassBleft.setValue(this.grassWidth); // for native driver
+        this.grassB.animation = this.animate(this.state.grassBleft, Grass.BASE_DURATION * 2);
+
+        // this.state.grassBleft.addListener(({ value }: any) => {
+        //   if (value <= -this.grassWidth) {
+        //     this.stop()
+        //     const rand = Math.random();
+        //     this.setState({ grassBheight: (rand > 0.5 ? 0.5 : (rand < 0.3 ? 0.3 : rand)) });
+        //     console.log("RENDER HEIGHT please")
+        //     // this.move()
+        //   }
+        // });
+
+        Animated.loop(this.grassB.animation).start();
+      }
+    });
+
   }
 
-  
+  // start = () => {
+  //   // this.stopAnimCallBack = false; // @remind clear
+
+  //   this.move();
+  // }
+
+  stop = () => {
+    // this.stopAnimCallBack = true; // @remind clear
+
+    this.state.grassAleft.stopAnimation((value: number) => this.grassA.leftVal = value);
+    this.state.grassBleft.stopAnimation((value: number) => this.grassB.leftVal = value);
+  }
 
   render() {
     return (
       <Box.default {...this.props}>
-        {/* <SpriteSheet
-          ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
-          source={require('../../assets/grass.png')}
-          columns={1}
-          rows={19}
+        <Leaves left={this.state.grassAleft} randHeight={this.state.grassAheight} myColor={"red"} {...this.props}/>
+        <Leaves left={this.state.grassBleft} randHeight={this.state.grassBheight} myColor={"yellow"} {...this.props}/>
 
-          height={30}
-
-          // width={this.props.size * 2.7}
-          viewStyle={{
-            left: -left,
-            top: -top,
-            backgroundColor: "yellow",
-          }}
-
-          animations={{
-            move: [
-              0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
-              10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-            ]
-          }} /> */}
-
-      {/* <Animated.Image
-        source={require('../../assets/grass.png')}
-        style={[{
-          top: 0,
-          left: this.state.grassAleft,
-          // width: Dimensions.get('screen').width * 1.5,
-          // width: "100%",
-          width: this.props.size[0],
-          height: 20,
-          backgroundColor: "yellow",
-          resizeMode: "stretch"
-        }]}></Animated.Image> */}
-     
-      {/* <Animated.Image
-        source={require('../../assets/grass.png')}
-        style={[{
-          top: 0,
-          left: this.state.grassBleft,
-          // width: Dimensions.get('screen').width * 1.5,
-          // width: "100%",
-          width: this.props.size[0],
-          height: 20,
-          backgroundColor: 'red',
-          resizeMode: "stretch"
-        }]}></Animated.Image> */}
-
-        <GrassA grassAleft={this.state.grassAleft} width={this.props.size[0]}/>
-        <GrassB grassBleft={this.state.grassBleft} {...this.props}/>
+        {/* <GrassB grassBleft={this.state.grassBleft} {...this.props} /> */}
       </Box.default>
     )
   }
 }
 
 
-class GrassB extends React.PureComponent< Box.Props & { grassBleft: any }, {}> {
+class Leaves extends React.PureComponent<Box.Props & { left: any, randHeight: number, myColor: string }, {}> {
+
+  componentDidMount() {
+    console.log("CHECK MOUNTING LEAVES")
+  }
+
+  componentWillUnmount() {
+    console.log("CHECK UNMOUNTING LEAVES")
+  }
+
+  
+
   render() {
+    const 
+      rand = Math.random(),
+      height = this.props.size[1] * this.props.randHeight;
+
+    console.log("RENDER HEIGHT " + height)
     return (
       <Animated.Image
         source={require('../../assets/grass.png')}
         style={[{
           position: "absolute",
-          top: 0,
-          left: this.props.grassBleft,
-          // width: Dimensions.get('screen').width * 1.5,
-          // width: "100%",
+          top: -height,
           width: this.props.size[0],
-          height: 20,
-          backgroundColor: 'red',
+          height: height,
+          backgroundColor: this.props.myColor,
           resizeMode: "stretch"
-        }]}></Animated.Image>
+        }, 
+        Platform.OS === 'web'
+          ? {left: this.props.left,}
+          : {transform: [{translateX: this.props.left}]}
+      ]}></Animated.Image>
     )
   }
 }
 
-class GrassA extends React.PureComponent<{ grassAleft: any, width: number }, {}> {
-  render() {
-    return (
-      <Animated.Image
-        source={require('../../assets/grass.png')}
-        style={[{
-          position: "absolute",
-          top: 0,
-          left: this.props.grassAleft,
-          // width: Dimensions.get('screen').width * 1.5,
-          // width: "100%",
-          width: this.props.width,
-          height: 20,
-          backgroundColor: "yellow",
-          resizeMode: "stretch"
-        }]}></Animated.Image>
-    )
-  }
-}
+// class GrassB extends React.PureComponent<Box.Props & { grassBleft: any }, {}> {
+//   render() {
+//     return (
+//       <Animated.Image
+//         source={require('../../assets/grass.png')}
+//         style={[{
+//           position: "absolute",
+//           top: 0,
+//           left: this.props.grassBleft,
+//           width: this.props.size[0],
+//           height: 20,
+//           backgroundColor: 'red',
+//           resizeMode: "stretch"
+//         }]}></Animated.Image>
+//     )
+//   }
+// }

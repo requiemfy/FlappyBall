@@ -21,19 +21,20 @@ export interface ISpriteSheetProps {
 }
 
 export class SpriteSheet extends Component<ISpriteSheetProps, {}> {
+  time: any; // @remind LOL
   play: (config: {
     type: string;
     fps?: number;
     loop?: boolean;
     resetAfterFinish?: boolean;
-    onFinish?: () => void;
+    onFinish?: ({ finished }: { finished: boolean }) => void;
   }) => void;
   stop: (cb?: (value: number) => void) => void;
   reset: (cb?: (value: number) => void) => void;
   reverse: (config: {
     type: string;
     fps?: number;
-    onFinish?: () => void;
+    onFinish?: ({ finished }: { finished: boolean }) => void;
   }) => void;
 }
 
