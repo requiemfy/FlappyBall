@@ -16,48 +16,36 @@ interface State {
 type GrassObject = {
   animation: any;
   leftVal: number;
-  listener: any; // @remind check
 };
 
 export default class Grass extends React.PureComponent<Box.Props & Props, any> { // @remind update state here
-  private static readonly BASE_DURATION = 1000;
+  private static readonly BASE_DURATION = 3000;
   private grassWidth = this.props.size[0];
   private grassA: GrassObject = {
     animation: null,
     leftVal: 0,
-    listener: null, // @remind check
   } 
   private grassB: GrassObject = {
     animation: null,
     leftVal: this.props.size[0],
-    listener: null,  // @remind check
   } 
 
   constructor(props: Box.Props & Props) {
     super(props);
     const { gameHeight } = GameDimension.window();
     this.state = {
-      // @remind check
-      // grassAleft: new Animated.Value(this.grassALeftVal),
-      // grassBleft: new Animated.Value(this.grassBLeftVal),
-
       grassAleft: new Animated.Value(this.grassA.leftVal),
       grassBleft: new Animated.Value(this.grassB.leftVal),
       grassAheight: 0.3,
       grassBheight: 0.3,
     }
-
-    // @remind check
-    // this.state.grassAleft.addListener(({value}: any) => this.grassA.leftVal = value);
-    // this.state.grassBleft.addListener(({value}: any) => this.grassB.leftVal = value);
   }
-
 
   componentDidMount() {
     console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
-    // this.move(); // @remind clear
+    this.move(); // @remind clear
   }
 
   componentWillUnmount() {
@@ -127,36 +115,84 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
 
     // @remind clear
     // USING PARALLEL
-    const switching = (a = -this.grassWidth, b = 0)  => {
+    // const switching = (a = -this.grassWidth, b = 0)  => {
+    //   this.grassA.animation = this.animate(
+    //     this.state.grassAleft,
+    //     this.calcDuration(this.grassWidth, 0), a
+    //   );
+    //   this.grassB.animation = this.animate(
+    //     this.state.grassBleft, // starting
+    //     this.calcDuration(this.grassWidth, 0), b
+    //   );
+    // }
+
+    // const animate1 = () => {
+    //   this.state.grassAleft.setValue(0);
+    //   this.state.grassBleft.setValue(this.grassWidth);
+    //   switching();
+    //   Animated.parallel([
+    //     this.grassA.animation,
+    //     this.grassB.animation
+    //   ]).start(({ finished }: any) => finished ? animate2() : null);
+    // }
+    // const animate2 = () => {
+    //   this.state.grassAleft.setValue(this.grassWidth);
+    //   this.state.grassBleft.setValue(0);
+    //   switching(0, -this.grassWidth);
+    //   Animated.parallel([
+    //     this.grassA.animation,
+    //     this.grassB.animation
+    //   ]).start(({ finished }: any) => finished ? animate1() : null);
+    // }
+    // animate1();
+
+
+    // @remind refactoring
+    const switching = (toValue=[-this.grassWidth, 0], left=[0, this.grassWidth])  => {
+      this.state.grassAleft.setValue(left[0]);
+      this.state.grassBleft.setValue(left[1]);
+
       this.grassA.animation = this.animate(
         this.state.grassAleft,
-        this.calcDuration(this.grassWidth, 0), a
+        this.calcDuration(this.grassWidth, 0), toValue[0]
       );
       this.grassB.animation = this.animate(
         this.state.grassBleft, // starting
-        this.calcDuration(this.grassWidth, 0), b
+        this.calcDuration(this.grassWidth, 0), toValue[1]
       );
     }
 
-    const animate1 = () => {
-      this.state.grassAleft.setValue(0);
-      this.state.grassBleft.setValue(this.grassWidth);
-      switching();
+    // const animate1 = () => {
+    //   switching();
+    //   Animated.parallel([
+    //     this.grassA.animation,
+    //     this.grassB.animation
+    //   ]).start(({ finished }: any) => finished ? animate2() : null);
+    // }
+    // const animate2 = () => {
+    //   switching([0, -this.grassWidth], [this.grassWidth, 0]);
+    //   Animated.parallel([
+    //     this.grassA.animation,
+    //     this.grassB.animation
+    //   ]).start(({ finished }: any) => finished ? animate1() : null);
+    // }
+    // animate1();
+
+    let first = "grass-a"
+    const animateGrass = () => {
+      if (first === "grass-a") {
+        first = "grass-b"
+        switching()
+      } else {
+        first = "grass-a"
+        switching([0, -this.grassWidth], [this.grassWidth, 0])
+      }
       Animated.parallel([
         this.grassA.animation,
         this.grassB.animation
-      ]).start(({ finished }: any) => finished ? animate2() : null);
+      ]).start(({ finished }: any) => finished ? animateGrass() : null);
     }
-    const animate2 = () => {
-      this.state.grassAleft.setValue(this.grassWidth);
-      this.state.grassBleft.setValue(0);
-      switching(0, -this.grassWidth);
-      Animated.parallel([
-        this.grassA.animation,
-        this.grassB.animation
-      ]).start(({ finished }: any) => finished ? animate1() : null);
-    }
-    animate1();
+    animateGrass()
 
   }
 
