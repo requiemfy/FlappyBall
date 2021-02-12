@@ -57,13 +57,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
     console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
-    this.move(); // @remind clear
-
-    // @remind clear
-    // setTimeout(() => {
-    //   this.grassA.animation.stop(() => {console.log("AAAAAAAAAAAAAAAAWDADASDSADSDDSASDADASD")});
-    // }, 2000);
-
+    // this.move(); // @remind clear
   }
 
   componentWillUnmount() {
@@ -84,141 +78,95 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
     return Grass.BASE_DURATION * percentage;
   }
 
-  private animate(animatedVal: any, duration: number) {
+  private animate(animatedVal: any, duration: number, toValue=-this.grassWidth ) {
     return Animated.timing(animatedVal, {
-      toValue: -this.grassWidth,
+      toValue: toValue,
       duration: duration,
       easing: Easing.linear,
-      // useNativeDriver: !(Platform.OS === 'web'),
-      useNativeDriver: false,
+      useNativeDriver: !(Platform.OS === 'web'),
+      // useNativeDriver: false,
     });
   }
 
   move = () => {
-
-    // const grassAmove = () => {
+    // const moveGrassA = () => {
     //   this.grassA.animation = this.animate(
     //     this.state.grassAleft,
     //     this.calcDuration(this.grassWidth, this.grassA.leftVal)
     //   );
-    //   this.grassA.animation.start(
-    //     ({ finished }: { finished: boolean }) => {
-    //       if (finished) {
-
-    //         Platform.OS === 'web'
-    //           ? this.setState({ grassAleft: new Animated.Value(this.grassWidth) })
-    //           : this.state.grassAleft.setValue(this.grassWidth); // for native driver
-    //         this.grassA.animation = this.animate(this.state.grassAleft, Grass.BASE_DURATION * 2);
-
-    //         // // const rand = Math.random();
-    //         // // this.setState({ grassAheight: (rand > 0.7 ? 0.7 : (rand < 0.3 ? 0.3 : rand)) });
-    //         // // console.log("RENDER GRASS A HEIGHT please")
-
-    //         Animated.loop(this.grassA.animation).start();
-    //       }
+    //   this.grassA.animation.start(({ finished }: any) => { // @remind refactore
+    //     if (finished) {
+    //       this.stop();
+    //       this.grassA.leftVal = this.grassB.leftVal + this.grassWidth;
+    //       this.state.grassAleft.setValue(this.grassA.leftVal);
+    //       moveGrassA();
+    //       moveGrassB();
     //     }
-    //   );
+    //   });
     // }
-    // grassAmove();
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const moveGrassA = () => {
-      this.grassA.animation = this.animate(
-        this.state.grassAleft,
-        this.calcDuration(this.grassWidth, this.grassA.leftVal)
-        // Grass.BASE_DURATION
-      );
+    // moveGrassA();
 
+    // const moveGrassB = () => {
+    //   console.log("GRASSSSSSSSSSSSSSSSSSSSSSSSSS B: " + this.grassB.leftVal)
+    //   this.grassB.animation = this.animate(
+    //     this.state.grassBleft, // starting
+    //     this.calcDuration(this.grassWidth, this.grassB.leftVal)
+    //   );
+    //   this.grassB.animation.start(({ finished }: any) => { // @remind refactore
+    //     if (finished) {
+    //       this.stop();
+    //       this.grassB.leftVal = this.grassA.leftVal + this.grassWidth;
+          // this.state.grassBleft.setValue(this.grassB.leftVal);
 
-      this.grassA.animation.start(({ finished }: any) => { // @remind refactore
-        if (finished) {
-          this.stop();
-
-          this.grassA.leftVal = this.grassB.leftVal + this.grassWidth;
-          // this.grassA.leftVal = (
-          //   !(Platform.OS === 'web')
-          //     ? this.grassB.leftVal
-          //     : this.state.grassBleft._value
-          //   ) + this.grassWidth; // for duration
-
-          this.state.grassAleft.setValue(this.grassA.leftVal);
-          // this.setState({ grassAleft: new Animated.Value(this.grassA.leftVal) });
-
-          moveGrassA();
-          moveGrassB();
-        }
-      });
-    }
-    moveGrassA();
-
-    // this.grassB.animation = this.animate(
-    //   this.state.grassBleft,
-    //   this.calcDuration(this.grassWidth, this.grassB.leftVal)
-    // );
-    // this.grassB.animation.start(({ finished }: { finished: boolean }) => {
-    //   if (finished) {
-    //     Platform.OS === 'web'
-          // ? this.setState({ grassBleft: new Animated.Value(this.grassWidth) })
-    //       : this.state.grassBleft.setValue(this.grassWidth); // for native driver
-    //     this.grassB.animation = this.animate(this.state.grassBleft, Grass.BASE_DURATION * 2);
-
-    //     Animated.loop(this.grassB.animation).start();
-    //   }
-    // });
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const moveGrassB = () => {
-      console.log("GRASSSSSSSSSSSSSSSSSSSSSSSSSS B: " + this.grassB.leftVal)
-      this.grassB.animation = this.animate(
-        this.state.grassBleft, // starting
-        this.calcDuration(this.grassWidth, this.grassB.leftVal)
-        // Grass.BASE_DURATION
-      );
-      this.grassB.animation.start(({ finished }: any) => { // @remind refactore
-        if (finished) {
-          this.stop();
-
-          this.grassB.leftVal = this.grassA.leftVal + this.grassWidth;
-          // this.grassB.leftVal = (
-          //   !(Platform.OS === 'web')
-          //     ? this.grassA.leftVal
-          //     : this.state.grassAleft._value
-          //   ) + this.grassWidth; // for duration
-            
-          this.state.grassBleft.setValue(this.grassB.leftVal);
-          // this.setState({ grassBleft: new Animated.Value(this.grassB.leftVal) });
-
-          moveGrassB();
-          moveGrassA();
-        }
-      });
-    }
-    moveGrassB();
-
+    //       moveGrassB();
+    //       moveGrassA();
+    //     }
+    //   });
+    // }
+    // moveGrassB();
 
     // @remind clear
-    // // USING PARALLEL
-    // this.grassA.animation = this.animate(
-    //   this.state.grassAleft,
-    //   this.calcDuration(this.grassWidth, this.grassA.leftVal)
-    // );
+    // USING PARALLEL
+    const switching = (a = -this.grassWidth, b = 0)  => {
+      this.grassA.animation = this.animate(
+        this.state.grassAleft,
+        this.calcDuration(this.grassWidth, 0), a
+      );
+      this.grassB.animation = this.animate(
+        this.state.grassBleft, // starting
+        this.calcDuration(this.grassWidth, 0), b
+      );
+    }
 
-    // this.grassB.animation = this.animate(
-    //   this.state.grassBleft, // starting
-    //   this.calcDuration(this.grassWidth, this.grassB.leftVal)
-    // );
-
-    // Animated.parallel([
-    //   this.grassA.animation,
-    //   this.grassB.animation
-    // ]).start();
+    const animate1 = () => {
+      this.state.grassAleft.setValue(0);
+      this.state.grassBleft.setValue(this.grassWidth);
+      switching();
+      Animated.parallel([
+        this.grassA.animation,
+        this.grassB.animation
+      ]).start(({ finished }: any) => finished ? animate2() : null);
+    }
+    const animate2 = () => {
+      this.state.grassAleft.setValue(this.grassWidth);
+      this.state.grassBleft.setValue(0);
+      switching(0, -this.grassWidth);
+      Animated.parallel([
+        this.grassA.animation,
+        this.grassB.animation
+      ]).start(({ finished }: any) => finished ? animate1() : null);
+    }
+    animate1();
 
   }
 
   stop = () => {
-    this.state.grassAleft.stopAnimation((value: number) => this.grassA.leftVal = value);
-    this.state.grassBleft.stopAnimation((value: number) => this.grassB.leftVal = value);
+    // this.state.grassAleft.stopAnimation((value: number) => this.grassA.leftVal = value);
+    // this.state.grassBleft.stopAnimation((value: number) => this.grassB.leftVal = value);
     // @remind clear
-    // this.grassA.animation.stop()
-    // this.grassB.animation.stop()
+    console.log("STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPPPP GRASSSSS")
+    this.grassA.animation.stop()
+    this.grassB.animation.stop()
   }
 
   render() {

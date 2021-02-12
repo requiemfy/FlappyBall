@@ -42,5 +42,7 @@ expect sprite won't work on mobile because i'm focusing first on web
 edit sprite shit a lot: make loop work on web
 
 ----------------------------------------------------------
-
 i remove all walls for now
+----------------------------------------------------------
+i'm trying to use Animated.parallel for grass
+idea: fixed stopping point for both grass, then switch at parallel callback
