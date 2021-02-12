@@ -20,6 +20,7 @@ type GrassObject = {
 export default class Grass extends React.PureComponent<Box.Props & Props, any> { // @remind update state here
   private static readonly BASE_DURATION = 3000;
   private grassWidth = this.props.size[0];
+  private firstGrass = "grass-a";
   private grassA: GrassObject = {
     animation: null,
   } 
@@ -35,6 +36,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
       grassBleft: new Animated.Value(this.grassWidth),
       grassAheight: 0.3,
       grassBheight: 0.3,
+      // 0.3 - 1.5 grass height
     }
   }
 
@@ -71,35 +73,35 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
     });
   }
 
-  move = () => {
-    const switching = (toValue=[-this.grassWidth, 0], left=[0, this.grassWidth])  => {
-      this.state.grassAleft.setValue(left[0]);
-      this.state.grassBleft.setValue(left[1]);
-      this.grassA.animation = this.animate(
-        this.state.grassAleft,
-        this.calcDuration(this.grassWidth, 0), toValue[0]
-      );
-      this.grassB.animation = this.animate(
-        this.state.grassBleft, // starting
-        this.calcDuration(this.grassWidth, 0), toValue[1]
-      );
-    }
+  private switching = (toValue=[-this.grassWidth, 0], left=[0, this.grassWidth])  => {
+    this.state.grassAleft.setValue(left[0]);
+    this.state.grassBleft.setValue(left[1]);
+    this.grassA.animation = this.animate(
+      this.state.grassAleft,
+      this.calcDuration(this.grassWidth, 0), toValue[0]
+    );
+    this.grassB.animation = this.animate(
+      this.state.grassBleft, // starting
+      this.calcDuration(this.grassWidth, 0), toValue[1]
+    );
+  }
 
-    let first = "grass-a"
-    const animateGrass = () => {
-      if (first === "grass-a") {
-        first = "grass-b"
-        switching()
-      } else {
-        first = "grass-a"
-        switching([0, -this.grassWidth], [this.grassWidth, 0])
-      }
-      Animated.parallel([
-        this.grassA.animation,
-        this.grassB.animation
-      ]).start(({ finished }: any) => finished ? animateGrass() : null);
+  private animateGrass = () => {
+    if (this.firstGrass === "grass-a") {
+      this.firstGrass = "grass-b"
+      this.switching()
+    } else {
+      this.firstGrass = "grass-a"
+      this.switching([0, -this.grassWidth], [this.grassWidth, 0])
     }
-    animateGrass()
+    Animated.parallel([
+      this.grassA.animation,
+      this.grassB.animation
+    ]).start(({ finished }: any) => finished ? this.animateGrass() : null);
+  }
+
+  move = () => {
+    this.animateGrass()
   }
 
   stop = () => {
@@ -117,7 +119,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
   }
 }
 
-
 class Leaves extends React.PureComponent<Box.Props & { left: any, randHeight: number, myColor: string }, {}> {
 
   componentDidMount() {
@@ -127,8 +128,6 @@ class Leaves extends React.PureComponent<Box.Props & { left: any, randHeight: nu
   componentWillUnmount() {
     console.log("CHECK UNMOUNTING LEAVES")
   }
-
-  
 
   render() {
     const 
