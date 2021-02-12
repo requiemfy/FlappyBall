@@ -36,7 +36,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
       grassBleft: new Animated.Value(this.grassWidth),
       grassAheight: 0.3,
       grassBheight: 0.3,
-      // 0.3 - 1.5 grass height
+      // 0.3 to 1.5 grass height
     }
   }
 
@@ -44,6 +44,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
     console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
+    this.move();
   }
 
   componentWillUnmount() {
@@ -89,15 +90,25 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
   private animateGrass = () => {
     if (this.firstGrass === "grass-a") {
       this.firstGrass = "grass-b"
+      this.setState({ grassBheight: this.randomHeight() });
       this.switching()
     } else {
       this.firstGrass = "grass-a"
+      this.setState({ grassAheight: this.randomHeight() });
       this.switching([0, -this.grassWidth], [this.grassWidth, 0])
     }
     Animated.parallel([
       this.grassA.animation,
       this.grassB.animation
     ]).start(({ finished }: any) => finished ? this.animateGrass() : null);
+  }
+
+  private randomHeight = () => {
+    const 
+      rand = Math.random(),
+      h1 = rand <= 0.3 ? 0.3 : rand,
+      h2 = h1 >= 0.9 ? 0.5 : 0;
+    return h1 + h2;
   }
 
   move = () => {
