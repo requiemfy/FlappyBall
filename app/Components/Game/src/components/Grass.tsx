@@ -22,6 +22,7 @@ type GrassObject = {
 
 export default class Grass extends React.PureComponent<Box.Props & Props, State> {
   private static readonly BASE_DURATION = 5000;
+  private static readonly BASE_DISTANCE = 798;
   private grassWidth = GameDimension.window().gameHeight * 3;
   // private grassWidth = this.props.size[0];
   private firstGrass = "grass-a";
@@ -46,36 +47,38 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
       grassBheight: 0.3,
       // 0.3 to 1.5 grass height
     }
+
+    console.log("GRASS WIDTH " + this.grassWidth)
   }
 
   componentDidMount() {
     console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
-
-    // @remind clear listener
     this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
     this.state.grassBleft.addListener(({value}) => this.grassB.stoppedLeft = value);
-
-    // this.move();
-    // this.swapGrass();
   }
 
   componentWillUnmount() {
     console.log("PLAYER WILL UN-MOUNT")
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
+    this.state.grassAleft.removeAllListeners();
+    this.state.grassBleft.removeAllListeners();
   }
 
   private orientationCallback = () => {
-    console.log("PLAYER ORIENT");
     this.stop();
+    // this.grassWidth = GameDimension.window().gameHeight * 3;
+    // this.grassWidth = this.props.size[0];
+    console.log("GRASS WIDTH " + this.grassWidth)
   }
 
   private calcDuration(width: number, left: number) {
     const
       distance = Math.abs(width + left),
-      percentage = distance / width;
+      // percentage = distance / width;
+      percentage = distance / Grass.BASE_DISTANCE;
     return Grass.BASE_DURATION * percentage;
   }
 
@@ -115,21 +118,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     }
   }
 
-  private movingGrass = () => { // @remind clear
-    // if (this.firstGrass === "grass-a") {
-    //   this.firstGrass = "grass-b"
-    //   this.setState({ grassBheight: this.randomHeight() });
-    //   this.switching()
-    // } else {
-    //   this.firstGrass = "grass-a"
-    //   this.setState({ grassAheight: this.randomHeight() });
-    //   this.switching([0, -this.grassWidth], [this.grassWidth, 0])
-    // }
-    // Animated.parallel([
-    //   this.grassA.animation,
-    //   this.grassB.animation
-    // ]).start(({ finished }: any) => finished ? this.movingGrass() : null);
-
+  private movingGrass = () => { // work recursively
     this.swapGrass();
     this.move();
   }
@@ -145,11 +134,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   private resume = () => {
     const distanceA = this.grassA.stoppedLeft - this.grassA.toValue;
     const distanceB = this.grassB.stoppedLeft - this.grassB.toValue;
-
-    // @remind clear
-    // const distanceA = Math.abs(Math.abs(this.grassA.stoppedLeft) - Math.abs(this.grassA.toValue));
-    // const distanceB = Math.abs(Math.abs(this.grassB.stoppedLeft) - Math.abs(this.grassB.toValue));
-    console.log("DISTANCE GRASS " + distanceA + " " + distanceB)
     this.grassA.animation = this.animate(
       this.state.grassAleft,
       this.calcDuration(this.grassWidth, -(this.grassWidth + distanceA)), this.grassA.toValue
@@ -171,10 +155,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   stop = () => {
     this.grassA.animation?.stop()
     this.grassB.animation?.stop()
-
-    // @remind clear
-    // this.state.grassAleft.stopAnimation((value: number) => this.grassA.stoppedLeft = value);
-    // this.state.grassBleft.stopAnimation((value: number) => this.grassB.stoppedLeft = value);
   }
 
   render() {
@@ -217,6 +197,7 @@ class Leaves extends React.PureComponent<
   }
 
   render() {
+    console.log("RENDERING LEAVES " + this.props.width)
     const
       rand = Math.random(),
       // height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
