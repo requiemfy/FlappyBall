@@ -19,10 +19,7 @@ type GrassObject = {
 
 export default class Grass extends React.PureComponent<Box.Props & Props, State> {
   private static readonly BASE_DURATION = 5000;
-  
-  // private grassWidth = this.props.size[0];
   private grassWidth = GameDimension.window().gameHeight * 3;
-
   private firstGrass = "grass-a";
   private grassA: GrassObject = {
     animation: null,
@@ -131,22 +128,19 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
           randHeight={this.state.grassAheight}
           myColor={"transparent"}
           width={this.grassWidth}
-          // {...this.props} 
         />
         <Leaves 
           left={this.state.grassBleft} 
           randHeight={this.state.grassBheight} 
           myColor={"transparent"} 
           width={this.grassWidth}
-          // {...this.props} 
-          />
+        />
       </Box.default>
     )
   }
 }
 
 class Leaves extends React.PureComponent<
-  // Box.Props & 
   {
     left: any;
     randHeight: number;
@@ -165,7 +159,6 @@ class Leaves extends React.PureComponent<
   render() {
     const
       rand = Math.random(),
-      // height = this.props.size[1] * this.props.randHeight;
       height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
     return (
       <Animated.Image
@@ -181,7 +174,8 @@ class Leaves extends React.PureComponent<
         Platform.OS === 'web'
           ? { left: this.props.left, }
           : { transform: [{ translateX: this.props.left }] }
-        ]}></Animated.Image>
+        ]}>
+      </Animated.Image>
     )
   }
 }

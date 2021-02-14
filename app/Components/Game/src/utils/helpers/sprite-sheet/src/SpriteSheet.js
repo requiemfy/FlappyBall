@@ -53,8 +53,6 @@ export default class SpriteSheet extends React.Component {
       translateYOutputRange: [0, 1],
       translateXInputRange: [0, 1],
       translateXOutputRange: [0, 1],
-      
-      // stopAnimation: false, // @remind clear
     };
     this.calcImgDims(this.props);
   }
@@ -202,12 +200,10 @@ export default class SpriteSheet extends React.Component {
   };
 
   stop = cb => {
-    // this.setState({ stopAnimation: true }); // @remind clear
     this.time.stopAnimation(cb);
   };
 
   reset = cb => {
-    // this.time.stopAnimation(cb); // @remind clear
     this.time.setValue(0);
   };
 
@@ -215,7 +211,6 @@ export default class SpriteSheet extends React.Component {
     let { animations } = this.props;
     let { length } = animations[type];
 
-    // this.setState({ animationType: type, stopAnimation: false }, () => {// @remind clear stopAnimation
     this.setState({ animationType: type }, () => {
       let animation = Animated.timing(this.time, {
         toValue: length,
@@ -228,18 +223,6 @@ export default class SpriteSheet extends React.Component {
       this.time.setValue(0);
 
       if (loop) {
-        // if (Platform.OS === "web") {
-        //   (function start(ref) {
-        //     animation.start(
-        //     //   (value) => {
-        //     //   ref.time.setValue(0);
-        //     //   // !ref.state.stopAnimation ? start(ref) : null; // @remind clear
-        //     //   value.finished ? start(ref) : null
-        //     // }
-        //     );
-        //   })(this);
-        // }
-        // else Animated.loop(animation).start();
         Animated.loop(animation).start();
       } else {
         animation.start((value) => {
