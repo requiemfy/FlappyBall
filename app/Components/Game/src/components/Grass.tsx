@@ -90,17 +90,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     this.grassB.toValue = toValue[1];
     this.state.grassAleft.setValue(left[0]);
     this.state.grassBleft.setValue(left[1]);
-
-    // this.grassA.animation = this.animate(
-    //   this.state.grassAleft,
-    //   this.calcDuration(this.grassWidth, 0), toValue[0]
-    // );
     this.setAnimGrassA(0, toValue[0]);
-
-    // this.grassB.animation = this.animate(
-    //   this.state.grassBleft, // starting
-    //   this.calcDuration(this.grassWidth, 0), toValue[1]
-    // );
     this.setAnimGrassB(0, toValue[1]);
   }
 
@@ -146,16 +136,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   private resume = () => {
     const distanceA = this.grassA.stoppedLeft - this.grassA.toValue;
     const distanceB = this.grassB.stoppedLeft - this.grassB.toValue;
-    // this.grassA.animation = this.animate(
-    //   this.state.grassAleft,
-    //   this.calcDuration(this.grassWidth, -(this.grassWidth + distanceA)), this.grassA.toValue
-    // );
     this.setAnimGrassA(-(this.grassWidth + distanceA), this.grassA.toValue);
-
-    // this.grassB.animation = this.animate(
-    //   this.state.grassBleft, // starting
-    //   this.calcDuration(this.grassWidth, -(this.grassWidth + distanceB)), this.grassB.toValue
-    // );
     this.setAnimGrassB(-(this.grassWidth + distanceB), this.grassB.toValue);
   }
 
