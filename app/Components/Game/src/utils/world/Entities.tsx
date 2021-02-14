@@ -17,6 +17,7 @@ import Circle from "../../components/shapes/Circle";
 import Player from '../../components/Player'
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
+import Roof from '../../components/Roof';
 
 export namespace Entities {
   type Bodies = (

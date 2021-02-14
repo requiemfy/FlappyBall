@@ -71,9 +71,9 @@ export namespace Matter {
       // Observe centerX, which is half of screen width
       // but we didn't explicity minus the half of floor width to it to fit the floor
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      // [ floorWidth, floorHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
+      [ floorWidth, floorHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
       // ^ is optional, in bottom gonna maximize the floor width, for falling wall to be caught in portrait
-      [ floorWidth, floorHeight ] = [ SCREEN_HEIGHT + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
+      // [ floorWidth, floorHeight ] = [ SCREEN_HEIGHT + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
       [ centerX, centerY ] = [ windowWidth / 2, gameHeight - (floorHeight / 2) ]
     ////////////////////////////////////////////////////////////
     console.log("\nmatter.tsx: ");

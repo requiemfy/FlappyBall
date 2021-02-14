@@ -1,32 +1,35 @@
-import { any } from 'prop-types';
 import React, { createRef, MutableRefObject } from 'react';
 import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
-// import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { GameDimension } from '../utils/helpers/dimensions';
-import SpriteSheet from '../utils/helpers/sprite-sheet';
+import { SCREEN_HEIGHT } from '../utils/world/constants';
 import * as Box from './shapes/Box';
 
 interface Props { setRef: ((ref: any) => void) | null; }
 
 interface State {
-  left: any;
-  top: number;
+  grassAleft: Animated.Value;
+  grassBleft: Animated.Value;
+  grassAheight: number;
+  grassBheight: number;
 }
 
 type GrassObject = {
   animation: any;
 };
 
-export default class Grass extends React.PureComponent<Box.Props & Props, any> { // @remind update state here
-  private static readonly BASE_DURATION = 3000;
-  private grassWidth = this.props.size[0];
+export default class Grass extends React.PureComponent<Box.Props & Props, State> {
+  private static readonly BASE_DURATION = 5000;
+  
+  // private grassWidth = this.props.size[0];
+  private grassWidth = GameDimension.window().gameHeight * 3;
+
   private firstGrass = "grass-a";
   private grassA: GrassObject = {
     animation: null,
-  } 
+  }
   private grassB: GrassObject = {
     animation: null,
-  } 
+  }
 
   constructor(props: Box.Props & Props) {
     super(props);
@@ -59,13 +62,13 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
   }
 
   private calcDuration(width: number, left: number) {
-    const 
+    const
       distance = width + left,
       percentage = distance / width;
     return Grass.BASE_DURATION * percentage;
   }
 
-  private animate(animatedVal: any, duration: number, toValue=-this.grassWidth ) {
+  private animate(animatedVal: any, duration: number, toValue = -this.grassWidth) {
     return Animated.timing(animatedVal, {
       toValue: toValue,
       duration: duration,
@@ -74,7 +77,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
     });
   }
 
-  private switching = (toValue=[-this.grassWidth, 0], left=[0, this.grassWidth])  => {
+  private switching = (toValue = [-this.grassWidth, 0], left = [0, this.grassWidth]) => {
     this.state.grassAleft.setValue(left[0]);
     this.state.grassBleft.setValue(left[1]);
     this.grassA.animation = this.animate(
@@ -104,7 +107,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
   }
 
   private randomHeight = () => {
-    const 
+    const
       rand = Math.random(),
       h1 = rand <= 0.3 ? 0.3 : rand,
       h2 = h1 >= 0.9 ? 0.5 : 0;
@@ -123,14 +126,33 @@ export default class Grass extends React.PureComponent<Box.Props & Props, any> {
   render() {
     return (
       <Box.default {...this.props}>
-        <Leaves left={this.state.grassAleft} randHeight={this.state.grassAheight} myColor={"transparent"} {...this.props}/>
-        <Leaves left={this.state.grassBleft} randHeight={this.state.grassBheight} myColor={"transparent"} {...this.props}/>
+        <Leaves
+          left={this.state.grassAleft}
+          randHeight={this.state.grassAheight}
+          myColor={"transparent"}
+          width={this.grassWidth}
+          // {...this.props} 
+        />
+        <Leaves 
+          left={this.state.grassBleft} 
+          randHeight={this.state.grassBheight} 
+          myColor={"transparent"} 
+          width={this.grassWidth}
+          // {...this.props} 
+          />
       </Box.default>
     )
   }
 }
 
-class Leaves extends React.PureComponent<Box.Props & { left: any, randHeight: number, myColor: string }, {}> {
+class Leaves extends React.PureComponent<
+  // Box.Props & 
+  {
+    left: any;
+    randHeight: number;
+    myColor: string;
+    width: number;
+  }, {}> {
 
   componentDidMount() {
     console.log("CHECK MOUNTING LEAVES")
@@ -141,26 +163,25 @@ class Leaves extends React.PureComponent<Box.Props & { left: any, randHeight: nu
   }
 
   render() {
-    const 
+    const
       rand = Math.random(),
-      height = this.props.size[1] * this.props.randHeight;
-
-    console.log("RENDER HEIGHT " + height)
+      // height = this.props.size[1] * this.props.randHeight;
+      height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
     return (
       <Animated.Image
         source={require('../../assets/grass.png')}
         style={[{
           position: "absolute",
           top: -height,
-          width: this.props.size[0],
+          width: this.props.width,
           height: height,
           backgroundColor: this.props.myColor,
           resizeMode: "stretch"
-        }, 
+        },
         Platform.OS === 'web'
-          ? {left: this.props.left,}
-          : {transform: [{translateX: this.props.left}]}
-      ]}></Animated.Image>
+          ? { left: this.props.left, }
+          : { transform: [{ translateX: this.props.left }] }
+        ]}></Animated.Image>
     )
   }
 }

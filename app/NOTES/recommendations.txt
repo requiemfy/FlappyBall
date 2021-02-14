@@ -46,3 +46,5 @@ i remove all walls for now
 ----------------------------------------------------------
 i'm trying to use Animated.parallel for grass
 idea: fixed stopping point for both grass, then switch at parallel callback
+----------------------------------------------------------
+i noticed that the floor height is NOT dependent on gameHeight RATIO, therefore changes are not proportion
