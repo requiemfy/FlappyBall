@@ -48,3 +48,11 @@ i'm trying to use Animated.parallel for grass
 idea: fixed stopping point for both grass, then switch at parallel callback
 ----------------------------------------------------------
 i noticed that the floor height is NOT dependent on gameHeight RATIO, therefore changes are not proportion
+----------------------------------------------------------
+components are not unmounted in change orientation
+
+leaves images doesn't exactly maintain x, y proportion 
+(also height, width but there's a possibility that we can handle these) in orientation change, 
+since we are not the one handling its dimension change in orientation
+
+we can barely handle the grass orientation change because of the limitation
