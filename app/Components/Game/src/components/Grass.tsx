@@ -1,3 +1,4 @@
+import { number } from 'prop-types';
 import React, { createRef, MutableRefObject } from 'react';
 import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
@@ -15,6 +16,8 @@ interface State {
 
 type GrassObject = {
   animation: any;
+  stoppedLeft: number;
+  toValue: number;
 };
 
 export default class Grass extends React.PureComponent<Box.Props & Props, State> {
@@ -24,9 +27,13 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   private firstGrass = "grass-a";
   private grassA: GrassObject = {
     animation: null,
+    stoppedLeft: 0,
+    toValue: -this.grassWidth,
   }
   private grassB: GrassObject = {
     animation: null,
+    stoppedLeft: this.grassWidth,
+    toValue: 0,
   }
 
   constructor(props: Box.Props & Props) {
@@ -45,7 +52,13 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
-    this.move();
+
+    // @remind clear listener
+    this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
+    this.state.grassBleft.addListener(({value}) => this.grassB.stoppedLeft = value);
+
+    // this.move();
+    // this.swapGrass();
   }
 
   componentWillUnmount() {
@@ -61,7 +74,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
 
   private calcDuration(width: number, left: number) {
     const
-      distance = width + left,
+      distance = Math.abs(width + left),
       percentage = distance / width;
     return Grass.BASE_DURATION * percentage;
   }
@@ -76,6 +89,8 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   }
 
   private switching = (toValue = [-this.grassWidth, 0], left = [0, this.grassWidth]) => {
+    this.grassA.toValue = toValue[0];
+    this.grassB.toValue = toValue[1];
     this.state.grassAleft.setValue(left[0]);
     this.state.grassBleft.setValue(left[1]);
     this.grassA.animation = this.animate(
@@ -88,7 +103,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     );
   }
 
-  private animateGrass = () => {
+  private swapGrass = () => { // putting front grass to back
     if (this.firstGrass === "grass-a") {
       this.firstGrass = "grass-b"
       this.setState({ grassBheight: this.randomHeight() });
@@ -98,10 +113,25 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
       this.setState({ grassAheight: this.randomHeight() });
       this.switching([0, -this.grassWidth], [this.grassWidth, 0])
     }
-    Animated.parallel([
-      this.grassA.animation,
-      this.grassB.animation
-    ]).start(({ finished }: any) => finished ? this.animateGrass() : null);
+  }
+
+  private movingGrass = () => { // @remind clear
+    // if (this.firstGrass === "grass-a") {
+    //   this.firstGrass = "grass-b"
+    //   this.setState({ grassBheight: this.randomHeight() });
+    //   this.switching()
+    // } else {
+    //   this.firstGrass = "grass-a"
+    //   this.setState({ grassAheight: this.randomHeight() });
+    //   this.switching([0, -this.grassWidth], [this.grassWidth, 0])
+    // }
+    // Animated.parallel([
+    //   this.grassA.animation,
+    //   this.grassB.animation
+    // ]).start(({ finished }: any) => finished ? this.movingGrass() : null);
+
+    this.swapGrass();
+    this.move();
   }
 
   private randomHeight = () => {
@@ -112,13 +142,39 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     return h1 + h2;
   }
 
+  private resume = () => {
+    const distanceA = this.grassA.stoppedLeft - this.grassA.toValue;
+    const distanceB = this.grassB.stoppedLeft - this.grassB.toValue;
+
+    // @remind clear
+    // const distanceA = Math.abs(Math.abs(this.grassA.stoppedLeft) - Math.abs(this.grassA.toValue));
+    // const distanceB = Math.abs(Math.abs(this.grassB.stoppedLeft) - Math.abs(this.grassB.toValue));
+    console.log("DISTANCE GRASS " + distanceA + " " + distanceB)
+    this.grassA.animation = this.animate(
+      this.state.grassAleft,
+      this.calcDuration(this.grassWidth, -(this.grassWidth + distanceA)), this.grassA.toValue
+    );
+    this.grassB.animation = this.animate(
+      this.state.grassBleft, // starting
+      this.calcDuration(this.grassWidth, -(this.grassWidth + distanceB)), this.grassB.toValue
+    );
+  }
+
   move = () => {
-    this.animateGrass()
+    this.resume();
+    Animated.parallel([
+      this.grassA.animation,
+      this.grassB.animation
+    ]).start(({ finished }: any) => finished ? this.movingGrass() : null);
   }
 
   stop = () => {
     this.grassA.animation?.stop()
     this.grassB.animation?.stop()
+
+    // @remind clear
+    // this.state.grassAleft.stopAnimation((value: number) => this.grassA.stoppedLeft = value);
+    // this.state.grassBleft.stopAnimation((value: number) => this.grassB.stoppedLeft = value);
   }
 
   render() {
