@@ -47,8 +47,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
       grassBheight: 0.3,
       // 0.3 to 1.5 grass height
     }
-
-    console.log("GRASS WIDTH " + this.grassWidth)
   }
 
   componentDidMount() {
@@ -69,15 +67,11 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
 
   private orientationCallback = () => {
     this.stop();
-    // this.grassWidth = GameDimension.window().gameHeight * 3;
-    // this.grassWidth = this.props.size[0];
-    console.log("GRASS WIDTH " + this.grassWidth)
   }
 
   private calcDuration(width: number, left: number) {
     const
       distance = Math.abs(width + left),
-      // percentage = distance / width;
       percentage = distance / Grass.BASE_DISTANCE;
     return Grass.BASE_DURATION * percentage;
   }
@@ -96,14 +90,18 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     this.grassB.toValue = toValue[1];
     this.state.grassAleft.setValue(left[0]);
     this.state.grassBleft.setValue(left[1]);
-    this.grassA.animation = this.animate(
-      this.state.grassAleft,
-      this.calcDuration(this.grassWidth, 0), toValue[0]
-    );
-    this.grassB.animation = this.animate(
-      this.state.grassBleft, // starting
-      this.calcDuration(this.grassWidth, 0), toValue[1]
-    );
+
+    // this.grassA.animation = this.animate(
+    //   this.state.grassAleft,
+    //   this.calcDuration(this.grassWidth, 0), toValue[0]
+    // );
+    this.setAnimGrassA(0, toValue[0]);
+
+    // this.grassB.animation = this.animate(
+    //   this.state.grassBleft, // starting
+    //   this.calcDuration(this.grassWidth, 0), toValue[1]
+    // );
+    this.setAnimGrassB(0, toValue[1]);
   }
 
   private swapGrass = () => { // putting front grass to back
@@ -131,17 +129,34 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     return h1 + h2;
   }
 
+  private setAnimGrassA = (left: number, toValue: number) => {
+    this.grassA.animation = this.animate(
+      this.state.grassAleft,
+      this.calcDuration(this.grassWidth, left), toValue
+    );
+  }
+
+  private setAnimGrassB = (left: number, toValue: number) => {
+    this.grassB.animation = this.animate(
+      this.state.grassBleft, // starting
+      this.calcDuration(this.grassWidth, left), toValue
+    );
+  }
+
   private resume = () => {
     const distanceA = this.grassA.stoppedLeft - this.grassA.toValue;
     const distanceB = this.grassB.stoppedLeft - this.grassB.toValue;
-    this.grassA.animation = this.animate(
-      this.state.grassAleft,
-      this.calcDuration(this.grassWidth, -(this.grassWidth + distanceA)), this.grassA.toValue
-    );
-    this.grassB.animation = this.animate(
-      this.state.grassBleft, // starting
-      this.calcDuration(this.grassWidth, -(this.grassWidth + distanceB)), this.grassB.toValue
-    );
+    // this.grassA.animation = this.animate(
+    //   this.state.grassAleft,
+    //   this.calcDuration(this.grassWidth, -(this.grassWidth + distanceA)), this.grassA.toValue
+    // );
+    this.setAnimGrassA(-(this.grassWidth + distanceA), this.grassA.toValue);
+
+    // this.grassB.animation = this.animate(
+    //   this.state.grassBleft, // starting
+    //   this.calcDuration(this.grassWidth, -(this.grassWidth + distanceB)), this.grassB.toValue
+    // );
+    this.setAnimGrassB(-(this.grassWidth + distanceB), this.grassB.toValue);
   }
 
   move = () => {
@@ -197,7 +212,6 @@ class Leaves extends React.PureComponent<
   }
 
   render() {
-    console.log("RENDERING LEAVES " + this.props.width)
     const
       rand = Math.random(),
       // height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
