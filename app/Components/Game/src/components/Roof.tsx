@@ -19,15 +19,12 @@ type RoofObject = {
   animation: any;
   stoppedLeft: number;
   toValue: number;
-  // vine: number; // @remind clear
 };
 
 export default class Roof extends React.PureComponent<Box.Props & Props, State> {
   private static readonly BASE_DURATION = 6000;
   private static readonly BASE_DISTANCE = 798;
   private roofWidth = GameDimension.getWidth("now");
-  // private roofWidth = GameDimension.window().gameHeight * 3;
-  // private roofWidth = this.props.size[0];
   private firstRoof = "roof-a";
   private roofA: RoofObject = {
     animation: null,
@@ -56,8 +53,6 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.state.roofAleft.addListener(({value}) => this.roofA.stoppedLeft = value);
     this.state.roofBleft.addListener(({value}) => this.roofB.stoppedLeft = value);
-
-    this.move();
   }
 
   componentWillUnmount() {
@@ -170,7 +165,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   render() {
     return (
       <Box.default {...this.props}>
-        {/* <Image // background image of roof
+        <Image // background image of roof
           source={require('../../assets/vines/static.png')}
           style={{
             position: 'absolute',
@@ -178,8 +173,9 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
             height: this.props.size[1] * 2,
             top: this.props.size[1] * 0.25,
             resizeMode: 'stretch',
+            zIndex: 99999,
           }}
-        /> */}
+        />
         <Vines
           left={this.state.roofAleft}
           myColor={"transparent"}
@@ -221,35 +217,37 @@ class Vines extends React.PureComponent<
   render() {
     let 
       height = this.props.size[1], 
-      top = this.props.size[1];
+      top = this.props.size[1], 
+      vine = require('../../assets/vines/1.png');
 
-    // switch (this.props.vine) {
-    //   case 1:
-    //     height *= 5;
-    //     top *= 0.5;
-    //     break;
-    //   case 2:
-    //     height *= 4;
-    //     top = -top * 0.5;
-    //     break;
-    //   case 3:
-    //     height *= 2; // 3
-    //     top -= (top * 0.2)
-    //     break;
-    //   case 4:
-    //     height *= 5;
-    //     top -= (top * 0.2)
-    //     break;
-    //   default:
-    //     break;
-    // }
-    height *= 5;
-    top *= 0.5;
+    switch (this.props.vine) {
+      case 1:
+        height *= 5;
+        top *= 0.5;
+        vine = require('../../assets/vines/1.png');
+        break;
+      case 2:
+        height *= 4;
+        top = -top * 0.5;
+        vine = require('../../assets/vines/2.png');
+        break;
+      case 3:
+        height *= 3;
+        top -= (top * 0.2)
+        vine = require('../../assets/vines/3.png');
+        break;
+      case 4:
+        height *= 5;
+        top -= (top * 0.2);
+        vine = require('../../assets/vines/4.png');
+        break;
+      default:
+        break;
+    }
 
-    console.log("ROOF RENDER " + this.props.size[1] + " : " + this.props.width)
     return (
       <Animated.Image
-        source={require('../../assets/vines/1.png')}
+        source={vine}
         resizeMethod={"resize"} // for orientation change response of image
         style={[{
           position: "absolute",
@@ -258,6 +256,7 @@ class Vines extends React.PureComponent<
           height: height,
           backgroundColor: this.props.myColor,
           resizeMode: "repeat",
+          zIndex: -1,
         },
         Platform.OS === 'web'
           ? { left: this.props.left, }

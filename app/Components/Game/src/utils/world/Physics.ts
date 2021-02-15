@@ -26,7 +26,7 @@ export namespace Physics {
   // yes 2nd param should be like that
   export const system: Physics = (entities, { time }) => { // @note INSPECTED: good
     entities.game.matterWorld.gravity.y = Math.abs(entities.game.gravity);
-    // wallRelativity(entities); // @remind
+    wallRelativity(entities);
     playerRelativity.velocity(entities);
     // //////////////////////////////////////////////////////////
     // entities.distance+=1; // this is on the entities script

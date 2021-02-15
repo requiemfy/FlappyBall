@@ -56,8 +56,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
     this.state.grassBleft.addListener(({value}) => this.grassB.stoppedLeft = value);
-
-    this.move();
   }
 
   componentWillUnmount() {

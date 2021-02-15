@@ -107,7 +107,7 @@ export namespace Entities {
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){ // @note INSPECTED: good
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
-        for (let wallNum = 0; wallNum--;) { // @remind number of wall
+        for (let wallNum = 4; wallNum--;) { // @remind number of wall
           if (game.wallIds.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
