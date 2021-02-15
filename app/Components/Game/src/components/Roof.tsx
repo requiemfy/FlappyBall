@@ -204,16 +204,6 @@ class Vines extends React.PureComponent<
     vine: number;
   }, {}> {
 
-  // image pos
-  // 1: height = * 5
-  //    top = this.props.size[1] * 0.5
-  // 2:  height = * 5
-  //     top = -(this.props.size[1])
-  // 3:  height = * 2
-  //     top = this.props.size[1] - (this.props.size[1] * 0.2)
-  // 4:  height = * 5
-  //     top = this.props.size[1] - (this.props.size[1] * 0.2)
-
   render() {
     let 
       height = this.props.size[1], 
