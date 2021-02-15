@@ -194,7 +194,6 @@ class Leaves extends React.PureComponent<
 
   render() {
     const
-      rand = Math.random(),
       // height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
       height = (this.props.size[1] * 0.9) * this.props.randHeight;
     return (

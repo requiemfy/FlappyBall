@@ -1,6 +1,6 @@
 import { number } from 'prop-types';
 import React, { createRef, MutableRefObject } from 'react';
-import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
+import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback, ImageBackground } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
 import { SCREEN_HEIGHT } from '../utils/world/constants';
 import * as Box from './shapes/Box';
@@ -10,12 +10,15 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   roofAleft: Animated.Value;
   roofBleft: Animated.Value;
+  roofAvine: number,
+  roofBvine: number,
 }
 
 type RoofObject = {
   animation: any;
   stoppedLeft: number;
   toValue: number;
+  // vine: number;
 };
 
 export default class Roof extends React.PureComponent<Box.Props & Props, State> {
@@ -28,11 +31,13 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     animation: null,
     stoppedLeft: 0,
     toValue: -this.roofWidth,
+    // vine: 1,
   }
   private roofB: RoofObject = {
     animation: null,
     stoppedLeft: this.roofWidth,
     toValue: 0,
+    // vine: 1,
   }
 
   constructor(props: Box.Props & Props) {
@@ -41,6 +46,8 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     this.state = {
       roofAleft: new Animated.Value(0),
       roofBleft: new Animated.Value(this.roofWidth),
+      roofAvine: 1,
+      roofBvine: 1,
     }
   }
 
@@ -71,6 +78,13 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     return Roof.BASE_DURATION * percentage;
   }
 
+  private randomVine() {
+    const 
+      max = 5, // excluded
+      min = 1; // included
+    return Math.floor(Math.random() * (max - min) ) + min;
+  }
+
   private animate(animatedVal: any, duration: number, toValue = -this.roofWidth) {
     return Animated.timing(animatedVal, {
       toValue: toValue,
@@ -92,9 +106,14 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   private swapRoof = () => {
     if (this.firstRoof === "roof-a") {
       this.firstRoof = "roof-b"
+      // this.roofA.vine = this.randomVine();
+      this.setState({ roofBvine: this.randomVine() })
       this.switching()
+
     } else {
       this.firstRoof = "roof-a"
+      // this.roofB.vine = this.randomVine();
+      this.setState({ roofAvine: this.randomVine() })
       this.switching([0, -this.roofWidth], [this.roofWidth, 0])
     }
   }
@@ -141,16 +160,30 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   render() {
     return (
       <Box.default {...this.props}>
+        <Image 
+          source={require('../../assets/vines/static.png')}
+          style={{
+            position: 'absolute',
+            width: this.props.size[0],
+            height: this.props.size[1] * 2,
+            top: this.props.size[1] * 0.25,
+            resizeMode: 'repeat',
+          }}
+        />
         <Vines
           left={this.state.roofAleft}
           myColor={"transparent"}
           width={this.roofWidth}
+          // vine={this.roofA.vine}
+          vine={this.state.roofAvine}
           {...this.props} 
         />
         <Vines 
           left={this.state.roofBleft} 
           myColor={"transparent"} 
           width={this.roofWidth}
+          // vine={this.roofB.vine}
+          vine={this.state.roofBvine}
           {...this.props} 
         />
       </Box.default>
@@ -164,6 +197,7 @@ class Vines extends React.PureComponent<
     left: any;
     myColor: string; // actually this is only for testing purposes, but just leave it here
     width: number;
+    vine: number;
   }, {}> {
 
   // image pos
@@ -177,15 +211,33 @@ class Vines extends React.PureComponent<
   //     top = this.props.size[1] - (this.props.size[1] * 0.2)
 
   render() {
-    const
-      rand = Math.random(),
-      height = this.props.size[1] * 5;
+    let height = this.props.size[1], top = this.props.size[1];
+    switch (this.props.vine) {
+      case 1:
+        height *= 5;
+        top *= 0.5;
+        break;
+      case 2:
+        height *= 4;
+        top = -top * 0.5;
+        break;
+      case 3:
+        height *= 2;
+        top -= (top * 0.2)
+        break;
+      case 4:
+        height *= 5;
+        top -= (top * 0.2)
+        break;
+      default:
+        break;
+    }
     return (
       <Animated.Image
-        source={require('../../assets/vines/4.png')}
+        source={require('../../assets/vines/'+ this.props.vine +'.png')}
         style={[{
           position: "absolute",
-          top: this.props.size[1] - (this.props.size[1] * 0.2),
+          top: top,
           width: this.props.width,
           height: height,
           backgroundColor: this.props.myColor,

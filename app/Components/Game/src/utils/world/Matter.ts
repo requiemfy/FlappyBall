@@ -88,7 +88,7 @@ export namespace Matter {
       width: floorWidth,
       height: floorHeight,
       borderRadius: 0,
-      color: "green",
+      color: "black",
       label: "Floor-Rectangle",
       static: true,
     }, {});
@@ -105,7 +105,7 @@ export namespace Matter {
       width: roofWidth,
       height: roofHeight,
       borderRadius: 0,
-      color: "brown",
+      color: "black",
       label: "Roof-Rectangle",
       static: true,
     }, {});
