@@ -21,9 +21,10 @@ type GrassObject = {
 };
 
 export default class Grass extends React.PureComponent<Box.Props & Props, State> {
-  private static readonly BASE_DURATION = 5000;
+  private static readonly BASE_DURATION = 6000;
   private static readonly BASE_DISTANCE = 798;
-  private grassWidth = GameDimension.window().gameHeight * 3;
+  private grassWidth = GameDimension.getWidth("now");
+  // private grassWidth = GameDimension.window().gameHeight * 3;
   // private grassWidth = this.props.size[0];
   private firstGrass = "grass-a";
   private grassA: GrassObject = {
@@ -55,6 +56,8 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
     this.state.grassBleft.addListener(({value}) => this.grassB.stoppedLeft = value);
+
+    this.move();
   }
 
   componentWillUnmount() {

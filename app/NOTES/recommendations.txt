@@ -58,3 +58,8 @@ since we are not the one handling its dimension change in orientation
 we can barely handle the grass orientation change because of the limitation
 
 we can't get animated value when useNativeDriver is true
+
+
+----------------------------------------------------------
+wallRelativity(entities);
+wall num in entities
