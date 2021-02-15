@@ -1,49 +1,61 @@
-import { any } from 'prop-types';
+import { number } from 'prop-types';
 import React, { createRef, MutableRefObject } from 'react';
 import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
-// import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { GameDimension } from '../utils/helpers/dimensions';
-import SpriteSheet from '../utils/helpers/sprite-sheet';
+import { SCREEN_HEIGHT } from '../utils/world/constants';
 import * as Box from './shapes/Box';
 
 interface Props { setRef: ((ref: any) => void) | null; }
 
 interface State {
-  left: any;
-  top: number;
+  grassAleft: Animated.Value;
+  grassBleft: Animated.Value;
+  grassAheight: number;
+  grassBheight: number;
 }
 
-type RoofObj = {
+type GrassObject = {
   animation: any;
+  stoppedLeft: number;
+  toValue: number;
 };
 
-export default class Roof extends React.PureComponent<Box.Props & Props, any> { // @remind update state here
-  private static readonly BASE_DURATION = 3000;
-  private roofWidth = this.props.size[0];
-  private firstRoof = "roof-a";
-  private grassA: RoofObj = {
+export default class Roof extends React.PureComponent<Box.Props & Props, State> {
+  private static readonly BASE_DURATION = 5000;
+  private static readonly BASE_DISTANCE = 798;
+  private grassWidth = GameDimension.window().gameHeight * 3;
+  // private grassWidth = this.props.size[0];
+  private firstGrass = "grass-a";
+  private grassA: GrassObject = {
     animation: null,
-  } 
-  private grassB: RoofObj = {
+    stoppedLeft: 0,
+    toValue: -this.grassWidth,
+  }
+  private grassB: GrassObject = {
     animation: null,
-  } 
+    stoppedLeft: this.grassWidth,
+    toValue: 0,
+  }
 
   constructor(props: Box.Props & Props) {
     super(props);
     const { gameHeight } = GameDimension.window();
     this.state = {
-      roofAleft: new Animated.Value(0),
-      roofBleft: new Animated.Value(this.roofWidth),
-      grassAheight: 4,
-      grassBheight: 4,
-      // 0.3 to 1.5 roof height
+      grassAleft: new Animated.Value(0),
+      grassBleft: new Animated.Value(this.grassWidth),
+      grassAheight: 0.3,
+      grassBheight: 0.3,
+      // 0.3 to 1.5 grass height
     }
   }
 
   componentDidMount() {
-    console.log("ROOF DID MOUNT");
+    console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
+    this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
+    this.state.grassBleft.addListener(({value}) => this.grassB.stoppedLeft = value);
+
     this.move();
   }
 
@@ -51,21 +63,22 @@ export default class Roof extends React.PureComponent<Box.Props & Props, any> { 
     console.log("PLAYER WILL UN-MOUNT")
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
+    this.state.grassAleft.removeAllListeners();
+    this.state.grassBleft.removeAllListeners();
   }
 
   private orientationCallback = () => {
-    console.log("PLAYER ORIENT");
     this.stop();
   }
 
   private calcDuration(width: number, left: number) {
-    const 
-      distance = width + left,
-      percentage = distance / width;
+    const
+      distance = Math.abs(width + left),
+      percentage = distance / Roof.BASE_DISTANCE;
     return Roof.BASE_DURATION * percentage;
   }
 
-  private animate(animatedVal: any, duration: number, toValue=-this.roofWidth ) {
+  private animate(animatedVal: any, duration: number, toValue = -this.grassWidth) {
     return Animated.timing(animatedVal, {
       toValue: toValue,
       duration: duration,
@@ -74,45 +87,67 @@ export default class Roof extends React.PureComponent<Box.Props & Props, any> { 
     });
   }
 
-  private switching = (toValue=[-this.roofWidth, 0], left=[0, this.roofWidth])  => {
-    this.state.roofAleft.setValue(left[0]);
-    this.state.roofBleft.setValue(left[1]);
-    this.grassA.animation = this.animate(
-      this.state.roofAleft,
-      this.calcDuration(this.roofWidth, 0), toValue[0]
-    );
-    this.grassB.animation = this.animate(
-      this.state.roofBleft, // starting
-      this.calcDuration(this.roofWidth, 0), toValue[1]
-    );
+  private switching = (toValue = [-this.grassWidth, 0], left = [0, this.grassWidth]) => {
+    this.grassA.toValue = toValue[0];
+    this.grassB.toValue = toValue[1];
+    this.state.grassAleft.setValue(left[0]);
+    this.state.grassBleft.setValue(left[1]);
+    this.setAnimGrassA(0, toValue[0]);
+    this.setAnimGrassB(0, toValue[1]);
   }
 
-  private animateGrass = () => {
-    if (this.firstRoof === "roof-a") {
-      this.firstRoof = "roof-b"
-      // this.setState({ grassBheight: this.randomHeight() });
+  private swapGrass = () => { // putting front grass to back
+    if (this.firstGrass === "grass-a") {
+      this.firstGrass = "grass-b"
+      this.setState({ grassBheight: this.randomHeight() });
       this.switching()
     } else {
-      this.firstRoof = "roof-a"
-      // this.setState({ grassAheight: this.randomHeight() });
-      this.switching([0, -this.roofWidth], [this.roofWidth, 0])
+      this.firstGrass = "grass-a"
+      this.setState({ grassAheight: this.randomHeight() });
+      this.switching([0, -this.grassWidth], [this.grassWidth, 0])
     }
-    Animated.parallel([
-      this.grassA.animation,
-      this.grassB.animation
-    ]).start(({ finished }: any) => finished ? this.animateGrass() : null);
+  }
+
+  private movingGrass = () => { // work recursively
+    this.swapGrass();
+    this.move();
   }
 
   private randomHeight = () => {
-    const 
+    const
       rand = Math.random(),
       h1 = rand <= 0.3 ? 0.3 : rand,
       h2 = h1 >= 0.9 ? 0.5 : 0;
     return h1 + h2;
   }
 
+  private setAnimGrassA = (left: number, toValue: number) => {
+    this.grassA.animation = this.animate(
+      this.state.grassAleft,
+      this.calcDuration(this.grassWidth, left), toValue
+    );
+  }
+
+  private setAnimGrassB = (left: number, toValue: number) => {
+    this.grassB.animation = this.animate(
+      this.state.grassBleft, // starting
+      this.calcDuration(this.grassWidth, left), toValue
+    );
+  }
+
+  private resume = () => {
+    const distanceA = this.grassA.stoppedLeft - this.grassA.toValue;
+    const distanceB = this.grassB.stoppedLeft - this.grassB.toValue;
+    this.setAnimGrassA(-(this.grassWidth + distanceA), this.grassA.toValue);
+    this.setAnimGrassB(-(this.grassWidth + distanceB), this.grassB.toValue);
+  }
+
   move = () => {
-    this.animateGrass()
+    this.resume();
+    Animated.parallel([
+      this.grassA.animation,
+      this.grassB.animation
+    ]).start(({ finished }: any) => finished ? this.movingGrass() : null);
   }
 
   stop = () => {
@@ -123,52 +158,63 @@ export default class Roof extends React.PureComponent<Box.Props & Props, any> { 
   render() {
     return (
       <Box.default {...this.props}>
-        <Vines left={this.state.roofAleft} randHeight={this.state.grassAheight} myColor={"transparent"} {...this.props}/>
-        <Vines left={this.state.roofBleft} randHeight={this.state.grassBheight} myColor={"transparent"} {...this.props}/>
+        <Leaves
+          left={this.state.grassAleft}
+          randHeight={this.state.grassAheight}
+          myColor={"transparent"}
+          width={this.grassWidth}
+          {...this.props} 
+        />
+        <Leaves 
+          left={this.state.grassBleft} 
+          randHeight={this.state.grassBheight} 
+          myColor={"transparent"} 
+          width={this.grassWidth}
+          {...this.props} 
+        />
       </Box.default>
     )
   }
 }
 
-// 1 = 5, 0.05
-// 2 = 4, 0.15
-
-
-class Vines extends React.PureComponent<Box.Props & { 
-    left: any, 
-    randHeight: number, 
-    myColor: string 
+class Leaves extends React.PureComponent<
+  Box.Props & 
+  {
+    left: any;
+    randHeight: number;
+    myColor: string;
+    width: number;
   }, {}> {
 
   componentDidMount() {
-    console.log("CHECK MOUNTING Vines")
+    console.log("CHECK MOUNTING LEAVES")
   }
 
   componentWillUnmount() {
-    console.log("CHECK UNMOUNTING Vines")
+    console.log("CHECK UNMOUNTING LEAVES")
   }
 
   render() {
-    const 
+    const
       rand = Math.random(),
-      height = this.props.size[1] * this.props.randHeight;
-
-    console.log("RENDER ROOF " + height)
+      // height = (GameDimension.window().gameHeight * 0.15) * this.props.randHeight;
+      height = (this.props.size[1] * 0.9) * this.props.randHeight;
     return (
       <Animated.Image
-        source={require('../../assets/vines/3.png')}
+        source={require('../../assets/grass.png')}
         style={[{
           position: "absolute",
-          top: -height * 0.1,
-          width: this.props.size[0],
+          top: -height,
+          width: this.props.width,
           height: height,
           backgroundColor: this.props.myColor,
           resizeMode: "stretch"
-        }, 
+        },
         Platform.OS === 'web'
-          ? {left: this.props.left,}
-          : {transform: [{translateX: this.props.left}]}
-      ]}></Animated.Image>
+          ? { left: this.props.left, }
+          : { transform: [{ translateX: this.props.left }] }
+        ]}>
+      </Animated.Image>
     )
   }
 }

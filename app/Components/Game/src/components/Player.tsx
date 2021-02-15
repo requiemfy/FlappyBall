@@ -9,7 +9,6 @@ interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
   left: number;
   top: number;
-  // finish: boolean; // for the purpose of forcely stop the onFinish callBack ASAP and never continues when FALSE, smoothly continue to next animation when TRUE
   startSprite: (spriteRef: SpriteSheet | null) => void;
 }
 
@@ -22,7 +21,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.state = {
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
-      // finish: true,
       startSprite: this.idle,
     }
   }
@@ -51,13 +49,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     });
   }
 
-  // setSpriteRef = (spriteRef: SpriteSheet | null) => {
-  //   this.spriteRef = spriteRef!;
-  //   // this.setState({ finish: true });
-  // }
-
   stopCurrentAnim = () => {
-    // this.setState({ finish: false }); // stop animation ASAP please, and don't ever try to continue no matter what
     this.spriteRef!.stop();
     this.spriteRef!.time.setValue(0); // this nigga here is needed for idle sprite, index 0 of idle causes error when using loop
   }
@@ -67,8 +59,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       type: type,
       fps: fps,
       loop: loop,
-      // onFinish: () => this.state.finish ? cb() : null
-      // onFinish: ({ finished }: { finished: boolean }) => finished ? cb(finished) : null
       onFinish: cb
 
     })
@@ -102,7 +92,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   // }
 
   reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = ({ finished }: { finished: boolean }) => {}) => {
-    // this.setSpriteRef(spriteRef);
     this.spriteRef = spriteRef!;
 
     this.spriteRef?.reverse({

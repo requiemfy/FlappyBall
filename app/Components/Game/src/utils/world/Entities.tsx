@@ -89,7 +89,7 @@ export namespace Entities {
           size: [roof.width, roof.height], 
           borderRadius: roof.borderRadius,
           color: roof.color, 
-          renderer: Box,
+          renderer: Roof,
         },
         game: game,
       };
