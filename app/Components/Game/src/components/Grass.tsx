@@ -115,7 +115,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     const
       rand = Math.random(),
       h1 = rand <= 0.3 ? 0.3 : rand,
-      h2 = h1 >= 0.9 ? 0.5 : 0;
+      h2 = h1 >= 0.9 ? 1 : 0;
     return h1 + h2;
   }
 

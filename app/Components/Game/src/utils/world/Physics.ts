@@ -192,6 +192,7 @@ export namespace Physics {
 
               (function collidedSprite() {
                 game.grassRef.stop();
+                game.roofRef.stop();
                 game.playerRef.stopCurrentAnim();
                 game.playerRef.setState({ startSprite: game.playerRef.collided });
               })();

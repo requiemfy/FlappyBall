@@ -32,6 +32,7 @@ import { Engine, World } from 'matter-js';
 import Player from './components/Player';
 import SpriteSheet from './utils/helpers/sprite-sheet';
 import Grass from './components/Grass';
+import Roof from './components/Roof';
 
 interface Props {
   navigation: NavigationParams;
@@ -63,6 +64,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   entities!: Entities.All; // all entities (player, floor)
   playerRef!: Player;
   grassRef!: Grass;
+  roofRef!: Roof;
   paused = false;
   over = false;
   wallIds: number[] = [];
@@ -116,6 +118,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
         this.engine.stop(); // if stop() went missing, add it to GameEngine index.d.ts
       }
       this.grassRef.stop();
+      this.roofRef.stop();
       this.props.navigation.push("Menu", { button: "resume" })
     } else {
       console.log("GAME OVER")
@@ -155,6 +158,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   play = () => {
     this.engine.start();
     this.grassRef.move();
+    this.roofRef.move();
   }
 
   playerFly = () => {

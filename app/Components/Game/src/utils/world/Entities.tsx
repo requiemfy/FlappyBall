@@ -56,7 +56,7 @@ export namespace Entities {
     [key: number]: Physical<number[]> & { heightPercent: number }; // initial wall
     player: Physical<number> & { setRef: (ref: any) => void };
     floor: Physical<number[]> & { setRef: (ref: any) => void };
-    roof: Physical<number[]>;
+    roof: Physical<number[]> & { setRef: (ref: any) => void };
   };
 
   // ====================================================================================================
@@ -89,6 +89,7 @@ export namespace Entities {
           size: [roof.width, roof.height], 
           borderRadius: roof.borderRadius,
           color: roof.color, 
+          setRef: ref => game.roofRef = ref,
           renderer: Roof,
         },
         game: game,
