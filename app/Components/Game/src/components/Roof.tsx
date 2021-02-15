@@ -1,3 +1,4 @@
+import { ScaleFromCenterAndroid } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets';
 import { number } from 'prop-types';
 import React, { createRef, MutableRefObject } from 'react';
 import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback, ImageBackground } from 'react-native';
@@ -78,6 +79,8 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
 
     this.state.roofAleft.setValue(0);
     this.state.roofBleft.setValue(this.roofWidth);
+
+    this.setState({});
   }
 
   private calcDuration(width: number, left: number) {
@@ -167,7 +170,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   render() {
     return (
       <Box.default {...this.props}>
-        <Image // background image of roof
+        {/* <Image // background image of roof
           source={require('../../assets/vines/static.png')}
           style={{
             position: 'absolute',
@@ -176,7 +179,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
             top: this.props.size[1] * 0.25,
             resizeMode: 'stretch',
           }}
-        />
+        /> */}
         <Vines
           left={this.state.roofAleft}
           myColor={"transparent"}
@@ -222,7 +225,7 @@ class Vines extends React.PureComponent<
 
     // switch (this.props.vine) {
     //   case 1:
-    //     height *= 5; // 4
+    //     height *= 5;
     //     top *= 0.5;
     //     break;
     //   case 2:
@@ -230,7 +233,7 @@ class Vines extends React.PureComponent<
     //     top = -top * 0.5;
     //     break;
     //   case 3:
-    //     height *= 2;
+    //     height *= 2; // 3
     //     top -= (top * 0.2)
     //     break;
     //   case 4:
@@ -240,18 +243,21 @@ class Vines extends React.PureComponent<
     //   default:
     //     break;
     // }
-    height *= 4;
+    height *= 5;
     top *= 0.5;
+
+    console.log("ROOF RENDER " + this.props.size[1] + " : " + this.props.width)
     return (
       <Animated.Image
         source={require('../../assets/vines/1.png')}
+        resizeMethod={"resize"} // for orientation change response of image
         style={[{
           position: "absolute",
           top: top,
           width: this.props.width,
           height: height,
           backgroundColor: this.props.myColor,
-          resizeMode: "repeat"
+          resizeMode: "repeat",
         },
         Platform.OS === 'web'
           ? { left: this.props.left, }
