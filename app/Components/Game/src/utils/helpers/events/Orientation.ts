@@ -30,6 +30,7 @@ export namespace Orientation {
       ////////////////////////////////////////////////////////////
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
+      game.forceUpdate();
     };
     Dimensions.addEventListener('change', orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
 

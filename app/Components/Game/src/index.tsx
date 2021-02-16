@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Alert, Animated, AppState, Dimensions, Platform, Text } from 'react-native'
+import { Alert, Animated, AppState, Dimensions, ImageBackground, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine } from './utils/helpers/react-native-game-engine';
 
@@ -211,6 +211,12 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             flexDirection: "row",
             backgroundColor: "pink",
           }}>
+            <ImageBackground source={require('../assets/bg.jpeg')}
+              style={{
+                position: "absolute",
+                width: GameDimension.getWidth("now"),
+                height: GameDimension.window().gameHeight,
+              }}></ImageBackground>
             <GameEngine
               ref={this.setEngineRef}
               onEvent={this.onGameEngineEvent}
@@ -219,7 +225,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
               // running={!this.paused} // @note running
               style={{
                 flex: 1,
-                backgroundColor: "blue",
+                // backgroundColor: "black",
                 left: this.state.left,
               }} />
             <StatusBar hidden />

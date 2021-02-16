@@ -63,3 +63,9 @@ we can't get animated value when useNativeDriver is true
 ----------------------------------------------------------
 wallRelativity(entities);
 wall num in entities
+
+----------------------------------------------------------
+trying to add background image in the game and make it responsive
+
+added in Orientation.ts:
+      game.forceUpdate();
