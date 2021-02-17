@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Alert, Animated, AppState, Dimensions, ImageBackground, Platform, Text } from 'react-native'
+import { ActivityIndicator, Alert, Animated, AppState, Dimensions, ImageBackground, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine } from './utils/helpers/react-native-game-engine';
 
@@ -34,6 +34,8 @@ import SpriteSheet from './utils/helpers/sprite-sheet';
 import Grass from './components/Grass';
 import Roof from './components/Roof';
 
+import PulseIndicator from 'react-native-indicators'; // added .d.ts file
+
 interface Props {
   navigation: NavigationParams;
   route: { params: { button: keyof { play: string; resume: string; restart: string; } } }
@@ -41,6 +43,7 @@ interface Props {
 interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
   score: number;
+  loadingBG: boolean;
 }
 interface Game {
   engine: GameEngine;
@@ -72,7 +75,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   willUnmount = false;
   entitiesInitialized = false;
   gravity = 0.12;
-  state = { score: 0, left: 0, };
+  state = { score: 0, left: 0, loadingBG: true };
   matterEngine = ENGINE.create({ enableSleeping: false });
   matterWorld = this.matterEngine.world;
 
@@ -216,7 +219,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
                 position: "absolute",
                 width: GameDimension.getWidth("now"),
                 height: GameDimension.window().gameHeight,
-              }}></ImageBackground>
+              }}
+              onLoadEnd={() => this.setState({ loadingBG: false })}
+            >
+            </ImageBackground>
             <GameEngine
               ref={this.setEngineRef}
               onEvent={this.onGameEngineEvent}
@@ -231,6 +237,24 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             <StatusBar hidden />
           </View>
         </TouchableWithoutFeedback>
+        {
+          this.state.loadingBG
+            ? <View style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: "black",
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+                {/* <ActivityIndicator size="large" color="white" /> */}
+                <PulseIndicator color='white'/>
+              </View>
+            : null
+        }
       </View>
     );
   }
