@@ -15,15 +15,16 @@ export default class TopBar extends React.PureComponent<Props, State> {
       <View style={styles.rootContainer}>
         <View style={styles.subContainer}>
 
-          <View style={{ width: "40%", height: "90%", backgroundColor: "black" }} >
-            <Text style={{ color: "white" }} >{ this.props.score }</Text>
+          <View style={styles.score} >
+            <Text style={{ color: "white", fontSize: 40, }} >{ this.props.score }</Text>
           </View>
 
-          <View style={[{ width: "40%", }]}>
+          <View style={[styles.menu]}>
             <Button
               onPress={this.props.pause}
               title={this.props.running}
-              color="gray" />
+              color="transparent" 
+            />
           </View> 
 
         </View>
@@ -41,8 +42,21 @@ const styles = StyleSheet.create({
   subContainer: { 
     flex: 1, 
     flexDirection: "row", 
-    backgroundColor: "red" ,
+    backgroundColor: "black" ,
     justifyContent: "space-around",
     alignItems: "center", 
+  },
+  score: { 
+    width: "40%", 
+    height: "90%", 
+    backgroundColor: "black" ,
+    alignItems: "center",
+    paddingTop: 5,
+  },
+  menu: { 
+    width: "40%", 
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 10,
   }
 })
