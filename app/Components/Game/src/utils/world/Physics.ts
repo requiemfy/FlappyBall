@@ -71,7 +71,8 @@ export namespace Physics {
         while (wallLen--) { // order doesn't matter, just move all the wall
           wallIndex = entities.game.wallIds[wallLen];
           wall = entities[wallIndex];
-          BODY.translate( wall.body, { x: -1.2, y: 0 } );
+          // BODY.translate( wall.body, { x: -1.2, y: 0 } );
+          BODY.translate( wall.body, { x: -3, y: 0 } );
         }
       })();
 
