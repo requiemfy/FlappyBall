@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic } from 'react-native';
+import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../../Components/Game/src';
@@ -9,19 +9,19 @@ import { NavigationParams, } from 'react-navigation';
 export namespace GameMenu {
   type MenuButton = keyof { play: string, resume: string, restart: string };
   type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
-  
+
   class MenuScreen extends React.PureComponent<MenuProps, {}> {
-    
+
     constructor(props: MenuProps) {
       super(props);
     }
 
-    componentDidMount () {
+    componentDidMount() {
       console.log("MENU SCREEN WILL MOUNT");
       BackHandler.addEventListener("hardwareBackPress", this.backAction);
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
       console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
       BackHandler.removeEventListener("hardwareBackPress", this.backAction);
     }
@@ -43,84 +43,104 @@ export namespace GameMenu {
       const button = this.props.route.params?.button;
       (button === "resume")
         ? this.props.navigation.goBack()
-        : this.props.navigation.reset({ 
-            index: 0,
-            routes: [
-              {name: 'FlappyBall', params: { button: button }},
-            ],
-          });
+        : this.props.navigation.reset({
+          index: 0,
+          routes: [
+            { name: 'FlappyBall', params: { button: button } },
+          ],
+        });
     }
 
-    render () {
+    render() {
       const button = this.props.route.params?.button;
       return (
-        <View style={{ 
-          flex: 1, 
-          alignItems: 'center', 
-          justifyContent: 'center',}}>
+        <View style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
 
-          <View style={{
+          {/* <View style={{
             position: "absolute",
             left: 0,
             top: 0,
             height: "100%",
             width: "100%",
             // backgroundColor: "red",
-            zIndex: 0, }}>
+            zIndex: 0,
+          }}>
             <Text style={{ fontSize: 30 }}>BACKGROUND IMAGE HERE</Text>
-          </View>
+          </View> */}
+
+          {
+            button !== "restart" && button !== "resume"
+              ? <ImageBackground source={require('../assets/bg.png')}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+              </ImageBackground>
+              : null
+          }
 
           <View style={{
-            backgroundColor: "yellow",
+            backgroundColor: 'rgba(0,0,0,0.5)',
             width: "70%",
-            height: "50%", }}>
+            height: "50%",
+            borderRadius: 10,
+          }}>
             <View style={{
               flex: 1,
               justifyContent: "center",
-              alignItems: "center", }}>
-                <View><Text>FLAPPY BALL</Text></View>
-                <View>
-                  <Button 
+              alignItems: "center",
+            }}>
+              <View style={{
+                marginBottom: 20
+              }}>
+                {
+                  button === "restart"
+                    ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
+                    : button === "resume"
+                      ? <Text style={styles.menuLabel}>PAUSED</Text>
+                      : <Text style={styles.menuLabel}>FLAPPY BALL</Text>
+                }
+              </View>
+              <View>
+                <View style={[styles.menuButton]}>
+                  <Button
                     title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "PLAY"}
+                    color="transparent"
                     onPress={this.navigate} />
-                  <Button 
-                    title="QUIT" 
+                </View>
+                <View style={[styles.menuButton]}>
+                  <Button
+                    title="QUIT"
+                    color="transparent"
                     onPress={this.backAction} />
                 </View>
               </View>
+            </View>
           </View>
 
         </View>
       )
     }
-    
+
   }
 
   const RootStack = createStackNavigator();
   export function StackScreen() {
     return (
       <NavigationContainer>
-        <RootStack.Navigator 
+        <RootStack.Navigator
           screenOptions={{
             headerShown: false,
             cardStyle: { backgroundColor: 'transparent' },
-            // cardOverlayEnabled: true,
             cardStyleInterpolator: ({ current: { progress } }) => ({
-              cardStyle: {
-                // opacity: progress.interpolate({
-                //   inputRange: [0, 0.5, 0.9, 1],
-                //   outputRange: [0, 0.25, 0.7, 1],
-                // }),
-                opacity: 1,
-              },
-              overlayStyle: {
-                // opacity: progress.interpolate({
-                //   inputRange: [0, 1],
-                //   outputRange: [0, 0.5],
-                //   extrapolate: 'clamp',
-                // }),
-                opacity: 0.5,
-              },
+              cardStyle: { opacity: 1, },
+              overlayStyle: { opacity: 0.5, },
             }),
           }}
           mode="modal" >
@@ -131,6 +151,15 @@ export namespace GameMenu {
       </NavigationContainer>
     );
   }
-
 }
+
+const styles = StyleSheet.create({
+  menuLabel: { fontSize: 20, fontWeight: "bold", color: "white" },
+  menuButton: {
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 10,
+    marginTop: 5,
+  }
+})
 

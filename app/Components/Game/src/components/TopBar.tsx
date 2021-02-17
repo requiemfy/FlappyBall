@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     height: "90%", 
     backgroundColor: "black" ,
     alignItems: "center",
-    paddingTop: 5,
   },
   menu: { 
     width: "40%", 
