@@ -252,7 +252,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
                 justifyContent: "center",
                 alignItems: "center",
               }}>
-                {/* <ActivityIndicator size="large" color="white" /> */}
                 <PulseIndicator color='white'/>
               </View>
             : null

@@ -4,16 +4,19 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../../Components/Game/src';
 import { NavigationParams, } from 'react-navigation';
+import PulseIndicator from 'react-native-indicators';
 
 
 export namespace GameMenu {
   type MenuButton = keyof { play: string, resume: string, restart: string };
   type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
+  type MenuState = { loadingBG: boolean}
 
-  class MenuScreen extends React.PureComponent<MenuProps, {}> {
+  class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
 
     constructor(props: MenuProps) {
       super(props);
+      this.state = { loadingBG: true }
     }
 
     componentDidMount() {
@@ -59,32 +62,18 @@ export namespace GameMenu {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-
-          {/* <View style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            height: "100%",
-            width: "100%",
-            // backgroundColor: "red",
-            zIndex: 0,
-          }}>
-            <Text style={{ fontSize: 30 }}>BACKGROUND IMAGE HERE</Text>
-          </View> */}
-
           {
             button !== "restart" && button !== "resume"
               ? <ImageBackground source={require('../assets/bg.png')}
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  onLoadEnd={() => this.setState({ loadingBG: false })}>
               </ImageBackground>
               : null
           }
-
           <View style={{
             backgroundColor: 'rgba(0,0,0,0.5)',
             width: "70%",
@@ -123,7 +112,23 @@ export namespace GameMenu {
               </View>
             </View>
           </View>
-
+          {
+            this.state.loadingBG && button !== "restart" && button !== "resume"
+              ? <View style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  backgroundColor: "black",
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}>
+                  <PulseIndicator color='white'/>
+                </View>
+              : null
+          }
         </View>
       )
     }
