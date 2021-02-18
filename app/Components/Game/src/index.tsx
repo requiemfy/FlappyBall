@@ -33,8 +33,7 @@ import Player from './components/Player';
 import SpriteSheet from './utils/helpers/sprite-sheet';
 import Grass from './components/Grass';
 import Roof from './components/Roof';
-
-import PulseIndicator from 'react-native-indicators'; // added .d.ts file
+import { PulseIndicator } from 'react-native-indicators';
 
 interface Props {
   navigation: NavigationParams;

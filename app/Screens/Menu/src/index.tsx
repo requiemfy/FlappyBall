@@ -4,8 +4,7 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../../Components/Game/src';
 import { NavigationParams, } from 'react-navigation';
-import PulseIndicator from 'react-native-indicators';
-
+import { PulseIndicator } from 'react-native-indicators';
 
 export namespace GameMenu {
   type MenuButton = keyof { play: string, resume: string, restart: string };
