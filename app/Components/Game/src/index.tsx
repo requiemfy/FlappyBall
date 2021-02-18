@@ -170,9 +170,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-      if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
+      // if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
+      if (orient === "landscape") Physics.playerRelativity.gravity(-0.0045);
       // else Physics.playerRelativity.gravity(-0.003);
-      else Physics.playerRelativity.gravity(-0.004);
+      else Physics.playerRelativity.gravity(-0.005);
 
       this.playerRef.stopCurrentAnim();
       // just choose either animation
@@ -185,7 +186,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (!this.over) {
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-      if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
+      // if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
+      if (orient === "landscape") Physics.playerRelativity.gravity(0.002);
       // else Physics.playerRelativity.gravity(0.0015);
       else Physics.playerRelativity.gravity(0.0015);
 
