@@ -26,9 +26,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.navigation = this.props.navigation;
   }
 
-  componentWillUnmount() {console.log("LOGIN SCREEN UNMOUNTED");}
-  componentDidMount() {console.log("LOGIN SCREEN UNMOUNTED");}
-
   tryLogin = () => {
     if (true) {
       this.setState({ invalidCreds: false });

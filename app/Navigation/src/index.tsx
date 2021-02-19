@@ -40,14 +40,7 @@ export default function MainStackScreen() {
         <RootStack.Screen 
           name="Menu" 
           component={MenuScreen}
-          // options={{
-          //   cardStyle: { backgroundColor: 'transparent' },
-          //   cardStyleInterpolator: ({ current: { progress } }) => ({
-          //     cardStyle: { opacity: 1, },
-          //     overlayStyle: { opacity: 0.5, },
-          //   }),
-          // }} 
-          />
+        />
         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
       </RootStack.Navigator>
       <StatusBar hidden />
