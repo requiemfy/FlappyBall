@@ -80,20 +80,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   }
 }
 
-
-// @remind clear unneccesarry shits here
 const styles = StyleSheet.create({
-  loadingContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: "#f2f2f2",
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   rootContainer: {
     flex: 1,
     alignItems: 'center',

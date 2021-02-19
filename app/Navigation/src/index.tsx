@@ -21,11 +21,11 @@ export default function MainStackScreen() {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
-          cardStyle: { backgroundColor: 'transparent' },
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: { opacity: 1, },
-            overlayStyle: { opacity: 0.5, },
-          }),
+          // cardStyle: { backgroundColor: 'transparent' },
+          // cardStyleInterpolator: ({ current: { progress } }) => ({
+          //   cardStyle: { opacity: 1, },
+          //   overlayStyle: { opacity: 0.5, },
+          // }),
         }}
         mode="modal" >
         <RootStack.Screen name="Login" component={LoginScreen} />
@@ -37,7 +37,16 @@ export default function MainStackScreen() {
             title: 'Sign Up Bro'
           }}
         />
-        <RootStack.Screen name="Menu" component={MenuScreen} />
+        <RootStack.Screen 
+          name="Menu" 
+          component={MenuScreen}
+          options={{
+            cardStyle: { backgroundColor: 'transparent' },
+            cardStyleInterpolator: ({ current: { progress } }) => ({
+              cardStyle: { opacity: 1, },
+              overlayStyle: { opacity: 0.5, },
+            }),
+          }} />
         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
       </RootStack.Navigator>
       <StatusBar hidden />

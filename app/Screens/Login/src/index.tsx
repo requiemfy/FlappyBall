@@ -30,8 +30,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   componentDidMount() {console.log("LOGIN SCREEN UNMOUNTED");}
 
   tryLogin = () => {
-    const isValid = this.email === "jasonramirez@gmail.com" && this.password === "1234";
-    if (isValid) {
+    if (true) {
       this.setState({ invalidCreds: false });
       this.navigation.reset({ 
         index: 0,
