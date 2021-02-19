@@ -2,16 +2,16 @@ import * as React from 'react';
 import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../../Components/Game/src';
+import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 
-export namespace GameMenu {
+// export namespace GameMenu {
   type MenuButton = keyof { play: string, resume: string, restart: string };
   type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
   type MenuState = { loadingBG: boolean}
 
-  class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
+  export default class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
 
     constructor(props: MenuProps) {
       super(props);
@@ -134,28 +134,28 @@ export namespace GameMenu {
 
   }
 
-  const RootStack = createStackNavigator();
-  export function StackScreen() {
-    return (
-      <NavigationContainer>
-        <RootStack.Navigator
-          screenOptions={{
-            headerShown: false,
-            cardStyle: { backgroundColor: 'transparent' },
-            cardStyleInterpolator: ({ current: { progress } }) => ({
-              cardStyle: { opacity: 1, },
-              overlayStyle: { opacity: 0.5, },
-            }),
-          }}
-          mode="modal" >
-          <RootStack.Screen name="Menu" component={MenuScreen} />
-          <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
-        </RootStack.Navigator>
-        <StatusBar hidden />
-      </NavigationContainer>
-    );
-  }
-}
+  // const RootStack = createStackNavigator();
+  // export function StackScreen() {
+  //   return (
+  //     <NavigationContainer>
+  //       <RootStack.Navigator
+  //         screenOptions={{
+  //           headerShown: false,
+  //           cardStyle: { backgroundColor: 'transparent' },
+  //           cardStyleInterpolator: ({ current: { progress } }) => ({
+  //             cardStyle: { opacity: 1, },
+  //             overlayStyle: { opacity: 0.5, },
+  //           }),
+  //         }}
+  //         mode="modal" >
+  //         <RootStack.Screen name="Menu" component={MenuScreen} />
+  //         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
+  //       </RootStack.Navigator>
+  //       <StatusBar hidden />
+  //     </NavigationContainer>
+  //   );
+  // }
+// }
 
 const styles = StyleSheet.create({
   menuLabel: { fontSize: 20, fontWeight: "bold", color: "white" },
