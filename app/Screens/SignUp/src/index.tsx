@@ -9,6 +9,7 @@ import {
   NavigationParams,
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
+import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { invalidCreds: boolean; loading: boolean }
@@ -25,16 +26,31 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
     this.state = { invalidCreds: false, loading: true };
   }
 
+  componentDidMount() {
+    console.log("sign up MOUNT");
+  }
+
+  componentWillUnmount() {
+    console.log("sign up UN-MOUNT")
+  }
+
   trySignUp = () => {
-    const isValid = this.email === "jasonramirez@gmail.com" && this.password === "1234";
-    if (isValid) {
-      this.setState({ invalidCreds: false });
-      this.navigation.reset({
-        index: 0,
-        routes: [{ name: 'Menu' }],
-      });
-    }
-    else this.setState({ invalidCreds: true });
+    // if (true) {
+    //   this.setState({ invalidCreds: false });
+    //   this.navigation.reset({
+    //     index: 0,
+    //     routes: [{ name: 'Menu' }],
+    //   });
+    // }
+    // else this.setState({ invalidCreds: true });
+
+    this.password === this.confirmPass
+      ? firebase
+        .auth()
+        .createUserWithEmailAndPassword(this.email, this.password)
+        .then(() => console.log("SUCCESS"))
+        .catch(err => this.setState({ invalidCreds: true }))
+      : this.setState({ invalidCreds: true });
   }
 
   render() {
@@ -52,7 +68,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
           placeholderTextColor="white"
           style={styles.textInput} />
         <TextInput
-          onChangeText={(text => { this.email = text })}
+          onChangeText={(text => { this.codeName = text })}
           placeholder="Code Name"
           placeholderTextColor="white"
           style={styles.textInput} />
@@ -63,7 +79,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
           secureTextEntry={true}
           style={styles.textInput} />
         <TextInput
-          onChangeText={(text => { this.password = text })}
+          onChangeText={(text => { this.confirmPass = text })}
           placeholder="Confirm Password"
           placeholderTextColor="white"
           secureTextEntry={true}

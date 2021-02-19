@@ -9,21 +9,43 @@ import {
   NavigationParams, 
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
+import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
-interface State { invalidCreds: boolean; loading: boolean}
+interface State { 
+  invalidCreds: boolean; 
+  loading: boolean;
+}
 
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
-  email: string;
-  password: string;
-  navigation: Props["navigation"];
+  email = "";
+  password = "";
+  navigation = this.props.navigation;
+  authSubscriber!: firebase.Unsubscribe;
 
   constructor(props: Props | any) {
     super(props);
-    this.email = "";
-    this.password = "";
-    this.state = { invalidCreds: false, loading: true };
-    this.navigation = this.props.navigation;
+    this.state = { 
+      invalidCreds: false, 
+      loading: true,  
+    };
+  }
+
+  componentDidMount() {
+    this.authSubscriber = firebase.auth().onAuthStateChanged((user: any) => {
+      user 
+        ? this.navigation.reset({ 
+            index: 0,
+            routes: [{ name: 'Menu' }],
+          }) 
+        : null;
+    });
+    console.log("login MOUNT")
+  }
+
+  componentWillUnmount() {
+    this.authSubscriber() // unsubscribe method returned
+    console.log("login UN-MOUNT")
   }
 
   tryLogin = () => {

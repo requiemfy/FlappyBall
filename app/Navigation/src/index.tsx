@@ -28,7 +28,10 @@ export default function MainStackScreen() {
           }),
         }}
         mode="modal" >
-        <RootStack.Screen name="Login" component={LoginScreen} />
+        <RootStack.Screen
+          name="Login"
+          component={LoginScreen} 
+        />
         <RootStack.Screen
           name="SignUp"
           component={SignUpScreen}
@@ -37,8 +40,8 @@ export default function MainStackScreen() {
             title: 'Sign Up Bro'
           }}
         />
-        <RootStack.Screen 
-          name="Menu" 
+        <RootStack.Screen
+          name="Menu"
           component={MenuScreen}
         />
         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
