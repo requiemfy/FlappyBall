@@ -24,13 +24,12 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.password = "";
     this.state = { invalidCreds: false, loading: true };
     this.navigation = this.props.navigation;
-    this.tryLogin = this.tryLogin.bind(this);
   }
 
   componentWillUnmount() {console.log("LOGIN SCREEN UNMOUNTED");}
   componentDidMount() {console.log("LOGIN SCREEN UNMOUNTED");}
 
-  tryLogin() {
+  tryLogin = () => {
     const isValid = this.email === "jasonramirez@gmail.com" && this.password === "1234";
     if (isValid) {
       this.setState({ invalidCreds: false });
@@ -42,13 +41,8 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     else this.setState({ invalidCreds: true });
   }
 
-  signUpAlert() {
-    Alert.alert(
-      "Alert",
-      "Sorry registration is not available at the moment.",
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-      { cancelable: false }
-   );
+  signUpAlert = () => {
+    this.navigation.navigate('SignUp');
   }
 
   render() {
@@ -60,34 +54,36 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
             <Text style={{ color: "red" }}>Invalid Credentials</Text>
           </View>
         }
-        <Image 
-          source={{ uri: "https://raw.githubusercontent.com/loyd-larazo/app-dev-2020-finals/main/instabook.png" }} 
-          style={{ height: 100, width: "35%", resizeMode: "contain", }}
-          onLoadEnd={() => this.setState({ loading: false })}/>
+
+        <Text style={styles.title}>FLAPPY BALL</Text>
+
         <TextInput 
           onChangeText={(text => {this.email = text})}
           placeholder="Email"
+          placeholderTextColor="white"
           style={styles.textInput} />
         <TextInput 
           onChangeText={(text => {this.password = text})}
           placeholder="Password"
+          placeholderTextColor="white"
           secureTextEntry={true}
           style={styles.textInput} /> 
         <View 
-          style={[{width:"80%", marginTop: 5, zIndex: 0}]}>
+          style={[{width:"80%", margin: 10}]}>
           <Button
             onPress={this.tryLogin}
             title="Log In"
-            color="#5294eb" />
+            color='rgba(66, 66, 66, 0.6)' />
         </View> 
         <View style={styles.signUp}>
           <Text style={{ color: "#989898" }}>Don't have an account?</Text>
           <TouchableOpacity onPress={this.signUpAlert}>
-            <Text>Sign Up</Text>
+            <Text style={{ fontWeight: 'bold', color: 'white' }} >Sign Up</Text>
           </TouchableOpacity>
         </View>
         {
-          this.state.loading 
+          // this.state.loading 
+          false
             && (<View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color="#00ff00"/>
                 </View>)
@@ -113,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     alignItems: 'center', 
     justifyContent: 'center',
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "black",
   },
   textInput: {
     width: "80%",
@@ -123,16 +119,15 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderWidth: 1,
     borderColor: "#e0e0e0",
+    color: "white"
   },
   signUp: { 
     width: "100%",
     height: "8%", 
-    position: "absolute",
+    // position: "absolute",
     bottom: 0,
     alignItems: "center",
     justifyContent: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0" 
   },
   invalidCreds: { 
     width: "100%", 
@@ -140,6 +135,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "pink", 
+  },
+  title: { 
+    fontSize: 30, 
+    fontWeight: "bold", 
+    color: "white" ,
+    marginBottom: "10%"
   }
 })
 export default withNavigation(LoginScreen);
