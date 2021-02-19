@@ -6,156 +6,132 @@ import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 
-// export namespace GameMenu {
-  type MenuButton = keyof { play: string, resume: string, restart: string };
-  type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
-  type MenuState = { loadingBG: boolean}
+type MenuButton = keyof { play: string, resume: string, restart: string };
+type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
+type MenuState = { loadingBG: boolean}
 
-  export default class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
+export default class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
 
-    constructor(props: MenuProps) {
-      super(props);
-      this.state = { loadingBG: true }
-    }
+  constructor(props: MenuProps) {
+    super(props);
+    this.state = { loadingBG: true }
+  }
 
-    componentDidMount() {
-      console.log("MENU SCREEN WILL MOUNT");
-      BackHandler.addEventListener("hardwareBackPress", this.backAction);
-    }
+  componentDidMount() {
+    console.log("MENU SCREEN WILL MOUNT");
+    BackHandler.addEventListener("hardwareBackPress", this.backAction);
+  }
 
-    componentWillUnmount() {
-      console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
-      BackHandler.removeEventListener("hardwareBackPress", this.backAction);
-    }
+  componentWillUnmount() {
+    console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    BackHandler.removeEventListener("hardwareBackPress", this.backAction);
+  }
 
-    backAction = () => {
-      Alert.alert("Hold on!", "Are you sure you want to go back?", [
+  backAction = () => {
+    Alert.alert("Hold on!", "Are you sure you want to go back?", [
+      {
+        text: "Cancel",
+        onPress: () => null,
+        style: "cancel"
+      },
+      { text: "YES", onPress: () => BackHandler.exitApp() }
+    ]);
+    return true;
+  }
+
+  navigate = () => {
+    console.log("navigate menu button pressed")
+    const button = this.props.route.params?.button;
+    (button === "resume")
+      ? this.props.navigation.goBack()
+      : this.props.navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'FlappyBall', params: { button: button } },
+        ],
+      });
+  }
+
+  render() {
+    const button = this.props.route.params?.button;
+    return (
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         {
-          text: "Cancel",
-          onPress: () => null,
-          style: "cancel"
-        },
-        { text: "YES", onPress: () => BackHandler.exitApp() }
-      ]);
-      return true;
-    }
-
-    navigate = () => {
-      console.log("navigate menu button pressed")
-      const button = this.props.route.params?.button;
-      (button === "resume")
-        ? this.props.navigation.goBack()
-        : this.props.navigation.reset({
-          index: 0,
-          routes: [
-            { name: 'FlappyBall', params: { button: button } },
-          ],
-        });
-    }
-
-    render() {
-      const button = this.props.route.params?.button;
-      return (
+          button !== "restart" && button !== "resume"
+            ? <ImageBackground source={require('../assets/bg.png')}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                }}
+                onLoadEnd={() => this.setState({ loadingBG: false })}>
+            </ImageBackground>
+            : null
+        }
         <View style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          width: "70%",
+          height: "50%",
+          borderRadius: 10,
         }}>
-          {
-            button !== "restart" && button !== "resume"
-              ? <ImageBackground source={require('../assets/bg.png')}
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  onLoadEnd={() => this.setState({ loadingBG: false })}>
-              </ImageBackground>
-              : null
-          }
           <View style={{
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            width: "70%",
-            height: "50%",
-            borderRadius: 10,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
           }}>
             <View style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
+              marginBottom: 20
             }}>
-              <View style={{
-                marginBottom: 20
-              }}>
-                {
-                  button === "restart"
-                    ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
-                    : button === "resume"
-                      ? <Text style={styles.menuLabel}>PAUSED</Text>
-                      : <Text style={styles.menuLabel}>FLAPPY BALL</Text>
-                }
+              {
+                button === "restart"
+                  ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
+                  : button === "resume"
+                    ? <Text style={styles.menuLabel}>PAUSED</Text>
+                    : <Text style={styles.menuLabel}>FLAPPY BALL</Text>
+              }
+            </View>
+            <View>
+              <View style={[styles.menuButton]}>
+                <Button
+                  title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "PLAY"}
+                  color="transparent"
+                  onPress={this.navigate} />
               </View>
-              <View>
-                <View style={[styles.menuButton]}>
-                  <Button
-                    title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "PLAY"}
-                    color="transparent"
-                    onPress={this.navigate} />
-                </View>
-                <View style={[styles.menuButton]}>
-                  <Button
-                    title="QUIT"
-                    color="transparent"
-                    onPress={this.backAction} />
-                </View>
+              <View style={[styles.menuButton]}>
+                <Button
+                  title="QUIT"
+                  color="transparent"
+                  onPress={this.backAction} />
               </View>
             </View>
           </View>
-          {
-            this.state.loadingBG && button !== "restart" && button !== "resume"
-              ? <View style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  backgroundColor: "black",
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}>
-                  <PulseIndicator color='white'/>
-                </View>
-              : null
-          }
         </View>
-      )
-    }
-
+        {
+          this.state.loadingBG && button !== "restart" && button !== "resume"
+            ? <View style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: "black",
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+                <PulseIndicator color='white'/>
+              </View>
+            : null
+        }
+      </View>
+    )
   }
 
-  // const RootStack = createStackNavigator();
-  // export function StackScreen() {
-  //   return (
-  //     <NavigationContainer>
-  //       <RootStack.Navigator
-  //         screenOptions={{
-  //           headerShown: false,
-  //           cardStyle: { backgroundColor: 'transparent' },
-  //           cardStyleInterpolator: ({ current: { progress } }) => ({
-  //             cardStyle: { opacity: 1, },
-  //             overlayStyle: { opacity: 0.5, },
-  //           }),
-  //         }}
-  //         mode="modal" >
-  //         <RootStack.Screen name="Menu" component={MenuScreen} />
-  //         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
-  //       </RootStack.Navigator>
-  //       <StatusBar hidden />
-  //     </NavigationContainer>
-  //   );
-  // }
-// }
+}
 
 const styles = StyleSheet.create({
   menuLabel: { fontSize: 20, fontWeight: "bold", color: "white" },

@@ -6,7 +6,6 @@ Firebase.init();
 
 export default function Game() {
   return (
-    // <GameMenu.StackScreen />
     <MainStackScreen />
   );
 }

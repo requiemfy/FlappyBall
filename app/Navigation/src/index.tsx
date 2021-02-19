@@ -3,6 +3,7 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Screens/Game/src';
 import MenuScreen from '../../Screens/Menu/src';
+import LoginScreen from '../../Screens/Login/src'
 import { StatusBar } from 'react-native';
 
 const RootStack = createStackNavigator();
@@ -19,6 +20,7 @@ export default function MainStackScreen() {
           }),
         }}
         mode="modal" >
+        <RootStack.Screen name="Login" component={LoginScreen} />
         <RootStack.Screen name="Menu" component={MenuScreen} />
         <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
       </RootStack.Navigator>
