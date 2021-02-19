@@ -3,8 +3,9 @@ import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Screens/Game/src';
 import MenuScreen from '../../Screens/Menu/src';
-import LoginScreen from '../../Screens/Login/src'
-import SignUpScreen from '../../Screens/SignUp/src'
+import LoginScreen from '../../Screens/Login/src';
+import SignUpScreen from '../../Screens/SignUp/src';
+import SettingScreen from '../../Screens/Settings/src';
 import { StatusBar } from 'react-native';
 import HomeScreen from '../../Screens/Home/src';
 
@@ -44,6 +45,10 @@ export default function MainStackScreen() {
         <RootStack.Screen
           name="Home"
           component={HomeScreen}
+        />
+        <RootStack.Screen
+          name="Settings"
+          component={SettingScreen}
         />
         <RootStack.Screen
           name="Menu"

@@ -3,7 +3,7 @@ import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, D
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
-import { NavigationParams, } from 'react-navigation';
+import { NavigationParams, ThemeColors, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 
 type HomeButton = keyof { play: string, resume: string, restart: string };
@@ -48,6 +48,10 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     });
   }
 
+  goSettings = () => {
+    this.props.navigation.navigate('Settings');
+  }
+
   render() {
     const button = this.props.route.params?.button;
     return (
@@ -57,6 +61,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         justifyContent: 'center',
       }}>
         <View style={{
+          backgroundColor: "black",
           width: "100%",
           height: "100%",
           borderRadius: 10,
@@ -89,7 +94,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
                 <Button
                   title="SETTINGS"
                   color="transparent"
-                  onPress={() => null} />
+                  onPress={this.goSettings} />
               </View>
               <View style={[styles.HomeButton]}>
                 <Button
