@@ -215,7 +215,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
           <View style={{
             flex: 1,
             flexDirection: "row",
-            backgroundColor: "pink",
+            backgroundColor: "black",
           }}>
             <ImageBackground source={require('../assets/bg.jpeg')}
               style={{
