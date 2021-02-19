@@ -6,6 +6,7 @@ import MenuScreen from '../../Screens/Menu/src';
 import LoginScreen from '../../Screens/Login/src'
 import SignUpScreen from '../../Screens/SignUp/src'
 import { StatusBar } from 'react-native';
+import HomeScreen from '../../Screens/Home/src';
 
 const RootStack = createStackNavigator();
 export default function MainStackScreen() {
@@ -39,6 +40,10 @@ export default function MainStackScreen() {
             headerShown: true,
             title: 'Sign Up Bro'
           }}
+        />
+        <RootStack.Screen
+          name="Home"
+          component={HomeScreen}
         />
         <RootStack.Screen
           name="Menu"

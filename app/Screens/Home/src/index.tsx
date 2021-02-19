@@ -6,23 +6,24 @@ import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 
-type MenuButton = keyof { play: string, resume: string, restart: string };
-type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
-type MenuState = { loadingBG: boolean}
+type HomeButton = keyof { play: string, resume: string, restart: string };
+type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton, } } }
+type HomeState = { loadingBG: boolean}
 
-export default class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
+export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
 
-  constructor(props: MenuProps) {
+  constructor(props: HomeProps) {
     super(props);
+    this.state = { loadingBG: true }
   }
 
   componentDidMount() {
-    console.log("MENU SCREEN WILL MOUNT");
+    console.log("Home SCREEN WILL MOUNT");
     BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    console.log("Home SCREEN WILL UUUUUUUUUUUN-MOUNT");
     BackHandler.removeEventListener("hardwareBackPress", this.backAction);
   }
 
@@ -38,25 +39,13 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
     return true;
   }
 
-  navigate = () => {
-    const button = this.props.route.params?.button;
-    (button === "resume")
-      ? this.props.navigation.goBack() // resume
-      : this.props.navigation.reset({ // restart
-        index: 0,
-        routes: [
-          { name: 'FlappyBall', params: { button: button } },
-        ],
-      });
-  }
-
-  goHome = () => {
+  play = () => {
     this.props.navigation.reset({
       index: 0,
       routes: [
-        { name: 'Home' },
+        { name: 'FlappyBall', params: { button: "play" } },
       ],
-    })
+    });
   }
 
   render() {
@@ -68,41 +57,41 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
         justifyContent: 'center',
       }}>
         <View style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          width: "70%",
-          height: "50%",
+          width: "100%",
+          height: "100%",
           borderRadius: 10,
         }}>
+          <ImageBackground 
+            source={require('../assets/bg.png')}
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+            }}
+            onLoadEnd={() => this.setState({ loadingBG: false })}>
+          </ImageBackground>
           <View style={{
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
           }}>
-            <View style={{
-              marginBottom: 20
-            }}>
-              {
-                button === "restart"
-                  ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
-                  : button === "resume"
-                    ? <Text style={styles.menuLabel}>PAUSED</Text>
-                    : <Text style={styles.menuLabel}>FLAPPY BALL</Text>
-              }
+            <View style={{ marginBottom: 20 }}>
+              <Text style={styles.HomeLabel}>FLAPPY BALL</Text>
             </View>
             <View>
-              <View style={[styles.menuButton]}>
+              <View style={[styles.HomeButton]}>
                 <Button
-                  title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "HOME"}
+                  title="PLAY"
                   color="transparent"
-                  onPress={this.navigate} />
+                  onPress={this.play} />
               </View>
-              <View style={[styles.menuButton]}>
+              <View style={[styles.HomeButton]}>
                 <Button
-                  title="Home"
+                  title="SETTINGS"
                   color="transparent"
-                  onPress={this.goHome} />
+                  onPress={() => null} />
               </View>
-              <View style={[styles.menuButton]}>
+              <View style={[styles.HomeButton]}>
                 <Button
                   title="QUIT"
                   color="transparent"
@@ -111,6 +100,23 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
             </View>
           </View>
         </View>
+        {
+          this.state.loadingBG && button !== "restart" && button !== "resume"
+            ? <View style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: "black",
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+                <PulseIndicator color='white'/>
+              </View>
+            : null
+        }
       </View>
     )
   }
@@ -118,8 +124,8 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
 }
 
 const styles = StyleSheet.create({
-  menuLabel: { fontSize: 20, fontWeight: "bold", color: "white" },
-  menuButton: {
+  HomeLabel: { fontSize: 20, fontWeight: "bold", color: "white" },
+  HomeButton: {
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 10,
