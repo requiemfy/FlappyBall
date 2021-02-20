@@ -12,17 +12,21 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
-interface State { invalidCreds: boolean;}
+interface State { invalidCreds: boolean; error: string }
 
-class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
-  oldPass = "";
-  password = "";
-  confirmPass = "";
+class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, any> {
   navigation = this.props.navigation;
 
   constructor(props: Props | any) {
     super(props);
-    this.state = { invalidCreds: false, };
+    this.state = { 
+      invalidCreds: false, 
+      error: "Invalid Inputs",
+    
+      currentPass: "",
+      newPass: "",
+      confirmPass: "",
+    };
   }
 
   componentDidMount() {
@@ -42,6 +46,44 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
       // });
     // }
     // else this.setState({ invalidCreds: true });
+
+    if (this.state.newPass !== this.state.confirmPass) {
+      this.setState({ invalidCreds: true, error: "Password doesn't match." });
+      return null;
+    } else  if (this.state.newPass === this.state.currentPass || this.state.newPass === "") {
+      this.setState({ invalidCreds: true, error: "Please enter new password." });
+      return null;
+    }
+    const 
+      user = firebase.auth().currentUser,
+      cred = firebase.auth.EmailAuthProvider.credential(user?.email!, this.state.currentPass);
+
+    user?.reauthenticateWithCredential(cred)
+      .then(() => {
+        firebase.auth().currentUser?.updatePassword(this.state.newPass)
+          .then(() => {
+            Alert.alert("Password", "Successfully Changed", [
+              { 
+                text: "OK", 
+                onPress: () => {
+                  this.setState({ currentPass: "", newPass: "", confirmPass: "" })
+                } 
+              }
+            ]);
+            this.setState({ invalidCreds: false })
+          })
+          .catch(err => {
+            Alert.alert("Password", err, [
+              { text: "OK", onPress: () => null }
+            ]);
+          })
+      })
+      .catch(err => {
+        console.log("ggwp", err)
+        const error = String(err).replace('Error: ', '');
+        this.setState({ invalidCreds: true, error: error });
+      });
+
   }
 
   logout = () => {
@@ -62,23 +104,27 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
         {
           this.state.invalidCreds &&
           <View style={styles.invalidCreds}>
-            <Text style={{ color: "red" }}>Invalid Credentials</Text>
+            <Text style={{ color: "red", textAlign: "center" }}>{this.state.error}</Text>
           </View>
         }
+        <Text style={styles.changePassLabel}>Change Password</Text>
         <TextInput
-          onChangeText={(text => { this.password = text })}
-          placeholder="Old Password"
+          onChangeText={(text => this.setState({ currentPass: text }))}
+          value={this.state.currentPass}
+          placeholder="Current Password"
           placeholderTextColor="white"
           secureTextEntry={true}
           style={styles.textInput} />
         <TextInput
-          onChangeText={(text => { this.password = text })}
+          onChangeText={(text => this.setState({ newPass: text }))}
+          value={this.state.newPass}
           placeholder="Password"
           placeholderTextColor="white"
           secureTextEntry={true}
           style={styles.textInput} />
         <TextInput
-          onChangeText={(text => { this.confirmPass = text })}
+          onChangeText={(text => this.setState({ confirmPass: text }))}
+          value={this.state.confirmPass}
           placeholder="Confirm Password"
           placeholderTextColor="white"
           secureTextEntry={true}
@@ -108,6 +154,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: "black",
+  },
+  changePassLabel: { 
+    color: "white", 
+    fontWeight: "bold", 
+    fontSize: 20, 
+    marginBottom: "2%" 
   },
   textInput: {
     width: "80%",
