@@ -96,6 +96,12 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
               </View>
               <View style={[styles.menuButton]}>
                 <Button
+                  title="Hall of Fame"
+                  color="transparent"
+                  onPress={() => null} />
+              </View>
+              <View style={[styles.menuButton]}>
+                <Button
                   title="Home"
                   color="transparent"
                   onPress={this.goHome} />

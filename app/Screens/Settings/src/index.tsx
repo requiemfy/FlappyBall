@@ -12,9 +12,15 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
-interface State { invalidCreds: boolean; error: string }
+interface State { 
+  invalidCreds: boolean; 
+  error: string;
+  currentPass: string;
+  newPass: string;
+  confirmPass: string; 
+}
 
-class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, any> {
+class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
 
   constructor(props: Props | any) {
@@ -22,7 +28,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     this.state = { 
       invalidCreds: false, 
       error: "Invalid Inputs",
-    
       currentPass: "",
       newPass: "",
       confirmPass: "",
@@ -38,15 +43,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   changePass = () => {
-    // if (true) {
-      // this.setState({ invalidCreds: false });
-      // this.navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: 'Menu' }],
-      // });
-    // }
-    // else this.setState({ invalidCreds: true });
-
     if (this.state.newPass !== this.state.confirmPass) {
       this.setState({ invalidCreds: true, error: "Password doesn't match." });
       return null;
@@ -83,7 +79,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
         const error = String(err).replace('Error: ', '');
         this.setState({ invalidCreds: true, error: error });
       });
-
   }
 
   logout = () => {

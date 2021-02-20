@@ -90,6 +90,12 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
               </View>
               <View style={[styles.HomeButton]}>
                 <Button
+                  title="Hall of Fame"
+                  color="transparent"
+                  onPress={() => null} />
+              </View>
+              <View style={[styles.HomeButton]}>
+                <Button
                   title="SETTINGS"
                   color="transparent"
                   onPress={this.goSettings} />
