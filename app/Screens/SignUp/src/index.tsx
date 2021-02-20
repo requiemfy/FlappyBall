@@ -12,7 +12,10 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
-interface State { invalidCreds: boolean; loading: boolean }
+interface State { 
+  invalidCreds: boolean; 
+  error: string;
+}
 
 class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   email = "";
@@ -23,7 +26,10 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
 
   constructor(props: Props | any) {
     super(props);
-    this.state = { invalidCreds: false, loading: true };
+    this.state = { 
+      invalidCreds: false, 
+      error: "Invalid Credentials"
+    };
   }
 
   componentDidMount() {
@@ -34,23 +40,69 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
     console.log("sign up UN-MOUNT")
   }
 
-  trySignUp = () => {
-    // if (true) {
-    //   this.setState({ invalidCreds: false });
-    //   this.navigation.reset({
-    //     index: 0,
-    //     routes: [{ name: 'Menu' }],
-    //   });
-    // }
-    // else this.setState({ invalidCreds: true });
+  // async isValidCodeName() {
+  //   let isUnique = true;
+    // await firebase
+    //   .database()
+    //   .ref('/users')
+    //   .orderByChild("codeName")
+    //   .equalTo(this.codeName)
+    //   .once("value")
+    //   .then(snapshot => {
+    //     isUnique = !snapshot.val() // if null then unique
+    //     console.log("1 isUnique", isUnique)
 
-    this.password === this.confirmPass
-      ? firebase
-        .auth()
-        .createUserWithEmailAndPassword(this.email, this.password)
-        .then(() => console.log("SUCCESS"))
-        .catch(err => this.setState({ invalidCreds: true }))
-      : this.setState({ invalidCreds: true });
+    //   })
+    //   .catch(err => console.log(err));
+  //   console.log("2 isUnique", isUnique);
+  //   console.log("codename", this.codeName)
+  //   return isUnique && this.codeName !== "";
+  // }
+
+  trySignUp = () => {
+    if (this.password !== this.confirmPass) {
+      this.setState({ invalidCreds: true, error: "Password doesn't match." });
+      return null;
+    } 
+    
+    firebase
+      .database()
+      .ref('users')
+      .orderByChild("codeName")
+      .equalTo(this.codeName)
+      .once("value")
+      .then(snapshot => {
+        if (!snapshot.exists() && this.codeName !== "") {// if null then unique
+          // these verfy email and password length
+          firebase
+          .auth()
+          .createUserWithEmailAndPassword(this.email, this.password)
+          .then((arg) => {
+            this.setState({ invalidCreds: false });
+            const user = {
+              codeName: this.codeName,
+              record: 0,
+            };
+            firebase
+              .database()
+              .ref('users/' + arg.user?.uid)
+              .update(user)
+              .then(snapshot => {
+                console.log("SIGN UP SUCCESS", snapshot);
+              })
+              .catch(err => {
+                console.log("SIGN UP FAILED", err);
+              })
+          })
+          .catch((err: object) => {
+            const error = String(err).replace('Error: ', '');
+            this.setState({ invalidCreds: true, error: error });
+          });
+        } else {
+          this.setState({ invalidCreds: true, error: "Code Name is already used." });
+        }
+      })
+      .catch(err => console.log(err));
   }
 
   render() {
@@ -59,7 +111,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
         {
           this.state.invalidCreds &&
           <View style={styles.invalidCreds}>
-            <Text style={{ color: "red" }}>Invalid Credentials</Text>
+            <Text style={{ color: "red" }}>{this.state.error}</Text>
           </View>
         }
         <TextInput

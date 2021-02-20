@@ -3,6 +3,7 @@ import * as firebase from 'firebase';
 const firebaseConfig = {
   apiKey: "AIzaSyBihnlJua8jyleOvJuCic6zw32VbyjXqYQ",
   authDomain: "flappyball-fc87c.firebaseapp.com",
+  databaseURL: "https://flappyball-fc87c-default-rtdb.firebaseio.com",
   projectId: "flappyball-fc87c",
   storageBucket: "flappyball-fc87c.appspot.com",
   messagingSenderId: "412260902872",

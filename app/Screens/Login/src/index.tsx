@@ -1,14 +1,15 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text } from 'react-native';
+import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, LogBox } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import { 
   NavigationScreenProp, 
   NavigationState, 
   NavigationInjectedProps, 
   withNavigation, 
-  NavigationParams, 
+  NavigationParams,
+  NavigationActions, 
 } from 'react-navigation';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, StackActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
@@ -25,6 +26,8 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
 
   constructor(props: Props | any) {
     super(props);
+    LogBox.ignoreLogs(['Setting a timer']);
+
     this.state = { 
       invalidCreds: false, 
       loading: true,  
@@ -32,7 +35,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   }
 
   componentDidMount() {
-    this.authSubscriber = firebase.auth().onAuthStateChanged((user: any) => {
+    this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
       user 
         ? this.navigation.reset({ 
             index: 0,
@@ -41,6 +44,17 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         : null;
     });
     console.log("login MOUNT")
+
+    // firebase
+    //   .database()
+    //   .ref('users')
+    //   .orderByChild("codeName")
+    //   .equalTo('x')
+    //   .once("value")
+    //   .then(snap => {
+    //     console.log(snap.exists())
+    //   })
+    //   .catch(err => console.log(err))
   }
 
   componentWillUnmount() {
@@ -59,7 +73,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     else this.setState({ invalidCreds: true });
   }
 
-  signUpAlert = () => {
+  signUp = () => {
     this.navigation.navigate('SignUp');
   }
 
@@ -95,7 +109,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         </View> 
         <View style={styles.signUp}>
           <Text style={{ color: "#989898" }}>Don't have an account?</Text>
-          <TouchableOpacity onPress={this.signUpAlert}>
+          <TouchableOpacity onPress={this.signUp}>
             <Text style={{ fontWeight: 'bold', color: 'white' }} >Sign Up</Text>
           </TouchableOpacity>
         </View>

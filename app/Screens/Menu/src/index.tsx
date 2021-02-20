@@ -18,15 +18,13 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
 
   componentDidMount() {
     console.log("MENU SCREEN WILL MOUNT");
-    BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
-    BackHandler.removeEventListener("hardwareBackPress", this.backAction);
   }
 
-  backAction = () => {
+  quit = () => {
     Alert.alert("Hold on!", "Are you sure you want to go back?", [
       {
         text: "Cancel",
@@ -106,7 +104,7 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
                 <Button
                   title="QUIT"
                   color="transparent"
-                  onPress={this.backAction} />
+                  onPress={this.quit} />
               </View>
             </View>
           </View>

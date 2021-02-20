@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, LogBox } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
@@ -19,15 +19,13 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
   componentDidMount() {
     console.log("Home SCREEN WILL MOUNT");
-    BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("Home SCREEN WILL UUUUUUUUUUUN-MOUNT");
-    BackHandler.removeEventListener("hardwareBackPress", this.backAction);
   }
 
-  backAction = () => {
+  quit = () => {
     Alert.alert("Hold on!", "Are you sure you want to go back?", [
       {
         text: "Cancel",
@@ -100,7 +98,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
                 <Button
                   title="QUIT"
                   color="transparent"
-                  onPress={this.backAction} />
+                  onPress={this.quit} />
               </View>
             </View>
           </View>
