@@ -15,7 +15,7 @@ import { firebase } from '../../../src/firebase'
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   invalidCreds: boolean; 
-  loading: boolean;
+  error: string;
 }
 
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
@@ -30,7 +30,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
 
     this.state = { 
       invalidCreds: false, 
-      loading: true,  
+      error: "Invalid Credentials"
     };
   }
 
@@ -44,17 +44,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         : null;
     });
     console.log("login MOUNT")
-
-    // firebase
-    //   .database()
-    //   .ref('users')
-    //   .orderByChild("codeName")
-    //   .equalTo('x')
-    //   .once("value")
-    //   .then(snap => {
-    //     console.log(snap.exists())
-    //   })
-    //   .catch(err => console.log(err))
   }
 
   componentWillUnmount() {
@@ -63,14 +52,14 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   }
 
   tryLogin = () => {
-    if (true) {
-      this.setState({ invalidCreds: false });
-      this.navigation.reset({ 
-        index: 0,
-        routes: [{ name: 'Home' }],
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(this.email, this.password)
+      .then((arg) => null)
+      .catch((err: object) => {
+        const error = String(err).replace('Error: ', '');
+        this.setState({ invalidCreds: true, error: error });
       });
-    } 
-    else this.setState({ invalidCreds: true });
   }
 
   signUp = () => {

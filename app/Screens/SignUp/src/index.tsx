@@ -40,31 +40,11 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
     console.log("sign up UN-MOUNT")
   }
 
-  // async isValidCodeName() {
-  //   let isUnique = true;
-    // await firebase
-    //   .database()
-    //   .ref('/users')
-    //   .orderByChild("codeName")
-    //   .equalTo(this.codeName)
-    //   .once("value")
-    //   .then(snapshot => {
-    //     isUnique = !snapshot.val() // if null then unique
-    //     console.log("1 isUnique", isUnique)
-
-    //   })
-    //   .catch(err => console.log(err));
-  //   console.log("2 isUnique", isUnique);
-  //   console.log("codename", this.codeName)
-  //   return isUnique && this.codeName !== "";
-  // }
-
   trySignUp = () => {
     if (this.password !== this.confirmPass) {
       this.setState({ invalidCreds: true, error: "Password doesn't match." });
       return null;
     } 
-    
     firebase
       .database()
       .ref('users')
