@@ -52,7 +52,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
       .equalTo(this.codeName)
       .once("value")
       .then(snapshot => {
-        if (!snapshot.exists() && this.codeName !== "") {// if null then unique
+        if (!snapshot.exists() && this.codeName !== "" && !this.codeName.includes(" ")) {// if null then unique
           // these verfy email and password length
           firebase
           .auth()
@@ -79,7 +79,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
             this.setState({ invalidCreds: true, error: error });
           });
         } else {
-          this.setState({ invalidCreds: true, error: "Code Name is already used." });
+          this.setState({ invalidCreds: true, error: "Code Name is already used or has space." });
         }
       })
       .catch(err => console.log(err));
@@ -91,7 +91,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
         {
           this.state.invalidCreds &&
           <View style={styles.invalidCreds}>
-            <Text style={{ color: "red" }}>{this.state.error}</Text>
+            <Text style={{ color: "red", textAlign: "center" }}>{this.state.error}</Text>
           </View>
         }
         <TextInput

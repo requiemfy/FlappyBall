@@ -11,34 +11,26 @@ import { firebase } from '../../../src/firebase'
 type HOFButton = keyof { play: string, resume: string, restart: string };
 type Players = { [key: string]: { codeName: string, record: 0 } }
 type Props = { navigation: NavigationParams; route: { params: { button: HOFButton, } } }
-type State = { loading: boolean; players: Players }
+type State = { loading: boolean; players: string[] }
 
 export default class HallOfFameScreen extends React.PureComponent<Props, State> {
+  records: any
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true, players: {} };
+    this.state = { loading: true, players: [] };
   }
 
   componentDidMount() {
     console.log("HallOfFame SCREEN WILL MOUNT");
-    // fetch('https://raw.githubusercontent.com/loyd-larazo/app-dev-2020-finals/main/feeds.json')
-    //   .then((response) => response.json())
-    //   .then((json) => this.setState({ scores: json }))
-    //   .catch((error) => console.error(error))
-    //   .finally(() => this.setState({ loading: false }));
-
     firebase
       .database()
       .ref('/users')
-      .orderByChild('record')
       .once('value')
       .then(snapshot => {
-        // console.log("hall of shits", snapshot)
-        // for (let user in snapshot.val()) {
-        //   console.log("USER", snapshot.val()[user])
-        // }
-        this.setState({ players: snapshot.val(), loading: false })
+        this.records = snapshot.val();
+        const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
+        this.setState({ players: arr, loading: false });
       })
       .catch(err => console.log(err))
   }
@@ -60,7 +52,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
         justifyContent: 'center',
       }}>
         <View style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.9)',
           width: "90%",
           height: "90%",
           borderRadius: 10,
@@ -80,13 +72,10 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
             }}>
             {
               this.state.loading 
-              // true
               ? <ActivityIndicator size="large" color="white" />
               : (<FlatList
-                  data={Object.keys(this.state.players)}
+                  data={this.state.players}
                   renderItem={({ item }) => {
-                    // console.log(this.state.players[item].codeName)
-                    
                     return (
                       <View style={{
                         alignItems: "center",
@@ -97,34 +86,22 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
                         paddingBottom: 10,
                         width: 200
                       }}>
-                          {/* <Image 
-                            style={{
-                              width: 30,
-                              height: 30,
-                              margin: 10,
-                              borderRadius: 60,
-                              resizeMode: "contain",
-                            }}
-                            source={{ uri: item.profile }}/> */}
-                          <Text style={{ 
-                            fontSize: 18, 
-                            color: "white", 
-                          }}>{this.state.players[item].codeName}</Text>
-                          <Text style={{ 
-                            fontSize: 20, 
-                            color: "white", 
-                            fontStyle: "italic",
-                            fontWeight: "bold",
-                          }}>{this.state.players[item].record}</Text>
+                        <Text style={{ 
+                          fontSize: 18, 
+                          color: "white", 
+                        }}>{this.records[item].codeName}</Text>
+                        <Text style={{ 
+                          fontSize: 20, 
+                          color: "white", 
+                          fontStyle: "italic",
+                          fontWeight: "bold",
+                        }}>{this.records[item].record}</Text>
                       </View>
                     );
-                    return null;
                   }}
                   keyExtractor={(item, index) => index.toString()} />)
             }
             </View>  
-
-
             <View style={{ flex: 1, justifyContent: "center", }}>
               <View style={[styles.HOFButton]}>
                 <Button
