@@ -6,40 +6,46 @@ import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
+import { firebase } from '../../../src/firebase'
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
+type Players = { [key: string]: { codeName: string, record: 0 } }
 type Props = { navigation: NavigationParams; route: { params: { button: HOFButton, } } }
-type State = { loading: boolean; feeds: [] }
-type Feeds = {
-  item: {
-    name: string;
-    profile: string;
-    post: string;
-    image: string;
-  }
-}
+type State = { loading: boolean; players: Players }
 
 export default class HallOfFameScreen extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true, feeds: [] };
+    this.state = { loading: true, players: {} };
   }
 
   componentDidMount() {
     console.log("HallOfFame SCREEN WILL MOUNT");
+    // fetch('https://raw.githubusercontent.com/loyd-larazo/app-dev-2020-finals/main/feeds.json')
+    //   .then((response) => response.json())
+    //   .then((json) => this.setState({ scores: json }))
+    //   .catch((error) => console.error(error))
+    //   .finally(() => this.setState({ loading: false }));
 
-    fetch('https://raw.githubusercontent.com/loyd-larazo/app-dev-2020-finals/main/feeds.json')
-      .then((response) => response.json())
-      .then((json) => this.setState({ feeds: json }))
-      .catch((error) => console.error(error))
-      .finally(() => this.setState({ loading: false }));
+    firebase
+      .database()
+      .ref('/users')
+      .orderByChild('record')
+      .once('value')
+      .then(snapshot => {
+        // console.log("hall of shits", snapshot)
+        // for (let user in snapshot.val()) {
+        //   console.log("USER", snapshot.val()[user])
+        // }
+        this.setState({ players: snapshot.val(), loading: false })
+      })
+      .catch(err => console.log(err))
   }
 
   componentWillUnmount() {
     console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
   }
-
 
   back = () => {
     this.props.navigation.goBack()
@@ -67,8 +73,6 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
             <View style={{ flex: 1, justifyContent: "center", }}>
               <Text style={styles.HallOfFameLabel}>HALL OF FAME</Text>
             </View>
-            
-
             <View style={{
               flex: 4,
               alignItems: 'center',
@@ -76,33 +80,45 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
             }}>
             {
               this.state.loading 
-              ? <ActivityIndicator size="large" color="#00ff00" />
+              // true
+              ? <ActivityIndicator size="large" color="white" />
               : (<FlatList
-                  data={this.state.feeds}
-                  renderItem={({ item }: Feeds) => {
+                  data={Object.keys(this.state.players)}
+                  renderItem={({ item }) => {
+                    // console.log(this.state.players[item].codeName)
+                    
                     return (
                       <View style={{
                         alignItems: "center",
-                        // margin: 10,
                         borderTopWidth: 1,
                         borderColor: "#e0e0e0",
                         backgroundColor: "black", 
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        width: 200
                       }}>
                           {/* <Image 
-                            style={styles.profilePicture}
+                            style={{
+                              width: 30,
+                              height: 30,
+                              margin: 10,
+                              borderRadius: 60,
+                              resizeMode: "contain",
+                            }}
                             source={{ uri: item.profile }}/> */}
                           <Text style={{ 
                             fontSize: 18, 
                             color: "white", 
-                          }}>{item.name}</Text>
+                          }}>{this.state.players[item].codeName}</Text>
                           <Text style={{ 
                             fontSize: 20, 
                             color: "white", 
                             fontStyle: "italic",
                             fontWeight: "bold",
-                          }}>10</Text>
+                          }}>{this.state.players[item].record}</Text>
                       </View>
                     );
+                    return null;
                   }}
                   keyExtractor={(item, index) => index.toString()} />)
             }
@@ -131,27 +147,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 10,
-  },
-
-  profileContainer: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-    flexDirection: "row",
-    backgroundColor: "transparent", 
-  },
-  profilePicture: {
-    width: 30,
-    height: 30,
-    margin: 10,
-    borderRadius: 60,
-    resizeMode: "contain",
-  },
-  postPicture: {
-    width: 280,
-    height: 280,
-    margin: 15,
-    resizeMode: "contain",
   },
 })
 
