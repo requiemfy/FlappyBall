@@ -50,6 +50,10 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     this.props.navigation.navigate('Settings');
   }
 
+  goHallOfFame = () => {
+    this.props.navigation.navigate('HallOfFame');
+  }
+
   render() {
     const button = this.props.route.params?.button;
     return (
@@ -92,7 +96,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
                 <Button
                   title="Hall of Fame"
                   color="transparent"
-                  onPress={() => null} />
+                  onPress={this.goHallOfFame} />
               </View>
               <View style={[styles.HomeButton]}>
                 <Button

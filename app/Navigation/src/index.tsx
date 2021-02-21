@@ -8,6 +8,7 @@ import SignUpScreen from '../../Screens/SignUp/src';
 import SettingScreen from '../../Screens/Settings/src';
 import { StatusBar } from 'react-native';
 import HomeScreen from '../../Screens/Home/src';
+import HallOfFameScreen from '../../Screens/HallOfFame/src';
 
 const RootStack = createStackNavigator();
 export default function MainStackScreen() {
@@ -54,7 +55,14 @@ export default function MainStackScreen() {
           name="Menu"
           component={MenuScreen}
         />
-        <RootStack.Screen name="FlappyBall" component={FlappyBallGame} />
+        <RootStack.Screen
+          name="HallOfFame"
+          component={HallOfFameScreen}
+        />
+        <RootStack.Screen 
+          name="FlappyBall" 
+          component={FlappyBallGame} 
+        />
       </RootStack.Navigator>
       <StatusBar hidden />
     </NavigationContainer>

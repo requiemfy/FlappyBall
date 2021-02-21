@@ -57,6 +57,10 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
     })
   }
 
+  goHallOfFame = () => {
+    this.props.navigation.navigate('HallOfFame');
+  }
+
   render() {
     const button = this.props.route.params?.button;
     return (
@@ -84,7 +88,7 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
                   ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
                   : button === "resume"
                     ? <Text style={styles.menuLabel}>PAUSED</Text>
-                    : <Text style={styles.menuLabel}>FLAPPY BALL</Text>
+                    : null
               }
             </View>
             <View>
@@ -98,7 +102,7 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
                 <Button
                   title="Hall of Fame"
                   color="transparent"
-                  onPress={() => null} />
+                  onPress={this.goHallOfFame} />
               </View>
               <View style={[styles.menuButton]}>
                 <Button
