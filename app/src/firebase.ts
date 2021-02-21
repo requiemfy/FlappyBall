@@ -14,4 +14,9 @@ export function init() {
   firebase.initializeApp(firebaseConfig);
 }
 
-export { firebase };
+type UserData = {
+  codeName: string;
+  record: number;
+}
+
+export { firebase, UserData };

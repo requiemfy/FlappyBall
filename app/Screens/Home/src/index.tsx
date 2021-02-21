@@ -37,32 +37,36 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
   componentDidMount() {
     console.log("Home SCREEN WILL MOUNT");
-    firebase
-      .database()
-      .ref('users/' + this.user?.uid)
-      .once('value')
-      .then(snapshot => {
-        const user = snapshot.val();
-        this.setState({ user: {
-          loading: false,
-          error: false,
-          codeName: user.codeName, 
-          record: user.record
-        }})
-      })
-      .catch(err => {
-        this.setState({
-          user: {
-            ...this.state.user, 
-            loading: false, 
-            error: true
-          }
-        })
-      })
+    this.getUserData();
   }
 
   componentWillUnmount() {
     console.log("Home SCREEN WILL UUUUUUUUUUUN-MOUNT");
+  }
+
+  getUserData = () => {
+    firebase
+    .database()
+    .ref('users/' + this.user?.uid)
+    .once('value')
+    .then(snapshot => {
+      const user = snapshot.val();
+      this.setState({ user: {
+        loading: false,
+        error: false,
+        codeName: user.codeName, 
+        record: user.record
+      }})
+    })
+    .catch(err => {
+      this.setState({
+        user: {
+          ...this.state.user, 
+          loading: false, 
+          error: true
+        }
+      })
+    });
   }
 
   quit = () => {

@@ -140,10 +140,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (e.type === "stopped") {
       this.paused = true;
       if (this.over && !this.willUnmount) {
-        this.willUnmount = true; // this is necessary because game engine is stopping again (even already stopped) when unmounting
+        this.willUnmount = true; // this is necessary because game engine event is stopping again (even already stopped) when unmounting
         Physics.removeCollisionListener(this);
         console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
-        this.props.navigation.push("Menu", { button: "restart", });
+        this.props.navigation.push("Menu", { button: "restart", score: this.state.score});
       }
     } else if (e.type === "started") {
       this.paused = false;

@@ -5,19 +5,28 @@ import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
+import { firebase, UserData } from '../../../src/firebase';
 
 type MenuButton = keyof { play: string, resume: string, restart: string };
-type MenuProps = { navigation: NavigationParams; route: { params: { button: MenuButton, } } }
-type MenuState = { loadingBG: boolean}
+type Props = { navigation: NavigationParams; route: { params: { button: MenuButton, score?: number} } }
+type State = { newHighScore: boolean}
 
-export default class MenuScreen extends React.PureComponent<MenuProps, MenuState> {
+export default class MenuScreen extends React.PureComponent<Props, State> {
+  database = firebase.database();
+  user = firebase.auth().currentUser;
+  score = 3;
+  stateButton = this.props.route.params?.button;
 
-  constructor(props: MenuProps) {
+  constructor(props: Props) {
     super(props);
+    this.state = {
+      newHighScore: false,
+    }
   }
 
   componentDidMount() {
     console.log("MENU SCREEN WILL MOUNT");
+    this.score ? this.hasNewHighScore() : null;
   }
 
   componentWillUnmount() {
@@ -61,8 +70,31 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
     this.props.navigation.navigate('HallOfFame');
   }
 
+  hasNewHighScore = () => {
+    this.database
+      .ref('users/' + this.user?.uid + "/record")
+      .once('value')
+      .then(snapshot => {
+        const record = snapshot.val() as number;
+        if (this.score! > record) {
+          this.setState({ newHighScore: true });
+          this.database
+            .ref('users/' + this.user?.uid)
+            .update({ record: this.score })
+            .then(snapshot => {
+              console.log("SIGN UP SUCCESS", snapshot);
+            })
+            .catch(err => {
+              console.log("SIGN UP FAILED", err);
+            })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      });
+  }
+
   render() {
-    const button = this.props.route.params?.button;
     return (
       <View style={{
         flex: 1,
@@ -71,8 +103,8 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
       }}>
         <View style={{
           backgroundColor: 'rgba(0,0,0,0.5)',
-          width: "70%",
-          height: "50%",
+          width: "90%",
+          height: "90%",
           borderRadius: 10,
         }}>
           <View style={{
@@ -80,13 +112,19 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
             justifyContent: "center",
             alignItems: "center",
           }}>
-            <View style={{
-              marginBottom: 20
-            }}>
+            <View>
               {
-                button === "restart"
-                  ? <Text style={{ fontSize: 30, fontWeight: "bold", color: "white" }}>That's Life</Text>
-                  : button === "resume"
+                this.stateButton === "restart"
+                  ? <View style={{ alignItems: "center" }}>
+                      <Text style={styles.menuLabel}>That's Life</Text>
+                      <Text style={{...styles.menuLabel, fontSize: 50}}>{this.score}</Text>
+                      {
+                        this.state.newHighScore
+                          ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
+                          : null
+                      }
+                    </View>
+                  : this.stateButton === "resume"
                     ? <Text style={styles.menuLabel}>PAUSED</Text>
                     : null
               }
@@ -94,7 +132,7 @@ export default class MenuScreen extends React.PureComponent<MenuProps, MenuState
             <View>
               <View style={[styles.menuButton]}>
                 <Button
-                  title={button === "restart" ? "RESTART" : button === "resume" ? "RESUME" : "HOME"}
+                  title={this.stateButton === "restart" ? "RESTART" : this.stateButton === "resume" ? "RESUME" : "HOME"}
                   color="transparent"
                   onPress={this.navigate} />
               </View>

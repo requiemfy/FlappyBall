@@ -23,6 +23,14 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
 
   componentDidMount() {
     console.log("HallOfFame SCREEN WILL MOUNT");
+    this.getRecords();
+  }
+
+  componentWillUnmount() {
+    console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
+  }
+
+  getRecords = () => {
     firebase
       .database()
       .ref('/users')
@@ -33,10 +41,6 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
         this.setState({ players: arr, loading: false });
       })
       .catch(err => console.log(err))
-  }
-
-  componentWillUnmount() {
-    console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
   }
 
   back = () => {

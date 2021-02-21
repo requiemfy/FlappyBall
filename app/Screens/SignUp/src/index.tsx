@@ -58,6 +58,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
           .auth()
           .createUserWithEmailAndPassword(this.email, this.password)
           .then((arg) => {
+            // add user initial data to database
             this.setState({ invalidCreds: false });
             const user = {
               codeName: this.codeName,
