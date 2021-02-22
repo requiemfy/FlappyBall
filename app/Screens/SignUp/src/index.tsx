@@ -10,6 +10,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
+import { backOnlyOnce } from '../../helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -44,7 +45,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   }
 
   backAction = () => {
-    this.props.navigation.goBack();
+    backOnlyOnce(this);
     return true;
   }
 
@@ -63,30 +64,30 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
         if (!snapshot.exists() && this.codeName !== "" && !this.codeName.includes(" ")) {// if null then unique
           // these verfy email and password length
           firebase
-          .auth()
-          .createUserWithEmailAndPassword(this.email, this.password)
-          .then((arg) => {
-            // add user initial data to database
-            this.setState({ invalidCreds: false });
-            const user = {
-              codeName: this.codeName,
-              record: 0,
-            };
-            firebase
-              .database()
-              .ref('users/' + arg.user?.uid)
-              .update(user)
-              .then(snapshot => {
-                console.log("SIGN UP SUCCESS", snapshot);
-              })
-              .catch(err => {
-                console.log("SIGN UP FAILED", err);
-              })
-          })
-          .catch((err: object) => {
-            const error = String(err).replace('Error: ', '');
-            this.setState({ invalidCreds: true, error: error });
-          });
+            .auth()
+            .createUserWithEmailAndPassword(this.email, this.password)
+            .then((arg) => {
+              // add user initial data to database
+              this.setState({ invalidCreds: false });
+              const user = {
+                codeName: this.codeName,
+                record: 0,
+              };
+              firebase
+                .database()
+                .ref('users/' + arg.user?.uid)
+                .update(user)
+                .then(snapshot => {
+                  console.log("SIGN UP SUCCESS", snapshot);
+                })
+                .catch(err => {
+                  console.log("SIGN UP FAILED", err);
+                })
+            })
+            .catch((err: object) => {
+              const error = String(err).replace('Error: ', '');
+              this.setState({ invalidCreds: true, error: error });
+            });
         } else {
           this.setState({ invalidCreds: true, error: "Code Name is already used or has space." });
         }

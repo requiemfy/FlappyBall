@@ -10,6 +10,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
+import { backOnlyOnce } from '../../helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -46,7 +47,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   backAction = () => {
-    this.props.navigation.goBack();
+    backOnlyOnce(this);
     return true;
   }
 
@@ -61,7 +62,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     const 
       user = firebase.auth().currentUser,
       cred = firebase.auth.EmailAuthProvider.credential(user?.email!, this.state.currentPass);
-
     user?.reauthenticateWithCredential(cred)
       .then(() => {
         firebase.auth().currentUser?.updatePassword(this.state.newPass)

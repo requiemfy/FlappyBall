@@ -6,6 +6,7 @@ import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase, UserData } from '../../../src/firebase';
+import { backOnlyOnce } from '../../helpers';
 
 type MenuButton = keyof { resume: string, restart: string };
 type Props = { 
@@ -48,7 +49,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   backAction = () => {
     this.stateButton === "resume" 
-      ? this.props.navigation.goBack()
+      ? backOnlyOnce(this)
       : null;
     return true;
   }
@@ -122,28 +123,20 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+      <View style={{ ...styles.flexCenter, }}>
         <View style={{
           backgroundColor: 'rgba(0,0,0,0.5)',
           width: "90%",
           height: "90%",
           borderRadius: 10,
         }}>
-          <View style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
+          <View style={{ ...styles.flexCenter, }}>
             <View>
               {
                 this.stateButton === "restart"
                   ? <View style={{ alignItems: "center" }}>
                       <Text style={styles.menuLabel}>That's Life</Text>
-                      <Text style={{...styles.menuLabel, fontSize: 50}}>{this.score}</Text>
+                      <Text style={{ ...styles.menuLabel, fontSize: 50 }}>{this.score}</Text>
                       {
                         this.state.newHighScore
                           ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
@@ -207,6 +200,11 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderRadius: 10,
     marginTop: 5,
-  }
+  },
+  flexCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 })
 

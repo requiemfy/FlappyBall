@@ -7,6 +7,7 @@ import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
 import { firebase, UserData } from '../../../src/firebase'
+import { backOnlyOnce } from '../../helpers';
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
 type Players = { [key: string]: UserData }
@@ -35,7 +36,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   }
 
   backAction = () => {
-    this.navigation.goBack();
+    backOnlyOnce(this);
     return true;
   }
 
@@ -46,6 +47,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
       .once('value')
       .then(snapshot => {
         this.records = snapshot.val();
+        // sort records object desc
         const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
         this.setState({ players: arr, loading: false });
       })
@@ -61,8 +63,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
     return (
       <View style={{
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        ...styles.flexCenter,
       }}>
         <View style={{
           backgroundColor: 'rgba(0,0,0,0.9)',
@@ -72,47 +73,45 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
         }}>
           <View style={{
             flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
+            ...styles.flexCenter,
           }}>
             <View style={{ flex: 1, justifyContent: "center", }}>
               <Text style={styles.HallOfFameLabel}>HALL OF FAME</Text>
             </View>
             <View style={{
               flex: 4,
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...styles.flexCenter,
             }}>
             {
               this.state.loading 
-              ? <ActivityIndicator size="large" color="white" />
-              : (<FlatList
-                  data={this.state.players}
-                  renderItem={({ item }) => {
-                    return (
-                      <View style={{
-                        alignItems: "center",
-                        borderTopWidth: 1,
-                        borderColor: "#e0e0e0",
-                        backgroundColor: "black", 
-                        paddingTop: 10,
-                        paddingBottom: 10,
-                        width: 200
-                      }}>
-                        <Text style={{ 
-                          fontSize: 18, 
-                          color: "white", 
-                        }}>{this.records[item].codeName}</Text>
-                        <Text style={{ 
-                          fontSize: 20, 
-                          color: "white", 
-                          fontStyle: "italic",
-                          fontWeight: "bold",
-                        }}>{this.records[item].record}</Text>
-                      </View>
-                    );
-                  }}
-                  keyExtractor={(item, index) => index.toString()} />)
+                ? <ActivityIndicator size="large" color="white" />
+                : (<FlatList
+                    data={this.state.players}
+                    renderItem={({ item }) => {
+                      return (
+                        <View style={{
+                          alignItems: "center",
+                          borderTopWidth: 1,
+                          borderColor: "#e0e0e0",
+                          backgroundColor: "black", 
+                          paddingTop: 10,
+                          paddingBottom: 10,
+                          width: 200
+                        }}>
+                          <Text style={{ 
+                            fontSize: 18, 
+                            color: "white", 
+                          }}>{this.records[item].codeName}</Text>
+                          <Text style={{ 
+                            fontSize: 20, 
+                            color: "white", 
+                            fontStyle: "italic",
+                            fontWeight: "bold",
+                          }}>{this.records[item].record}</Text>
+                        </View>
+                      );
+                    }}
+                    keyExtractor={(item, index) => index.toString()} />)
             }
             </View>  
             <View style={{ flex: 1, justifyContent: "center", }}>
@@ -138,5 +137,9 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderRadius: 10,
   },
+  flexCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 })
 

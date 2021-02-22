@@ -46,27 +46,27 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
   getUserData = () => {
     firebase
-    .database()
-    .ref('users/' + this.user?.uid)
-    .once('value')
-    .then(snapshot => {
-      const user = snapshot.val();
-      this.setState({ user: {
-        loading: false,
-        error: false,
-        codeName: user.codeName, 
-        record: user.record
-      }})
-    })
-    .catch(err => {
-      this.setState({
-        user: {
-          ...this.state.user, 
-          loading: false, 
-          error: true
-        }
+      .database()
+      .ref('users/' + this.user?.uid)
+      .once('value')
+      .then(snapshot => {
+        const user = snapshot.val();
+        this.setState({ user: {
+          loading: false,
+          error: false,
+          codeName: user.codeName, 
+          record: user.record
+        }})
       })
-    });
+      .catch(err => {
+        this.setState({
+          user: {
+            ...this.state.user, 
+            loading: false, 
+            error: true
+          }
+        })
+      });
   }
 
   quit = () => {
@@ -101,11 +101,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   render() {
     const button = this.props.route.params?.button;
     return (
-      <View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+      <View style={{ ...styles.flexCenter, }}>
         <View style={{
           backgroundColor: "black",
           width: "100%",
@@ -121,11 +117,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
             }}
             onLoadEnd={() => this.setState({ loadingBG: false })}>
           </ImageBackground>
-          <View style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
+          <View style={{ ...styles.flexCenter, }}>
             <View style={{ flex: 1, justifyContent: "center", }}>
               <Text style={{ 
                 fontSize: 40, 
@@ -159,12 +151,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
                   onPress={this.quit} />
               </View>
             </View>
-            <View style={{ 
-              flex: 1, 
-              marginTop: 30,
-              justifyContent: "center",
-              alignItems: "center"
-            }}>
+            <View style={{ marginTop: 30, ...styles.flexCenter, }}>
               {
                 this.state.user.error
                   ? <Text style={{color: "white"}}>Error getting data</Text>
@@ -212,6 +199,11 @@ const styles = StyleSheet.create({
     color: "white" ,
     fontSize: 25,
     fontWeight: "bold",
+  },
+  flexCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   }
 })
 
