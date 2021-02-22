@@ -106,7 +106,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   }
 
   render() {
-    const button = this.props.route.params?.button;
     return (
       <View style={{ ...styles.flexCenter, }}>
         <View style={{
