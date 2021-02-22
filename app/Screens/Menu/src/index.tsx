@@ -8,14 +8,24 @@ import { PulseIndicator } from 'react-native-indicators';
 import { firebase, UserData } from '../../../src/firebase';
 
 type MenuButton = keyof { play: string, resume: string, restart: string };
-type Props = { navigation: NavigationParams; route: { params: { button: MenuButton, score?: number} } }
+type Props = { 
+  navigation: NavigationParams; 
+  route: { 
+    params: { 
+      button: MenuButton; 
+      connection: string;
+      score?: number;
+    }
+  }
+}
 type State = { newHighScore: boolean}
 
 export default class MenuScreen extends React.PureComponent<Props, State> {
   database = firebase.database();
   user = firebase.auth().currentUser;
-  score = 3;
-  stateButton = this.props.route.params?.button;
+  score = this.props.route.params?.score;
+  stateButton = this.props.route.params.button;
+  connection = this.props.route.params.connection;
 
   constructor(props: Props) {
     super(props);
@@ -34,7 +44,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   quit = () => {
-    Alert.alert("Hold on!", "Are you sure you want to go back?", [
+    Alert.alert("Hold on!", "Are you sure you want to quit?", [
       {
         text: "Cancel",
         onPress: () => null,
@@ -68,6 +78,13 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   goHallOfFame = () => {
     this.props.navigation.navigate('HallOfFame');
+  }
+
+  logIn = () => {
+    this.props.navigation.reset({ 
+      index: 0,
+      routes: [{ name: 'Login' }],
+    }) 
   }
 
   hasNewHighScore = () => {
@@ -136,18 +153,29 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
                   color="transparent"
                   onPress={this.navigate} />
               </View>
-              <View style={[styles.menuButton]}>
-                <Button
-                  title="Hall of Fame"
-                  color="transparent"
-                  onPress={this.goHallOfFame} />
-              </View>
-              <View style={[styles.menuButton]}>
-                <Button
-                  title="Home"
-                  color="transparent"
-                  onPress={this.goHome} />
-              </View>
+              {
+                this.connection === "online"
+                ? <View>
+                    <View style={[styles.menuButton]}>
+                      <Button
+                        title="Hall of Fame"
+                        color="transparent"
+                        onPress={this.goHallOfFame} />
+                    </View>
+                    <View style={[styles.menuButton]}>
+                      <Button
+                        title="Home"
+                        color="transparent"
+                        onPress={this.goHome} />
+                    </View>
+                  </View>
+                : <View style={[styles.menuButton]}>
+                    <Button
+                      title="Log In"
+                      color="transparent"
+                      onPress={this.logIn} />
+                  </View>
+              }
               <View style={[styles.menuButton]}>
                 <Button
                   title="QUIT"

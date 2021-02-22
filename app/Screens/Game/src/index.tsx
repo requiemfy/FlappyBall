@@ -37,7 +37,12 @@ import { PulseIndicator } from 'react-native-indicators';
 
 interface Props {
   navigation: NavigationParams;
-  route: { params: { button: keyof { play: string; resume: string; restart: string; } } }
+  route: { 
+    params: { 
+      button: keyof { play: string; resume: string; restart: string; };
+      connection: string;
+    }
+  }
 }
 interface State {
   left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
@@ -77,6 +82,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   state = { score: 0, left: 0, loadingBG: true };
   matterEngine = ENGINE.create({ enableSleeping: false });
   matterWorld = this.matterEngine.world;
+  connection = this.props.route.params.connection; // only useful for menu buttons
 
   constructor(props: Props) {
     super(props);
@@ -121,7 +127,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       }
       this.grassRef.stop();
       this.roofRef.stop();
-      this.props.navigation.push("Menu", { button: "resume" })
+      this.props.navigation.push("Menu", { 
+        button: "resume", 
+        connection: this.connection,
+      })
     } else {
       console.log("GAME OVER")
     }
@@ -143,7 +152,11 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
         this.willUnmount = true; // this is necessary because game engine event is stopping again (even already stopped) when unmounting
         Physics.removeCollisionListener(this);
         console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
-        this.props.navigation.push("Menu", { button: "restart", score: this.state.score});
+        this.props.navigation.push("Menu", { 
+          button: "restart", 
+          score: this.state.score,
+          connection: this.connection,
+        });
       }
     } else if (e.type === "started") {
       this.paused = false;

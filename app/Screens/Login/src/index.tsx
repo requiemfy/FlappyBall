@@ -66,6 +66,10 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.navigation.navigate('SignUp');
   }
 
+  playOffline = () => {
+    this.navigation.navigate("FlappyBall", { connection: "offline" })
+  }
+
   render() {
     return(
       <View style={styles.rootContainer}>
@@ -75,9 +79,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
             <Text style={{ color: "red" }}>Invalid Credentials</Text>
           </View>
         }
-
         <Text style={styles.title}>FLAPPY BALL</Text>
-
         <TextInput 
           onChangeText={(text => {this.email = text})}
           placeholder="Email"
@@ -102,13 +104,13 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
             <Text style={{ fontWeight: 'bold', color: 'white' }} >Sign Up</Text>
           </TouchableOpacity>
         </View>
-        {
-          // this.state.loading 
-          false
-            && (<View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#00ff00"/>
-                </View>)
-        }
+        <View 
+          style={[{width:"60%", margin: 10}]}>
+          <Button
+            onPress={this.playOffline}
+            title="Play Offline"
+            color='rgba(66, 66, 66, 0.6)' />
+        </View> 
       </View>
     )
   }
