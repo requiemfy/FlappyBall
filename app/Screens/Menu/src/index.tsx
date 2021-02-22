@@ -7,7 +7,7 @@ import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase, UserData } from '../../../src/firebase';
 
-type MenuButton = keyof { play: string, resume: string, restart: string };
+type MenuButton = keyof { resume: string, restart: string };
 type Props = { 
   navigation: NavigationParams; 
   route: { 
@@ -47,7 +47,9 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   backAction = () => {
-    this.props.navigation.goBack();
+    this.stateButton === "resume" 
+      ? this.props.navigation.goBack()
+      : null;
     return true;
   }
 
@@ -62,14 +64,14 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     ]);
   }
 
-  navigate = () => {
+  play = () => {
     const button = this.props.route.params?.button;
     (button === "resume")
       ? this.props.navigation.goBack() // resume
       : this.props.navigation.reset({ // restart
         index: 0,
         routes: [
-          { name: 'FlappyBall', params: { button: button } },
+          { name: 'FlappyBall', params: { button: button, connection: this.connection } },
         ],
       });
   }
@@ -158,7 +160,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
                 <Button
                   title={this.stateButton === "restart" ? "RESTART" : this.stateButton === "resume" ? "RESUME" : "HOME"}
                   color="transparent"
-                  onPress={this.navigate} />
+                  onPress={this.play} />
               </View>
               {
                 this.connection === "online"

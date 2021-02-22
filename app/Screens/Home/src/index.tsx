@@ -85,7 +85,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     this.props.navigation.reset({
       index: 0,
       routes: [
-        { name: 'FlappyBall', params: { button: "play" } },
+        { name: 'FlappyBall', params: { button: "play", connection: "online" } },
       ],
     });
   }

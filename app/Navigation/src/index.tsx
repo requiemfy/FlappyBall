@@ -50,6 +50,10 @@ export default function MainStackScreen() {
         <RootStack.Screen
           name="Settings"
           component={SettingScreen}
+          options={{
+            headerShown: true,
+            title: 'Settings'
+          }}
         />
         <RootStack.Screen
           name="Menu"
