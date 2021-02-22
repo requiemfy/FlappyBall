@@ -6,6 +6,7 @@ import {
   WORLD, 
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
+  SCREEN_HEIGHT,
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
 import { getStatusBarHeight } from "react-native-status-bar-height";
@@ -54,14 +55,14 @@ export namespace Matter {
       borderRadius: playerBaseSize / 2,
       color: "transparent",
       label: "Player-Circle",
-      static: true,
+      static: false,
     }, {});
   }
   
   const createFloor: Body<{}, TwoDimensions> = () => {
     const 
-      { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      [ floorWidth, floorHeight ] = [ GameDimension.getWidth("now"), gameHeight * FLOOR_HEIGHT ],
+      { windowWidth, gameHeight } = GameDimension.window(),
+      [ floorWidth, floorHeight ] = [ SCREEN_HEIGHT + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
       [ centerX, centerY ] = [ windowWidth / 2, gameHeight - (floorHeight / 2) ]
     return createRectangle ({
       x: centerX,
