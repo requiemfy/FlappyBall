@@ -69,16 +69,23 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
       });
   }
 
-  quit = () => {
-    Alert.alert("Hold on!", "Are you sure you want to quit?", [
+  alertQuit = (cb: any, lastWords: string) => {
+    Alert.alert("Hold on!", lastWords, [
       {
         text: "Cancel",
         onPress: () => null,
         style: "cancel"
       },
-      { text: "YES", onPress: () => BackHandler.exitApp() }
+      { text: "YES", onPress: () => {
+        cb();
+      }}
     ]);
-    return true;
+  }
+
+  quit = () => {
+    this.alertQuit(() => {
+      this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
+    }, "Are you sure you want to quit?");
   }
 
   play = () => {

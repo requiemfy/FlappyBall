@@ -51,6 +51,11 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     return true;
   }
 
+  showError = (err: any) => {
+    const error = String(err).replace('Error: ', '');
+    this.setState({ invalidCreds: true, error: error });
+  }
+
   changePass = () => {
     if (this.state.newPass !== this.state.confirmPass) {
       this.setState({ invalidCreds: true, error: "Password doesn't match." });
@@ -77,28 +82,41 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
             this.setState({ invalidCreds: false })
           })
           .catch(err => {
-            Alert.alert("Password", err, [
-              { text: "OK", onPress: () => null }
-            ]);
+            this.showError(err)
           })
       })
       .catch(err => {
-        console.log("ggwp", err)
-        const error = String(err).replace('Error: ', '');
-        this.setState({ invalidCreds: true, error: error });
+        this.showError(err)
       });
   }
 
+  alertLogout = (cb: any, lastWords: string) => {
+    Alert.alert("Hold on!", lastWords, [
+      {
+        text: "Cancel",
+        onPress: () => null,
+        style: "cancel"
+      },
+      { text: "YES", onPress: () => {
+        cb();
+      }}
+    ]);
+  }
+
   logout = () => {
-    this.setState({ invalidCreds: false });
-    firebase
-      .auth()
-      .signOut()
-      .then(() => this.navigation.reset({
-          index: 0,
-          routes: [{ name: 'Login' }],
-        }))
-      .catch(err => console.log(err));
+    this.alertLogout(() => {
+      this.alertLogout(() => {
+        this.setState({ invalidCreds: false });
+        firebase
+          .auth()
+          .signOut()
+          .then(() => this.navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            }))
+          .catch(err => console.log(err));
+      }, "Seriously?")
+    }, "Are you sure you want to logout?")
   }
 
   render() {
@@ -140,11 +158,11 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
             color='rgba(66, 66, 66, 0.6)' />
         </View>
         <View
-          style={[styles.button, { marginTop: "10%" }]}>
+          style={[{ width: 100, marginTop: "2%" }]}>
           <Button
             onPress={this.logout}
             title='LOG OUT'
-            color='rgba(66, 66, 66, 0.6)' />
+            color='rgba(66, 66, 66, 0.3)' />
         </View>
       </View>
     )

@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     fontSize: 30, 
     fontWeight: "bold", 
     color: "white" ,
-    marginBottom: "10%"
+    marginBottom: 20,
   }
 })
 export default withNavigation(LoginScreen);
