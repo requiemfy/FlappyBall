@@ -1,4 +1,3 @@
-
 import { Dimensions } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
@@ -20,14 +19,8 @@ export namespace Orientation {
 
   let orientationCallback: ((event: object) => void) | null; // Event
   export const addChangeListener: OrientGame = (game) => {
-    console.log("\torientation.tsx: addChangeListener!!!");
 
     orientationCallback = () => {
-      ////////////////////////////////////////////////////////////
-      console.log("\n\norientation.tsx:\n````````````````````````````````````````````````````````````");
-      console.log("ORIENTATION CHANGED");
-      console.log("game.paused: " + game.paused);
-      ////////////////////////////////////////////////////////////
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
       game.forceUpdate(); // this is for update of GameDimensions
@@ -40,7 +33,6 @@ export namespace Orientation {
         let prevOrient: number; // we are not sure what's first orientation
         DeviceMotion.addListener((current) => {
           if (prevOrient !== current.orientation) {
-            console.log("orientation " + current.orientation);
             if (current.orientation == 90) game.setState({ left: getStatusBarHeight(), })
             else game.setState({ left: 0, });
             prevOrient = current.orientation;
@@ -85,7 +77,6 @@ export namespace Orientation {
         { lastEntX, lastEntY } = lastEntityCoords(wall);
       wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...maintainedProps});
       i++;
-      console.log("ORIENTATION WALL " + wallKey);
     }
     return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }
@@ -98,14 +89,6 @@ export namespace Orientation {
       gameWidth = GameDimension.getWidth("now"),
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
-      ////////////////////////////////////////////////////////////
-      console.log("\t----diemensions of x,y: " + windowWidth + ", " + windowHeight );
-      console.log("\t----prev game dim: x,y" + prevGameWidth + ", " + prevGameHeight );
-      console.log("\t----current game dim: x,y" + gameWidth + ", " + gameHeight );
-      console.log("\t----Entity of x,y: " + lastEntX + ", " + lastEntY );
-      console.log("\t----Update Entity of x,y: " + updatedX + ", " + updatedY );
-      console.log("````````````````````````````````````````````````````````````");
-      ////////////////////////////////////////////////////////////
     return { x: updatedX, y: updatedY };
   }
 

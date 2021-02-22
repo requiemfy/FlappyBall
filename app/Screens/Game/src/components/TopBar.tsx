@@ -14,11 +14,9 @@ export default class TopBar extends React.PureComponent<Props, State> {
     return (
       <View style={styles.rootContainer}>
         <View style={styles.subContainer}>
-
           <View style={styles.score} >
             <Text style={{ color: "white", fontSize: 40, }} >{ this.props.score }</Text>
           </View>
-
           <View style={[styles.menu]}>
             <Button
               onPress={this.props.pause}
@@ -26,7 +24,6 @@ export default class TopBar extends React.PureComponent<Props, State> {
               color="transparent" 
             />
           </View> 
-
         </View>
       </View>
     );

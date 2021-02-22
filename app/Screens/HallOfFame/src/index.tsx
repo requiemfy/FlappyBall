@@ -1,10 +1,6 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, ActivityIndicator, Image, NativeEventSubscription } from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../Game/src';
+import { View, Text, Button, BackHandler, StyleSheet, ActivityIndicator, NativeEventSubscription } from 'react-native';
 import { NavigationParams, } from 'react-navigation';
-import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
 import { firebase, UserData } from '../../../src/firebase'
 import { backOnlyOnce } from '../../helpers';
@@ -25,13 +21,11 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   }
 
   componentDidMount() {
-    console.log("HallOfFame SCREEN WILL MOUNT");
     this.getRecords();
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
     this.backHandler.remove();
   }
 
@@ -47,11 +41,9 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
       .once('value')
       .then(snapshot => {
         this.records = snapshot.val();
-        // sort records object desc
         const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
         this.setState({ players: arr, loading: false });
       })
-      .catch(err => console.log(err))
   }
 
   back = () => {
@@ -59,28 +51,21 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   }
 
   render() {
-    const button = this.props.route.params?.button;
     return (
-      <View style={{
-        flex: 1,
-        ...styles.flexCenter,
-      }}>
+      <View style={styles.flexCenter}>
         <View style={{
           backgroundColor: 'rgba(0,0,0,0.9)',
           width: "90%",
           height: "90%",
           borderRadius: 10,
         }}>
-          <View style={{
-            flex: 1,
-            ...styles.flexCenter,
-          }}>
-            <View style={{ flex: 1, justifyContent: "center", }}>
+          <View style={styles.flexCenter}>
+            <View style={styles.flexJustify}>
               <Text style={styles.HallOfFameLabel}>HALL OF FAME</Text>
             </View>
             <View style={{
-              flex: 4,
               ...styles.flexCenter,
+              flex: 4,
             }}>
             {
               this.state.loading 
@@ -114,7 +99,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
                     keyExtractor={(item, index) => index.toString()} />)
             }
             </View>  
-            <View style={{ flex: 1, justifyContent: "center", }}>
+            <View style={styles.flexJustify}>
               <View style={[styles.HOFButton]}>
                 <Button
                   title="OK"
@@ -138,8 +123,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   flexCenter: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  flexJustify: {
+    flex: 1,
+    justifyContent: "center"
   }
 })
 

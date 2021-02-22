@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
-import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { Alert, Button, StyleSheet, View, Text, NativeEventSubscription, BackHandler } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -37,12 +37,10 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   componentDidMount() {
-    console.log("settings MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("settings UN-MOUNT")
     this.backHandler.remove();
   }
 
@@ -114,7 +112,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
               index: 0,
               routes: [{ name: 'Login' }],
             }))
-          .catch(err => console.log(err));
       }, "Seriously?")
     }, "Are you sure you want to logout?")
   }

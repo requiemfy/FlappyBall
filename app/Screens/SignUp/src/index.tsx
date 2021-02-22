@@ -35,12 +35,10 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   }
 
   componentDidMount() {
-    console.log("sign up MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("sign up UN-MOUNT")
     this.backHandler.remove();
   }
 
@@ -77,12 +75,6 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
                 .database()
                 .ref('users/' + arg.user?.uid)
                 .update(user)
-                .then(snapshot => {
-                  console.log("SIGN UP SUCCESS", snapshot);
-                })
-                .catch(err => {
-                  console.log("SIGN UP FAILED", err);
-                })
             })
             .catch((err: object) => {
               const error = String(err).replace('Error: ', '');
@@ -92,7 +84,6 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
           this.setState({ invalidCreds: true, error: "Code Name is already used or has space." });
         }
       })
-      .catch(err => console.log(err));
   }
 
   render() {

@@ -1,12 +1,9 @@
-import { number } from 'prop-types';
-import React, { createRef, MutableRefObject } from 'react';
-import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback } from 'react-native';
+import React from 'react';
+import { Animated, Easing, Dimensions, Platform } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
-import { SCREEN_HEIGHT } from '../utils/world/constants';
 import * as Box from './shapes/Box';
 
 interface Props { setRef: ((ref: any) => void) | null; }
-
 interface State {
   grassAleft: Animated.Value;
   grassBleft: Animated.Value;
@@ -24,8 +21,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   private static readonly BASE_DURATION = 6000;
   private static readonly BASE_DISTANCE = 798;
   private grassWidth = GameDimension.getWidth("now");
-  // private grassWidth = GameDimension.window().gameHeight * 3;
-  // private grassWidth = this.props.size[0];
   private firstGrass = "grass-a";
   private grassA: GrassObject = {
     animation: null,
@@ -51,7 +46,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   }
 
   componentDidMount() {
-    console.log("GRASS DID MOUNT");
     this.props.setRef ? this.props.setRef(this) : null;
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.state.grassAleft.addListener(({value}) => this.grassA.stoppedLeft = value);
@@ -59,7 +53,6 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   }
 
   componentWillUnmount() {
-    console.log("PLAYER WILL UN-MOUNT")
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.grassAleft.removeAllListeners();
@@ -186,11 +179,9 @@ class Leaves extends React.PureComponent<
   }, {}> {
 
   componentDidMount() {
-    console.log("CHECK MOUNTING LEAVES")
   }
 
   componentWillUnmount() {
-    console.log("CHECK UNMOUNTING LEAVES")
   }
 
   render() {

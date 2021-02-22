@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, LogBox, NativeEventSubscription, BackHandler } from 'react-native';
+import { Button, StyleSheet, View, Text, LogBox, NativeEventSubscription, BackHandler } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import { 
   NavigationScreenProp, 
@@ -7,9 +7,8 @@ import {
   NavigationInjectedProps, 
   withNavigation, 
   NavigationParams,
-  NavigationActions, 
 } from 'react-navigation';
-import { CommonActions, StackActions } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
@@ -28,7 +27,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   constructor(props: Props | any) {
     super(props);
     LogBox.ignoreLogs(['Setting a timer']);
-
     this.state = { 
       invalidCreds: false, 
       error: "Invalid Credentials"
@@ -44,14 +42,12 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
           }) 
         : null;
     });
-    console.log("login MOUNT")
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    this.authSubscriber() // unsubscribe method returned
+    this.authSubscriber() 
     this.backHandler.remove();
-    console.log("login UN-MOUNT")
   }
 
   backAction = () => {

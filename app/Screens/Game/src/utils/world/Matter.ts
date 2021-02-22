@@ -3,11 +3,9 @@ import {
   PLAYER_SIZE, 
   FLOOR_HEIGHT, 
   ROOF_HEIGHT, 
-  // world, 
   WORLD, 
   GAME_LANDSCAPE_WIDTH,
   GAME_PORTRAIT_WIDTH,
-  SCREEN_HEIGHT,
 } from "./constants";
 import { GameDimension } from "../helpers/dimensions";
 import { getStatusBarHeight } from "react-native-status-bar-height";
@@ -16,8 +14,7 @@ import FlappyBallGame from "../..";
 export namespace Matter {
   type OptionalCoordinates = {x?: number, y?:number};
   type TwoDimensions = { width: number; height: number; }
-
-  type Shape<Config> = <Params>( // character shape
+  type Shape<Config> = <Params>(
     required: Config & {
       x: number;
       y: number;
@@ -32,21 +29,17 @@ export namespace Matter {
     color: string;
     body: any;
   };
-
-  type Body<Params, Return> = (params: Params) => Return & { // character
+  type Body<Params, Return> = (params: Params) => Return & {
     borderRadius: number;
     color: string;
     body: any;
   };
-
   type WallParams = OptionalCoordinates & { 
     heightPercent: number;
     position?: keyof { up: string, down: string};
     isStatic?: boolean;
   };
 
-
-  // ==================================== Entities ===================================
   const createPlayer: Body<OptionalCoordinates, { size: number }> = ({ x, y }) => {
     const
       { gameHeight } = GameDimension.window(),
@@ -67,25 +60,9 @@ export namespace Matter {
   
   const createFloor: Body<{}, TwoDimensions> = () => {
     const 
-      // NOTE: matter js CENTER x, y works differently.
-      // Observe centerX, which is half of screen width
-      // but we didn't explicity minus the half of floor width to it to fit the floor
       { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
-      
-      // [ floorWidth, floorHeight ] = [ windowWidth + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
-      // ^ is optional, in bottom gonna maximize the floor width, for falling wall to be caught in portrait
-      // [ floorWidth, floorHeight ] = [ SCREEN_HEIGHT + (getStatusBarHeight() * 2), gameHeight * FLOOR_HEIGHT ],
-      // below is dependent on GameDimension width
       [ floorWidth, floorHeight ] = [ GameDimension.getWidth("now"), gameHeight * FLOOR_HEIGHT ],
-
       [ centerX, centerY ] = [ windowWidth / 2, gameHeight - (floorHeight / 2) ]
-    ////////////////////////////////////////////////////////////
-    console.log("\nmatter.tsx: ");
-    console.log("=========== ============== ===========");
-    console.log("CREATING FLOOR");
-    console.log("\tDimensions width: " + windowWidth)
-    console.log("\tDimensions height: " + windowHeight)
-    ////////////////////////////////////////////////////////////
     return createRectangle ({
       x: centerX,
       y: centerY,
@@ -115,22 +92,17 @@ export namespace Matter {
     }, {});
   }
 
-  // possible cases of coordinates:
-  //    x defined, y undefined -> showing walls initially (Initial Entity Wall), based on previous wall's x
-  //    x and y are both defined -> showing walls with specific coords, triggered by orientation
-  //    x and y are both undefined -> showing walls by default: coords are purely based on game dimensions
   const createWall: Body<WallParams, TwoDimensions & { heightPercent: number }> = ({ x, y, heightPercent, position, isStatic=true }) => { // @note INSPECTED: good
     const 
-      { windowWidth, windowHeight, gameHeight } = GameDimension.window(), // gameHeight is auto update
+      { windowWidth, windowHeight, gameHeight } = GameDimension.window(),
       [ wallWidth, wallHeight ] = [ gameHeight * 0.07, gameHeight * heightPercent ]; 
-    // i can't put these x, y default values in the function param because it also depends on some variables
-    if (x === void 0) { // if x undefined, then it depends on the wall width, game width
+    if (x === void 0) {
       if (GameDimension.getOrientation(windowWidth, windowHeight) === "landscape") x = GAME_LANDSCAPE_WIDTH + (wallWidth / 2)
       else x = GAME_PORTRAIT_WIDTH + (wallWidth / 2);
     }
-    if (y === void 0) { // if y undefined, then it depends on the wall height, game height
+    if (y === void 0) {
       if (position === "down") {
-        y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2); // papatong lang sa nav bar pababa
+        y = (gameHeight - (gameHeight * FLOOR_HEIGHT)) - (wallHeight / 2);
       } else if (position === "up") {
         y = ((gameHeight * ROOF_HEIGHT)) + (wallHeight / 2);
       }
@@ -148,9 +120,7 @@ export namespace Matter {
         heightPercent: heightPercent,
      });
   }
-  // ==================================== Entities ===================================
 
-  // ================================= Matter Bodies =================================
   const createRectangle: Shape<TwoDimensions> = (required, additional) => {
     return {
       width: required.width,
@@ -163,45 +133,35 @@ export namespace Matter {
   }
 
   const createCircle: Shape<{ size: number }> = (required, additional) => {
-    // circle view size is effected by border radius
-    // while circle body in matter js, it's size = radius
-    const bodySize = required.size / 2; // for Circle Matterjs Shape
+    const bodySize = required.size / 2; 
     return {
-      size: required.size, // for Circle View Component
+      size: required.size,
       borderRadius: required.borderRadius,
       color: required.color,
       body: BODIES.circle(required.x, required.y, bodySize, { isStatic: required.static, label: required.label }),
       ...additional,
     }
   }
-  // ================================= Matter Bodies =================================
 
-  // =================================== Getters =====================================
-  // won't work              { coords } - because we access x,y from player which is then possibly undef obj
   export const getPlayer = (game: FlappyBallGame, coords = {}) => {
     const player = createPlayer(coords);
     WORLD.add(game.matterWorld, player.body);
-    console.log("Creating Player - world.bodies.length: " + game.matterWorld.bodies.length);
     return player;
   }
   export const getRoof = (game: FlappyBallGame) => {
     const roof = createRoof({});
     WORLD.add(game.matterWorld, roof.body);
-    console.log("Creating Roof - world.bodies.length: " + game.matterWorld.bodies.length);
     return roof;
   }
   export const getFloor = (game: FlappyBallGame) => {
     const floor = createFloor({});
     WORLD.add(game.matterWorld, floor.body);
-    console.log("Creating Floor - world.bodies.length: " + game.matterWorld.bodies.length);
     return floor;
   }
   export const getWall = (game: FlappyBallGame, prop: any) => {
     const wall = createWall(prop);
     WORLD.add(game.matterWorld, wall.body);
-    console.log("Creating Wall - world.bodies.length: " + game.matterWorld.bodies.length);
     return wall;
   }
-  // =================================== Getters =====================================
 }
 

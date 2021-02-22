@@ -1,8 +1,7 @@
 // quadrilateral matter template
-
 import { Body } from 'matter-js';
 import * as React from 'react'
-import { TouchableWithoutFeedback, View } from "react-native";
+import { View } from "react-native";
 
 export interface Props {
   size: number[];
@@ -15,7 +14,6 @@ export interface State { }
 // PureComponent won't work
 export default class Box extends React.Component<Props, State> {
   componentWillUnmount() {
-    console.log("UNMOUNTING.... BOX");
   }
 
   render() {
@@ -24,16 +22,6 @@ export default class Box extends React.Component<Props, State> {
       height = this.props.size[1],
       x = this.props.body.position.x - (width / 2),
       y = this.props.body.position.y - (height / 2);
-    ////////////////////////////////////////////////////////////
-    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    // console.log("Box.tsx: RENDERING CLASS BOX");
-    // console.log(
-    //   "\t center matter body x,y: " + 
-    //   this.props.body.position.x + ", " +
-    //   this.props.body.position.y
-    // );
-    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    ////////////////////////////////////////////////////////////
     return (
       <View
         style={{

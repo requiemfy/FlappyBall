@@ -1,9 +1,6 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, Dimensions, ImageBackground, StyleSheet, LogBox } from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../Game/src';
-import { NavigationParams, ThemeColors, } from 'react-navigation';
+import { View, Text, Button, BackHandler, Alert, ImageBackground, StyleSheet } from 'react-native';
+import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase } from '../../../src/firebase'
 
@@ -36,12 +33,10 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   }
 
   componentDidMount() {
-    console.log("Home SCREEN WILL MOUNT");
     this.getUserData();
   }
 
   componentWillUnmount() {
-    console.log("Home SCREEN WILL UUUUUUUUUUUN-MOUNT");
   }
 
   getUserData = () => {
@@ -110,28 +105,26 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
       <View style={{ ...styles.flexCenter, }}>
         <View style={{
           backgroundColor: "black",
-          width: "100%",
-          height: "100%",
+          ...styles.maxDims,
           borderRadius: 10,
         }}>
           <ImageBackground 
             source={require('../assets/bg.png')}
             style={{
               position: "absolute",
-              width: "100%",
-              height: "100%",
+              ...styles.maxDims,
             }}
             onLoadEnd={() => this.setState({ loadingBG: false })}>
           </ImageBackground>
           <View style={{ ...styles.flexCenter, }}>
-            <View style={{ flex: 1, justifyContent: "center", }}>
+            <View style={styles.flexJustify}>
               <Text style={{ 
                 fontSize: 40, 
                 fontWeight: "bold", 
                 color: "white" 
               }}>FLAPPY BALL</Text>
             </View>
-            <View style={{ flex: 1, justifyContent: "center", }}>
+            <View style={styles.flexJustify}>
               <View style={[styles.HomeButton]}>
                 <Button
                   title="PLAY"
@@ -210,6 +203,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  flexJustify: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  maxDims: {
+    width: "100%",
+    height: "100%",
   }
 })
 
