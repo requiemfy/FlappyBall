@@ -69,3 +69,11 @@ trying to add background image in the game and make it responsive
 
 added in Orientation.ts:
       game.forceUpdate();
+
+----------------------------------------------------------
+bug experience:
+  wall distance vs floor length: 
+    floor may not catch to falling wall
+
+  grass doesn't adjust its width on orientation  
+    the problem is, if we adapt the grass width, its left will also be affected
