@@ -96,7 +96,7 @@ export namespace Entities {
     
     (function getInitialWalls(){
       if (!game.entitiesInitialized) {
-        for (let wallNum = 2; wallNum--;) {
+        for (let wallNum = 3; wallNum--;) {
           if (game.wallIds.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
