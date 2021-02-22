@@ -111,7 +111,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       .once('value')
       .then(snapshot => {
         const record = snapshot.val() as number;
-        if (this.score! > record) {
+        if (record && (this.score! > record)) {
           this.setState({ newHighScore: true });
           this.database
             .ref('users/' + this.user?.uid)
