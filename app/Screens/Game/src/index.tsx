@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ActivityIndicator, Alert, Animated, AppState, Dimensions, ImageBackground, Platform, Text } from 'react-native'
+import { ActivityIndicator, Alert, Animated, AppState, BackHandler, BackHandlerStatic, Dimensions, ImageBackground, NativeEventSubscription, Platform, Text } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine } from './utils/helpers/react-native-game-engine';
 
@@ -39,8 +39,7 @@ interface Props {
   navigation: NavigationParams;
   route: { 
     params: { 
-      button: keyof { play: string; resume: string; restart: string; };
-      connection: string;
+      connection: keyof { online: string, offline: string };
     }
   }
 }
@@ -83,6 +82,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   matterEngine = ENGINE.create({ enableSleeping: false });
   matterWorld = this.matterEngine.world;
   connection = this.props.route.params.connection; // only useful for menu buttons
+  backHandler!: NativeEventSubscription;
 
   constructor(props: Props) {
     super(props);
@@ -100,6 +100,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     GameAppState.addChangeListener(this);
     console.log("--------------------------\n")
     ////////////////////////////////////////////////////////////
+    this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     setTimeout(() => {
       this.engine.stop();
     }, 0)
@@ -107,9 +108,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   componentWillUnmount() {
     console.log("FLAPPY GAME WILL UNMOUNT!!")
+    Physics.removeCollisionListener(this);
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
-    Physics.removeCollisionListener(this);
+    this.backHandler.remove();
     // this.entities.game = null; // @note to avoid cycle reference
   }
 
@@ -143,6 +145,10 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     console.log("--------------------------");
     ////////////////////////////////////////////////////////////
     return false;
+  }
+
+  backAction = () => {
+    return true;
   }
 
   onGameEngineEvent = (e: { type: string; }) => {
@@ -214,7 +220,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     ////////////////////////////////////////////////////////////
     console.log("\nindex.tsx:")
     console.log("--------------------------");
-    console.log("RENDER()..." + this.props.route.params?.button);
+    console.log("RENDER()...");
     console.log("--------------------------\n");
     ////////////////////////////////////////////////////////////
     return (

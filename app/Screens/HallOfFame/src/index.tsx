@@ -1,20 +1,22 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, ActivityIndicator, Image, NativeEventSubscription } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
-import { firebase } from '../../../src/firebase'
+import { firebase, UserData } from '../../../src/firebase'
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
-type Players = { [key: string]: { codeName: string, record: 0 } }
+type Players = { [key: string]: UserData }
 type Props = { navigation: NavigationParams; route: { params: { button: HOFButton, } } }
 type State = { loading: boolean; players: string[] }
 
 export default class HallOfFameScreen extends React.PureComponent<Props, State> {
-  records: any
+  navigation = this.props.navigation;
+  records!: Players;
+  backHandler!: NativeEventSubscription;
 
   constructor(props: Props) {
     super(props);
@@ -24,10 +26,17 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   componentDidMount() {
     console.log("HallOfFame SCREEN WILL MOUNT");
     this.getRecords();
+    this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    this.backHandler.remove();
+  }
+
+  backAction = () => {
+    this.navigation.goBack();
+    return true;
   }
 
   getRecords = () => {

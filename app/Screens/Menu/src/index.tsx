@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, NativeEventSubscription } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
@@ -26,6 +26,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   score = this.props.route.params?.score;
   stateButton = this.props.route.params.button;
   connection = this.props.route.params.connection;
+  backHandler!: NativeEventSubscription;
 
   constructor(props: Props) {
     super(props);
@@ -37,10 +38,17 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   componentDidMount() {
     console.log("MENU SCREEN WILL MOUNT");
     this.score ? this.hasNewHighScore() : null;
+    this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    this.backHandler.remove();
+  }
+
+  backAction = () => {
+    this.props.navigation.goBack();
+    return true;
   }
 
   quit = () => {
@@ -52,7 +60,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       },
       { text: "YES", onPress: () => BackHandler.exitApp() }
     ]);
-    return true;
   }
 
   navigate = () => {

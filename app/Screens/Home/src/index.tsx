@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, LogBox } from 'react-native';
+import { View, Text, Button, StatusBar, BackHandler, Alert, Dimensions, ImageBackground, StyleSheet, LogBox } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Game/src';
@@ -70,7 +70,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   }
 
   quit = () => {
-    Alert.alert("Hold on!", "Are you sure you want to go back?", [
+    Alert.alert("Hold on!", "Are you sure you want to quit?", [
       {
         text: "Cancel",
         onPress: () => null,

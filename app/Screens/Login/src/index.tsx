@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, LogBox } from 'react-native';
+import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, LogBox, NativeEventSubscription, BackHandler } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import { 
   NavigationScreenProp, 
@@ -23,6 +23,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   password = "";
   navigation = this.props.navigation;
   authSubscriber!: firebase.Unsubscribe;
+  backHandler!: NativeEventSubscription;
 
   constructor(props: Props | any) {
     super(props);
@@ -44,11 +45,17 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         : null;
     });
     console.log("login MOUNT")
+    this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     this.authSubscriber() // unsubscribe method returned
     console.log("login UN-MOUNT")
+  }
+
+  backAction = () => {
+    BackHandler.exitApp();
+    return true;
   }
 
   tryLogin = () => {
@@ -67,7 +74,13 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   }
 
   playOffline = () => {
-    this.navigation.navigate("FlappyBall", { connection: "offline" })
+    this.navigation.reset({ 
+      index: 0,
+      routes: [{ 
+        name: 'FlappyBall',
+        params: { connection: "offline" }
+      }],
+    }) 
   }
 
   render() {

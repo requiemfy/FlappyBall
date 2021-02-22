@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text } from 'react-native';
+import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
@@ -22,6 +22,7 @@ interface State {
 
 class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
+  backHandler!: NativeEventSubscription;
 
   constructor(props: Props | any) {
     super(props);
@@ -36,10 +37,17 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
 
   componentDidMount() {
     console.log("settings MOUNT");
+    this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("settings UN-MOUNT")
+    this.backHandler.remove();
+  }
+
+  backAction = () => {
+    this.props.navigation.goBack();
+    return true;
   }
 
   changePass = () => {
