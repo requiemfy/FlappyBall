@@ -1,3 +1,3 @@
 # FlappyBall
 
-My First Game with React-Native
+My First Game with Expo
