@@ -10,18 +10,26 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   invalidCreds: boolean; 
   error: string;
+  showConnectionState: boolean;
+  connectState: string;
 }
 
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   email = "";
   password = "";
+  connection = { 
+    current: true, 
+    color: "green", 
+  };
   navigation = this.props.navigation;
   authSubscriber!: firebase.Unsubscribe;
+  netInfo!: NetInfoSubscription ;
   backHandler!: NativeEventSubscription;
 
   constructor(props: Props | any) {
@@ -29,25 +37,48 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     LogBox.ignoreLogs(['Setting a timer']);
     this.state = { 
       invalidCreds: false, 
-      error: "Invalid Credentials"
+      error: "Invalid Credentials",
+      showConnectionState: false,
+      connectState: "Checking connection...",
     };
   }
 
   componentDidMount() {
+    this.netInfo = NetInfo.addEventListener(state => {
+      if (state.isConnected) {
+        if (!this.connection.current) {
+          this.connection.current = true;
+          this.setState({ 
+            showConnectionState: true,
+            connectState: "You are now connected to " + state.type
+          });
+          setTimeout(() => this.setState({ showConnectionState: false }), 2000);
+        }
+      } else {
+        this.connection.current = false;
+        this.setState({ 
+          showConnectionState: true,
+          connectState: "No internet connection"
+        });
+      }
+    });
+
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
-      user 
+      user && this.connection.current
         ? this.navigation.reset({ 
             index: 0,
             routes: [{ name: 'Home' }],
           }) 
         : null;
     });
+
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     this.authSubscriber() 
     this.backHandler.remove();
+    this.netInfo();
   }
 
   backAction = () => {
@@ -83,6 +114,22 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   render() {
     return(
       <View style={styles.rootContainer}>
+         {
+          this.state.showConnectionState &&
+          <View style={{
+            position: "absolute",
+            backgroundColor: this.connection.current ? "green" : "red",
+            top: 0,
+            width: "100%",
+            height: "5%",
+            justifyContent: "center"
+          }}>
+            <Text style={{ 
+              color: "black", 
+              textAlign: "center" 
+            }}>{this.state.connectState}</Text>
+          </View>
+        }
         {
           this.state.invalidCreds && 
           <View style={styles.invalidCreds}>
