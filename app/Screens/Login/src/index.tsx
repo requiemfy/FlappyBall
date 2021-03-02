@@ -22,6 +22,7 @@ interface State {
 }
 
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
+  user: firebase.User | null = null;
   email = "";
   password = "";
   connection = { 
@@ -54,7 +55,9 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
             showConnectionState: true,
             connectState: "You are now connected to " + state.type
           });
-          setTimeout(() => this.setState({ showConnectionState: false }), 2000);
+          this.user
+            ? this.goLogin()
+            : setTimeout(() => this.setState({ showConnectionState: false }), 2000);
         }
       } else {
         this.connection.current = false;
@@ -66,11 +69,9 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     });
 
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
+      this.user = user;
       user && this.connection.current
-        ? this.navigation.reset({ 
-            index: 0,
-            routes: [{ name: 'Home' }],
-          }) 
+        ? this.goLogin()
         : null;
     });
 
@@ -97,6 +98,13 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         const error = String(err).replace('Error: ', '');
         this.setState({ invalidCreds: true, error: error });
       });
+  }
+
+  goLogin = () => {
+    this.navigation.reset({ 
+      index: 0,
+      routes: [{ name: 'Home' }],
+    });
   }
 
   signUp = () => {
