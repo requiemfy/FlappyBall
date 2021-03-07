@@ -64,6 +64,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.grassAleft.removeAllListeners();
     this.state.grassBleft.removeAllListeners();
+    this.stop();
   }
 
   private orientationCallback = () => {

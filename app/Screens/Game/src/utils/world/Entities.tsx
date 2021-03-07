@@ -18,6 +18,7 @@ import Player from '../../components/Player'
 import { GameDimension } from "../helpers/dimensions";
 import { Coordinates } from "../helpers/coordinates";
 import Roof from '../../components/Roof';
+import Wall from '../../components/Wall';
 
 export namespace Entities {
   type Bodies = (
@@ -42,7 +43,7 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    renderer: typeof Box | typeof Player; // @remind update (grass roof)
+    renderer: typeof Box | typeof Wall | typeof Grass | typeof Roof | typeof Player; // @remind update (grass roof)
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -183,6 +184,7 @@ export namespace Entities {
                 borderRadius: wall.borderRadius,
                 color: wall.color, 
                 renderer: Box,
+                // renderer: Wall // @remind
               };
             
             (function setWallId() { // @note INSPECTED: good

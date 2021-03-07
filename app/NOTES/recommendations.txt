@@ -77,3 +77,10 @@ bug experience:
 
   grass doesn't adjust its width on orientation  
     the problem is, if we adapt the grass width, its left will also be affected
+
+
+----------------------------------------------------------
+tying to optimize wall move by using interval
+i've already done that in Wall Class
+
+then disable the wall move method in physics

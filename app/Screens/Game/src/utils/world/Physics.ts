@@ -108,7 +108,7 @@ export namespace Physics {
           && 
           (function isWallOutOfVision() { // removes the OBJECT and BODY
             const wallIndex = entities.game.wallIds[0], wall = entities[wallIndex]; // always the first wall
-            if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because sometimes we indent based on getStatusBarHeight when oriented left
+            if ((wall.body.position.x + (wall.size[0] / 2)) < -getStatusBarHeight()) { // not < 0, because of notch that we have to indent
               COMPOSITE.remove(entities.game.matterWorld, wall.body);
               delete entities[wallIndex]; 
               return true;
