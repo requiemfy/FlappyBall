@@ -11,7 +11,9 @@ const firebaseConfig = {
 };
 
 export function init() {
-  firebase.initializeApp(firebaseConfig);
+  if (firebase.apps.length === 0) {
+    firebase.initializeApp(firebaseConfig);
+  }
 }
 
 type UserData = {
