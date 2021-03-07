@@ -86,6 +86,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
     this.backHandler.remove();
+
+    this.entities.game = null;
   }
 
   setEngineRef = (ref: GameEngine) => {

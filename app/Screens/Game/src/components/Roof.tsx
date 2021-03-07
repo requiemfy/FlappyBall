@@ -57,6 +57,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.roofAleft.removeAllListeners();
     this.state.roofBleft.removeAllListeners();
+    this.stop();
   }
 
   private orientationCallback = () => {
