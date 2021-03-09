@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
-import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -15,12 +15,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
-  invalidCreds: boolean; 
-  error: string;
-  currentPass: string;
-  newPass: string;
-  confirmPass: string; 
+  items: Item[]
 }
+
+type Item = {id: string, description: string, url: string};
 
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
@@ -28,22 +26,23 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   constructor(props: Props | any) {
     super(props);
+    const reference = firebase.storage().ref('item_images');
+    this.listShopItems(reference).then(() => {
+      console.log('Finished listing');
+    });
+
     this.state = { 
-      invalidCreds: false, 
-      error: "Invalid Inputs",
-      currentPass: "",
-      newPass: "",
-      confirmPass: "",
+      items: []
     };
   }
 
   componentDidMount() {
-    console.log("settings MOUNT");
+    console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("settings UN-MOUNT")
+    console.log("Inventorys UN-MOUNT")
     this.backHandler.remove();
   }
 
@@ -52,170 +51,80 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-  showError = (err: any) => {
-    const error = String(err).replace('Error: ', '');
-    this.setState({ invalidCreds: true, error: error });
-  }
-
-  changePass = () => {
-    if (this.state.newPass !== this.state.confirmPass) {
-      this.setState({ invalidCreds: true, error: "Password doesn't match." });
-      return null;
-    } else  if (this.state.newPass === this.state.currentPass || this.state.newPass === "") {
-      this.setState({ invalidCreds: true, error: "Please enter new password." });
-      return null;
-    }
-    const 
-      user = firebase.auth().currentUser,
-      cred = firebase.auth.EmailAuthProvider.credential(user?.email!, this.state.currentPass);
-    user?.reauthenticateWithCredential(cred)
-      .then(() => {
-        firebase.auth().currentUser?.updatePassword(this.state.newPass)
-          .then(() => {
-            Alert.alert("Password", "Successfully Changed", [
-              { 
-                text: "OK", 
-                onPress: () => {
-                  this.setState({ currentPass: "", newPass: "", confirmPass: "" })
-                } 
-              }
-            ]);
-            this.setState({ invalidCreds: false })
-          })
-          .catch(err => {
-            this.showError(err)
-          })
-      })
-      .catch(err => {
-        this.showError(err)
+  listShopItems = (
+    reference: firebase.storage.Reference
+  ): Promise<any> => {
+    return reference.list().then( async (result) => {
+      let items: Item[] = [];
+      await new Promise((resolve) => {
+        result.items.forEach(async (ref) => {
+          let url, itemName, description!: string;
+          // set itemName
+          itemName = ref.name.replace('.png', '');
+          // set url
+          url = await firebase.storage()
+            .ref(ref.fullPath)
+            .getDownloadURL();
+          // set description
+          await firebase
+            .database()
+            .ref('items/' + itemName + '/description')
+            .once("value")
+            .then(snapshot => {
+              description = snapshot.val();
+            });
+          items = [
+            ...items,
+            {
+              id: itemName,
+              description: description,
+              url: url,
+            }
+          ];
+  
+          if (result.items.indexOf(ref) === (result.items.length-1)) {
+            resolve(null) 
+          }
+        })
       });
-  }
-
-  alertLogout = (cb: any, lastWords: string) => {
-    Alert.alert("Hold on!", lastWords, [
-      {
-        text: "Cancel",
-        onPress: () => null,
-        style: "cancel"
-      },
-      { text: "YES", onPress: () => {
-        cb();
-      }}
-    ]);
-  }
-
-  logout = () => {
-    this.alertLogout(() => {
-      this.alertLogout(() => {
-        this.setState({ invalidCreds: false });
-        firebase
-          .auth()
-          .signOut()
-          .then(() => this.navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            }))
-          .catch(err => console.log(err));
-      }, "Seriously?")
-    }, "Are you sure you want to logout?")
+      console.log("items", items)
+      this.setState({ items: items })
+      return Promise.resolve();
+    });
   }
 
   render() {
-    return (
+    return(
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.contentContainer}>
-          <View
-            style={[styles.button, { height: 100 }]}>
-            <Button
-              onPress={() => null}
-              title='inventory'
-              color='rgba(66, 66, 66, 0.6)' />
-          </View>
-          {
-            this.state.invalidCreds &&
-            <View style={styles.invalidCreds}>
-              <Text style={{ color: "red", textAlign: "center" }}>{this.state.error}</Text>
-            </View>
-          }
-          <Text style={styles.changePassLabel}>Change Password</Text>
-          <TextInput
-            onChangeText={(text => this.setState({ currentPass: text }))}
-            value={this.state.currentPass}
-            placeholder="Current Password"
-            placeholderTextColor="white"
-            secureTextEntry={true}
-            style={styles.textInput} />
-          <TextInput
-            onChangeText={(text => this.setState({ newPass: text }))}
-            value={this.state.newPass}
-            placeholder="Password"
-            placeholderTextColor="white"
-            secureTextEntry={true}
-            style={styles.textInput} />
-          <TextInput
-            onChangeText={(text => this.setState({ confirmPass: text }))}
-            value={this.state.confirmPass}
-            placeholder="Confirm Password"
-            placeholderTextColor="white"
-            secureTextEntry={true}
-            style={styles.textInput} />
-          <View
-            style={[styles.button]}>
-            <Button
-              onPress={this.changePass}
-              title='CONFIRM'
-              color='rgba(66, 66, 66, 0.6)' />
-          </View>
-          <View
-            style={[{ width: 100, marginTop: 30 }]}>
-            <Button
-              onPress={this.logout}
-              title='LOG OUT'
-              color='rgba(66, 66, 66, 0.3)' />
-          </View>
-        </ScrollView>
+        <FlatList 
+          contentContainerStyle={{flex: 1, justifyContent: "center",}}
+          data={this.state.items}
+          renderItem={({ item }) => {
+            return(
+              <View style={styles.item}>
+                <Text>{item.description}</Text>
+              </View>
+            )
+          }}
+          keyExtractor={(item: any) => item.name}
+          numColumns={2}
+        />
       </SafeAreaView>
-    )
+    );
   }
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: "red",
   },
-  contentContainer: {
-    padding: 10,
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: 'center',
-    backgroundColor: "black",
+  item: {
+    flex: 1,
+    height: 100,
+    backgroundColor: "green", 
+    borderWidth: 1, 
+    borderColor: "black",
   },
-  changePassLabel: { 
-    color: "white", 
-    fontWeight: "bold", 
-    fontSize: 20, 
-    marginBottom: "2%" 
-  },
-  textInput: {
-    width: "80%",
-    height: 40,
-    margin: 5,
-    paddingLeft: 20,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    color: 'white',
-  },
-  invalidCreds: {
-    width: "100%",
-    height: "5%",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "pink",
-  },
-  button: {
-    width: "80%",
-    marginTop: 5,
-  }
 })
 export default withNavigation(InventoryScreen);
