@@ -22,7 +22,7 @@ interface State {
   confirmPass: string; 
 }
 
-class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
+class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
   backHandler!: NativeEventSubscription;
 
@@ -120,10 +120,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     }, "Are you sure you want to logout?")
   }
 
-  goInventory = () => {
-    this.navigation.navigate("Inventory");
-  }
-
   render() {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -131,7 +127,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
           <View
             style={[styles.button, { height: 100 }]}>
             <Button
-              onPress={this.goInventory}
+              onPress={() => null}
               title='inventory'
               color='rgba(66, 66, 66, 0.6)' />
           </View>
@@ -222,4 +218,4 @@ const styles = StyleSheet.create({
     marginTop: 5,
   }
 })
-export default withNavigation(SettingScreen);
+export default withNavigation(InventoryScreen);
