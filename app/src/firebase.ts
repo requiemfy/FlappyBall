@@ -19,6 +19,7 @@ export function init() {
 type UserData = {
   codeName: string;
   record: number;
+  [key: string]: number | string;
 }
 
 export { firebase, UserData };
