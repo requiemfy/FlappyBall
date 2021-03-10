@@ -10,7 +10,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce } from '../../helpers';
+import { backOnlyOnce } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 

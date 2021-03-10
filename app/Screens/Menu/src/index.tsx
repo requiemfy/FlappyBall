@@ -6,7 +6,7 @@ import FlappyBallGame from '../../Game/src';
 import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase, UserData } from '../../../src/firebase';
-import { backOnlyOnce } from '../../helpers';
+import { backOnlyOnce } from '../../../src/helpers';
 
 type MenuButton = keyof { resume: string, restart: string };
 type Props = { 

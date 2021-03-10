@@ -7,7 +7,7 @@ import { NavigationParams, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
 import { firebase, UserData } from '../../../src/firebase'
-import { backOnlyOnce } from '../../helpers';
+import { backOnlyOnce } from '../../../src/helpers';
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
 type Players = { [key: string]: UserData }
