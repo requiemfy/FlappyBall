@@ -10,11 +10,11 @@ const firebaseConfig = {
   appId: "1:412260902872:web:29855120415292cdb374ad"
 };
 
-export function init() {
+(function init() {
   if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
   }
-}
+})();
 
 type UserData = {
   codeName: string;

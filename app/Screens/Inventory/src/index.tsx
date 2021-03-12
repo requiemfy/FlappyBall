@@ -1,7 +1,5 @@
 // Lists all user's purchased item in the shop
 
-
-
 import * as React from 'react';
 import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
 import { FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
@@ -16,10 +14,13 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 import { backOnlyOnce } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Cache from '../../../src/cacheAssets';
+import { Asset } from 'expo-asset';
+import CacheStorage from 'react-native-cache-storage';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
-  items: Item[]
+  items: Item[];
 }
 
 type Item = {id: string, description: string, url: string};
@@ -28,13 +29,26 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   navigation = this.props.navigation;
   user = firebase.auth().currentUser;
   backHandler!: NativeEventSubscription;
+  // cacheStorage = new CacheStorage();
 
   constructor(props: Props | any) {
     super(props);
     this.state = { 
-      items: []
+      items: JSON.parse(Cache.inventory.items),
     };
-    this.listInventoryItems();
+    // this.listInventory();
+
+    // const getCache = this.cacheStorage.getItem("inventory")
+      // .then(arg => {
+      //   console.log("getting inventory", arg)
+      //   this.cacheStorage.setItem("inventory", "new set").then(() => {
+      //     console.log("setted item")
+      //     this.cacheStorage.getItem("inventory")
+      //       .then(arg => {
+      //         console.log("getting inventory new val", arg)
+      //       })
+      //   })
+      // })
   }
 
   componentDidMount() {
@@ -52,105 +66,99 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-
-  // in constructor:::
-  // const reference = firebase.storage().ref('item_images');
-  // this.listInventory(reference).then(() => {
-  //   console.log('Finished listing');
-  // });
-
-
-  // listInventory = (
-  //   reference: firebase.storage.Reference
-  // ): Promise<any> => {
-  //   return reference.list().then( async (result) => {
-  //     let items: Item[] = [];
-
-      // await new Promise((resolve) => {
-      //   result.items.forEach(async (ref) => {
-      //     let url, itemName, description!: string;
-      //     // set itemName
-      //     itemName = ref.name.replace('.png', '');
-      //     // set url
-      //     url = await firebase.storage()
-      //       .ref(ref.fullPath)
-      //       .getDownloadURL();
-      //     // set description
-      //     await firebase
-      //       .database()
-      //       .ref('items/' + itemName + '/description')
-      //       .once("value")
-      //       .then(snapshot => {
-      //         description = snapshot.val();
-      //       });
-      //     items = [
-      //       ...items,
-      //       {
-      //         id: itemName,
-      //         description: description,
-      //         url: url,
-      //       }
-      //     ];
-  
-      //     if (result.items.indexOf(ref) === (result.items.length-1)) {
-      //       resolve(null) 
-      //     }
-      //   })
-      // });
-
-  //     console.log("items", items)
-  //     this.setState({ items: items })
-  //     return Promise.resolve();
-  //   });
+  // check cache storage if items already exist, then don't fetch again
+  // private listInventory = () => {
+  //   // this.cacheStorage.getItem("inventory")
+  //   //   .then(arg => {
+  //   //     console.log("INVENTORY", arg)
+  //   //     if (arg) {
+  //   //       this.setState({ items: JSON.parse(arg) });
+  //   //     } else {
+  //   //       // this.fetchInventory();
+  //   //     }
+  //   //   })
   // }
 
 
-  private listInventoryItems = async () => {
-    let items: Item[] = [];
-    const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
-      firebase
-        .database()
-        .ref('items/' + itemName + '/description')
-        .once("value")
-        .then(snapshot => resolve(snapshot.val()))
-        .catch(err => reject(err));
-    });
-    const getItemUrl = (itemName: string) => firebase
-      .storage()
-      .ref('item_images/' + itemName + '.png')
-      .getDownloadURL();
-    firebase
-      .database()
-      // LVhjESKOFUZdbmgT9AF6JyEog0B2
-      .ref('users/' + this.user?.uid + '/inventory')
-      .once('value')
-      .then(snapshot => {
-        new Promise((resolve, reject) => {
-          const inventory: string[] = snapshot.val();
-          let promises: Promise<unknown>[] = [];
-          inventory?.forEach(async (item: string) => {
-            const promise = new Promise((resolve, reject) => {
-              Promise.all([getItemDescription(item), getItemUrl(item)])
-                .then(arg => resolve({ id: item, description: arg[0], url: arg[1] }))
-                .catch(err => reject(err));
-            });
-            promises.push(promise);
-          });
-          Promise.all(promises).then(arg => resolve(arg)).catch(err => reject(err))
-        })
-        .then(items => {
-          const itemsArr = items as Item[];
-          this.setState({ items: itemsArr });
-        })
-        .catch(err => console.log(err));
-      });
+  // private fetchInventory = (() => {
+  //   const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
+  //     firebase
+  //       .database()
+  //       .ref('items/' + itemName + '/description')
+  //       .once("value")
+  //       .then(snapshot => resolve(snapshot.val()))
+  //       .catch(err => reject(err));
+  //   });
+
+  //   const getItemUrl = (itemName: string) => firebase
+  //     .storage()
+  //     .ref('item_images/' + itemName + '.png')
+  //     .getDownloadURL();
+
+  //   return async () => {
+  //     let items: Item[] = [];
+  //     firebase
+  //       .database()
+  //       // LVhjESKOFUZdbmgT9AF6JyEog0B2
+  //       .ref('users/' + this.user?.uid + '/inventory')
+  //       .once('value')
+  //       .then(snapshot => {
+  //         new Promise((resolve, reject) => {
+  //           const inventory: string[] = snapshot.val();
+  //           let promises: Promise<unknown>[] = [];
+  //           inventory?.forEach(async (item: string) => {
+  //             const promise = new Promise((resolve, reject) => {
+  //               Promise.all([getItemDescription(item), getItemUrl(item)])
+  //                 .then(async arg => {
+  
+  //                   // @remind fail
+  //                   // const image: any = cacheImage([arg[1]]);
+  //                   // await Promise.all([...image]);
+  
+  //                   // await Image.prefetch(arg[1])
+  //                   //   .then(async () => {
+  //                   //     const gg = await Image.queryCache!([arg[1] as string])
+  //                   //       .then(arg => console.log("Query fetch", arg));
+  //                   //   });
+  
+  //                   // Image.queryCache!(["https://gg.com"])
+  //                   //   .then(arg => {
+  //                   //     if (!Object.keys(arg).length) {
+  //                   //       Image.prefetch(arg[1]);
+  //                   //     }
+  //                   //   })
+  
+  //                   resolve({ id: item, description: arg[0], url: arg[1] })
+  //                 })
+  //                 .catch(err => reject(err));
+  //             });
+  //             promises.push(promise);
+  //           });
+  //           Promise.all(promises).then(arg => resolve(arg)).catch(err => reject(err))
+  //         })
+  //         .then(items => {
+  //           const 
+  //             itemsArr = items as Item[],
+  //             cacheItem = JSON.stringify(itemsArr);
+  //           this.cacheStorage.setItem('inventory', cacheItem, 60);
+  //           this.setState({ items: itemsArr });
+  //         })
+  //         .catch(err => console.log(err));
+  //       });
+  //   }
+  // })()
+
+  private setSprite = (item: string) => {
+    ballySprite = item;
   }
 
   render() {
+    
     return(
       <SafeAreaView style={styles.safeArea}>
         {
-          this.state.items.length
+          // this.state.items.length
+          true
           ? <FlatList 
               contentContainerStyle={styles.flatlist}
               data={this.state.items}
@@ -158,8 +166,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 <View style={styles.item}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={() => console.log(item.id)}>
+                    onPress={() => this.setSprite(item.id)}>
+                      
                     <Image source={{uri: item.url}} style={{resizeMode: "contain", width: 100, height: 100}}/>
+
                     <Text>{item.description}</Text>
                   </TouchableOpacity>
                 </View>
@@ -175,6 +185,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       </SafeAreaView>
     );
   }
+}
+
+let ballySprite: string | null = null;
+function getBallySprite() {
+  return ballySprite;
 }
 
 const styles = StyleSheet.create({
@@ -203,3 +218,4 @@ const styles = StyleSheet.create({
   },
 })
 export default withNavigation(InventoryScreen);
+export { getBallySprite };

@@ -43,7 +43,7 @@ export namespace Entities {
     size: Size;
     borderRadius: number;
     color: String; 
-    renderer: typeof Box | typeof Wall | typeof Grass | typeof Roof | typeof Player; // @remind update (grass roof)
+    renderer: typeof Box | typeof Wall | typeof Grass | typeof Roof | typeof Player;
   };
 
   // ENTITIES THAT ARE INITIALIZED CONTINUOUSLY
@@ -108,7 +108,7 @@ export namespace Entities {
     // setting initial wall entities with many times creations (depending on how many "wallNum")
     (function getInitialWalls(){ // @note INSPECTED: good
       if (!game.entitiesInitialized) { // EXECUTED EXACTLY ONCE (not even in swap)
-        for (let wallNum = 3; wallNum--;) { // @remind number of wall
+        for (let wallNum = 3; wallNum--;) {
           if (game.wallIds.length > 0) {
             const 
               firstWallX = Coordinates.getFirstWallX(game.entities),
@@ -184,7 +184,7 @@ export namespace Entities {
                 borderRadius: wall.borderRadius,
                 color: wall.color, 
                 renderer: Box,
-                // renderer: Wall // @remind
+                // renderer: Wall // @note
               };
             
             (function setWallId() { // @note INSPECTED: good
