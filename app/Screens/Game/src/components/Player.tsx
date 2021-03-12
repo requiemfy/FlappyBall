@@ -1,6 +1,5 @@
 import React, { createRef, MutableRefObject } from 'react';
 import { Dimensions, Image, Platform } from 'react-native';
-import { getBallySprite } from '../../../Inventory/src'; // @remind clean this
 import { GameDimension } from '../utils/helpers/dimensions';
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Circle from './shapes/Circle';
@@ -138,31 +137,15 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   render() {
-
-    // @remind player caching sample clear later
-    // let sprite = require('../Screens/Game/assets/bally/bally.png');
-    let sprite = Asset.fromModule(require('../../assets/bally/bally.png')).localUri as string;
-    
     const
       left = this.state.left,
       top = this.state.top;
-
-    // --- @remind clean
-    const 
-      width = Dimensions.get('window').width,
-      ratio = width/2700,
-      height = 3000 * ratio;
-      console.log("sprite", sprite)
-    // ---    
 
     return (
       <Circle.default {...this.props}>
         <SpriteSheet
           ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
-
           source={require('../../assets/bally/bally.png')}
-          // source={{ uri: sprite, width: width, height: height }} @remind clean these
-
           columns={9}
           rows={10}
           width={this.props.size * 2.7}

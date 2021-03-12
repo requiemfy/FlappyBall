@@ -1,12 +1,10 @@
-// @remind looks like these shits doesn't work
-
 import { Image } from 'react-native';
 import { Asset } from 'expo-asset';
 import { images } from './requireAssets';
 import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 
-let inventory: { items: string };
+let cachedInventory: string;
 const cacheStorage = new CacheStorage();
 
 function cacheImage(images: any[]) {
@@ -22,7 +20,6 @@ function cacheImage(images: any[]) {
 async function loadAssetsAsync() {
   // const imageAssets: any = cacheImage(images);
   // await Promise.all([...imageAssets]).then(arg => {
-  //   console.log("LOADED ASSETS", arg)
   // });
 }
 
@@ -30,7 +27,6 @@ async function loadAssetsAsync() {
 //   const cachedImgs = images.map(image => {
 //     return Asset.fromModule(image).name
 //   })
-//   console.log('cachedImgs', cachedImgs)
 // }
 
 async function loadUserAssetAsync() {
@@ -69,6 +65,7 @@ const fetchInventory = (() => {
 
         if (!snapshot) {
           console.log("SNAPSHOT", snapshot)
+          cachedInventory = JSON.stringify([])
           return ;
         }
 
@@ -93,8 +90,7 @@ const fetchInventory = (() => {
           cacheStorage.setItem('inventory', cacheItems, 60)
             .then(() => {
               cacheStorage.getItem("inventory").then(arg => {
-                inventory = { items: arg! };
-                Object.freeze(inventory);
+                cachedInventory = arg!;
                 resolve("Success Cache Inventory")
               })
             })
@@ -107,13 +103,11 @@ const fetchInventory = (() => {
   }
 
   return async (resolve: any, reject: any) => {
-    console.log("TRY TO GET INVENTORY")
     cacheStorage.getItem("inventory")
     .then(arg => {
       console.log("CURRENT INVENTORY", arg)
       if (arg) {
-        inventory = { items: arg }
-        Object.freeze(inventory);
+        cachedInventory = arg;
         resolve("Success Cache Inventory")
       } else {
         cacheInventory(resolve, reject);
@@ -123,4 +117,14 @@ const fetchInventory = (() => {
   }
 })();
 
-export { cacheImage, loadAssetsAsync, loadUserAssetAsync, inventory }
+// getters
+function getCachedInventory() {
+  return cachedInventory;
+}
+
+export { 
+  cacheImage, 
+  loadAssetsAsync, 
+  loadUserAssetAsync, 
+  getCachedInventory 
+}

@@ -29,26 +29,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   navigation = this.props.navigation;
   user = firebase.auth().currentUser;
   backHandler!: NativeEventSubscription;
-  // cacheStorage = new CacheStorage();
 
   constructor(props: Props | any) {
     super(props);
     this.state = { 
-      items: JSON.parse(Cache.inventory.items),
+      items: JSON.parse(Cache.getCachedInventory()),
     };
-    // this.listInventory();
-
-    // const getCache = this.cacheStorage.getItem("inventory")
-      // .then(arg => {
-      //   console.log("getting inventory", arg)
-      //   this.cacheStorage.setItem("inventory", "new set").then(() => {
-      //     console.log("setted item")
-      //     this.cacheStorage.getItem("inventory")
-      //       .then(arg => {
-      //         console.log("getting inventory new val", arg)
-      //       })
-      //   })
-      // })
   }
 
   componentDidMount() {
@@ -66,88 +52,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-  // check cache storage if items already exist, then don't fetch again
-  // private listInventory = () => {
-  //   // this.cacheStorage.getItem("inventory")
-  //   //   .then(arg => {
-  //   //     console.log("INVENTORY", arg)
-  //   //     if (arg) {
-  //   //       this.setState({ items: JSON.parse(arg) });
-  //   //     } else {
-  //   //       // this.fetchInventory();
-  //   //     }
-  //   //   })
-  // }
-
-
-  // private fetchInventory = (() => {
-  //   const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
-  //     firebase
-  //       .database()
-  //       .ref('items/' + itemName + '/description')
-  //       .once("value")
-  //       .then(snapshot => resolve(snapshot.val()))
-  //       .catch(err => reject(err));
-  //   });
-
-  //   const getItemUrl = (itemName: string) => firebase
-  //     .storage()
-  //     .ref('item_images/' + itemName + '.png')
-  //     .getDownloadURL();
-
-  //   return async () => {
-  //     let items: Item[] = [];
-  //     firebase
-  //       .database()
-  //       // LVhjESKOFUZdbmgT9AF6JyEog0B2
-  //       .ref('users/' + this.user?.uid + '/inventory')
-  //       .once('value')
-  //       .then(snapshot => {
-  //         new Promise((resolve, reject) => {
-  //           const inventory: string[] = snapshot.val();
-  //           let promises: Promise<unknown>[] = [];
-  //           inventory?.forEach(async (item: string) => {
-  //             const promise = new Promise((resolve, reject) => {
-  //               Promise.all([getItemDescription(item), getItemUrl(item)])
-  //                 .then(async arg => {
-  
-  //                   // @remind fail
-  //                   // const image: any = cacheImage([arg[1]]);
-  //                   // await Promise.all([...image]);
-  
-  //                   // await Image.prefetch(arg[1])
-  //                   //   .then(async () => {
-  //                   //     const gg = await Image.queryCache!([arg[1] as string])
-  //                   //       .then(arg => console.log("Query fetch", arg));
-  //                   //   });
-  
-  //                   // Image.queryCache!(["https://gg.com"])
-  //                   //   .then(arg => {
-  //                   //     if (!Object.keys(arg).length) {
-  //                   //       Image.prefetch(arg[1]);
-  //                   //     }
-  //                   //   })
-  
-  //                   resolve({ id: item, description: arg[0], url: arg[1] })
-  //                 })
-  //                 .catch(err => reject(err));
-  //             });
-  //             promises.push(promise);
-  //           });
-  //           Promise.all(promises).then(arg => resolve(arg)).catch(err => reject(err))
-  //         })
-  //         .then(items => {
-  //           const 
-  //             itemsArr = items as Item[],
-  //             cacheItem = JSON.stringify(itemsArr);
-  //           this.cacheStorage.setItem('inventory', cacheItem, 60);
-  //           this.setState({ items: itemsArr });
-  //         })
-  //         .catch(err => console.log(err));
-  //       });
-  //   }
-  // })()
-
   private setSprite = (item: string) => {
     ballySprite = item;
   }
@@ -157,8 +61,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return(
       <SafeAreaView style={styles.safeArea}>
         {
-          // this.state.items.length
-          true
+          this.state.items.length
           ? <FlatList 
               contentContainerStyle={styles.flatlist}
               data={this.state.items}
