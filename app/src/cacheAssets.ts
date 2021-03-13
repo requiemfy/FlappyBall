@@ -31,14 +31,18 @@ async function loadAssetsAsync() {
 
 async function loadUserAssetAsync() {
   const inventory = new Promise((resolve, reject) => {
-    fetchInventory(resolve, reject)
+    setInventory(resolve, reject)
   });
   await Promise.all([inventory])
     .then(arg => console.log("SUCCESS USER LOAD", arg))
     .catch(err => console.log(err))
 }
 
-const fetchInventory = (() => {
+
+// =======================================================================
+// INVENTORY CACHING
+
+const setInventory = (() => {
 
   const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
     firebase
@@ -117,10 +121,12 @@ const fetchInventory = (() => {
   }
 })();
 
-// getters
 function getCachedInventory() {
   return cachedInventory;
 }
+
+// INVENTORY CACHING
+// =======================================================================
 
 export { 
   cacheImage, 
