@@ -12,6 +12,7 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 import { backOnlyOnce } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Cache from '../../../src/cacheAssets'
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -104,6 +105,10 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     ]);
   }
 
+  clearCache = () => {
+    Cache.inventory.clear();
+  }
+
   logout = () => {
     this.alertLogout(() => {
       this.alertLogout(() => {
@@ -111,10 +116,13 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
         firebase
           .auth()
           .signOut()
-          .then(() => this.navigation.reset({
+          .then(() => {
+            this.clearCache();
+            this.navigation.reset({
               index: 0,
               routes: [{ name: 'Login' }],
-            }))
+            });
+          })
           .catch(err => console.log(err));
       }, "Seriously?")
     }, "Are you sure you want to logout?")
