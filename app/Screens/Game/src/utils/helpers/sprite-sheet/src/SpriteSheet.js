@@ -95,6 +95,7 @@ export default class SpriteSheet extends React.Component {
           },
         ]}>
         <Animated.Image
+          fadeDuration={0}
           source={source}
           onLoad={onLoad}
           style={[

@@ -167,6 +167,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
     return (
       <Box.default {...this.props}>
         <Image // background image of roof
+          fadeDuration={0}
           source={require('../../assets/vines/static.png')}
           style={{
             position: 'absolute',
@@ -238,6 +239,7 @@ class Vines extends React.PureComponent<
 
     return (
       <Animated.Image
+        fadeDuration={0}
         source={vine}
         resizeMethod={"resize"} // for orientation change response of image
         style={[{

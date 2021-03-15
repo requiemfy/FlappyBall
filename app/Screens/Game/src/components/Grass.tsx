@@ -198,6 +198,7 @@ class Leaves extends React.PureComponent<
     const height = (this.props.size[1] * 0.9) * this.props.randHeight;
     return (
       <Animated.Image
+        fadeDuration={0}
         source={require('../../assets/grass.png')}
         style={[{
           position: "absolute",

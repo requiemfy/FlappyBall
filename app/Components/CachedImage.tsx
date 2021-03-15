@@ -70,6 +70,9 @@ export default class CachedImage extends Component<{source: any, isBackground: a
           <Image
             {...this.props}
             source={this.state.imgURI ? { uri: this.state.imgURI } : {}}
+            // defaultSource={this.state.imgURI ? { uri: this.state.imgURI } : {}}
+            style={{resizeMode: "contain", width: 100, height: 100}}
+            fadeDuration={0}
           />
         )}
       </View>
