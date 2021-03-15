@@ -1,6 +1,6 @@
 import { Image } from 'react-native';
 import { Asset } from 'expo-asset';
-import { images } from './requireAssets';
+import * as Assets from './requireAssets';
 import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 
@@ -30,7 +30,7 @@ async function loadAssetsAsync() {
 
 async function loadUserAssetAsync() {
   const loadInventory = new Promise((resolve, reject) => {
-    inventory.fetch(resolve, reject)
+    inventory.fetch(resolve, reject).catch(err => console.log("Error fetching inventory:", err));
   });
   await Promise.all([loadInventory])
     .then(arg => console.log("SUCCESS USER LOAD", arg))
@@ -85,7 +85,6 @@ const inventory = (() => {
               const promise = new Promise((itemResolve, itemReject) => {
                 Promise.all([getItemDescription(item), getItemUrl(item)])
                   .then(async arg => {
-                    Image.prefetch(arg[1]);
                     itemResolve({ id: item, description: arg[0], url: arg[1] });
                   })
                   .catch(err => itemReject(err));
@@ -98,7 +97,7 @@ const inventory = (() => {
           })
           .then(allItems => {
             const cacheItems = JSON.stringify(allItems);
-            cacheStorage.setItem('inventory', cacheItems, 60)
+            cacheStorage.setItem('inventory', cacheItems, 60 * 60 * 24)
               .then(() => {
                 cacheStorage.getItem("inventory").then(arg => {
                   cachedInventory = arg!;

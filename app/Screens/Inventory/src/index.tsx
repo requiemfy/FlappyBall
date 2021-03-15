@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets';
 import { Asset } from 'expo-asset';
 import CacheStorage from 'react-native-cache-storage';
+import CachedImage from '../../../Components/CachedImage';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -35,8 +36,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.state = { 
       items: JSON.parse(Cache.inventory.cache),
     };
-
-    console.log("this.state.items", this.state.items)
   }
 
   componentDidMount() {
@@ -73,7 +72,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                     style={styles.touchable} 
                     onPress={() => this.setSprite(item.id)}>
                       
-                    <Image source={{uri: item.url}} style={{resizeMode: "contain", width: 100, height: 100}}/>
+                    {/* <Image source={{uri: item.url}} style={{resizeMode: "contain", width: 100, height: 100}}/> */}
+                    <CachedImage 
+                      isBackground={false} 
+                      source={{uri: item.url}} 
+                      />
 
                     <Text>{item.description}</Text>
                   </TouchableOpacity>
