@@ -73,12 +73,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                     style={styles.touchable} 
                     onPress={() => this.setSprite(item.id)}>
                       
-                    {/* <Image source={{uri: item.url}} style={{resizeMode: "contain", width: 100, height: 100}}/> */}
-                    {/* <CachedImage 
-                      isBackground={false} 
-                      source={{uri: item.url}} 
-                      /> */}
-                      
                       <FastImage
                         style={{width: 100, height: 100}}
                         source={{
