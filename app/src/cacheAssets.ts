@@ -3,8 +3,7 @@ import { Asset } from 'expo-asset';
 import * as Assets from './requireAssets';
 import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
-
-
+import FastImage from 'react-native-fast-image';
 
 function cacheImage(images: any[]) {
   return images.map(image => {
@@ -43,7 +42,7 @@ async function loadUserAssetAsync() {
 
 const inventory = (() => {
 
-  let cachedInventory: string;
+  let cachedInventory: string = JSON.stringify([]);
   const cacheStorage = new CacheStorage();
   
   const fetchInventory = (() => {
@@ -70,38 +69,39 @@ const inventory = (() => {
         .ref('users/' + user?.uid + '/inventory')
         .once('value')
         .then(snapshot => {
-  
-          if (!snapshot) {
-            cachedInventory = JSON.stringify([])
-            return ;
-          }
+          if (!snapshot) return ;
+
+          let allItemUri: any[] = [];
 
           new Promise((allResolve, allReject) => {
             
             const inventory: string[] = snapshot.val();
-            let promises: Promise<unknown>[] = [];
+            let promiseAllItems: Promise<unknown>[] = [];
 
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
                 Promise.all([getItemDescription(item), getItemUrl(item)])
                   .then(async arg => {
                     itemResolve({ id: item, description: arg[0], url: arg[1] });
+                    allItemUri.push({ uri: arg[1] });
                   })
                   .catch(err => itemReject(err));
               });
-              promises.push(promise);
+              promiseAllItems.push(promise);
 
             });
-            Promise.all(promises).then(allItems => allResolve(allItems)).catch(err => allReject(err))
+            Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
   
           })
           .then(allItems => {
+
+            allItemUri.length ? FastImage.preload(allItemUri) : null;
             const cacheItems = JSON.stringify(allItems);
             cacheStorage.setItem('inventory', cacheItems, 60 * 60 * 24)
               .then(() => {
                 cacheStorage.getItem("inventory").then(arg => {
                   cachedInventory = arg!;
-                  inventoryResolve("Success Cache Inventory")
+                  inventoryResolve("Success caching inventory")
                 })
               })
               .catch(err => inventoryReject(err));
@@ -114,16 +114,16 @@ const inventory = (() => {
   
     return async (resolve: any, reject: any) => {
       cacheStorage.getItem("inventory")
-      .then(arg => {
-        console.log("CURRENT INVENTORY", arg)
-        if (arg) {
-          cachedInventory = arg;
-          resolve("Success Cache Inventory")
-        } else {
-          cacheInventory(resolve, reject);
-        }
-      })
-      .catch(err => reject(err))
+        .then(arg => {
+          console.log("CURRENT INVENTORY", arg)
+          if (arg) {
+            cachedInventory = arg;
+            resolve("Success Cache Inventory")
+          } else {
+            cacheInventory(resolve, reject);
+          }
+        })
+        .catch(err => reject(err));
     }
   })();
   
