@@ -5,20 +5,14 @@ import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 import FastImage from 'react-native-fast-image';
 
-function cacheImage(images: any[]) {
-  return images.map(image => {
-    if (typeof image === 'string') {
-      return Image.prefetch(image);
-    } else {
-      return Asset.fromModule(image).downloadAsync();
-    }
-  });
+function cacheStaticImg(images: any[]) {
+  return images.map(image => Asset.fromModule(image).downloadAsync());
 }
 
 async function loadAssetsAsync() {
-  // const imageAssets: any = cacheImage(images);
-  // await Promise.all([...imageAssets]).then(arg => {
-  // });
+  const imageAssets: any = cacheStaticImg(Assets.images);
+  await Promise.all([...imageAssets]).then(arg => {
+  });
 }
 
 // function getCachedResources() {
@@ -142,7 +136,6 @@ const inventory = (() => {
 // =======================================================================
 
 export { 
-  cacheImage, 
   loadAssetsAsync, 
   loadUserAssetAsync, 
   inventory 

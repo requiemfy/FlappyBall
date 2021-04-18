@@ -8,15 +8,15 @@ import { loadAssetsAsync } from './cacheAssets';
 export default function Game() {
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // if (isLoading) {
-  //   return (
-  //     <AppLoading 
-  //       startAsync={() => loadAssetsAsync()}
-  //       onFinish={() => setIsLoading(false)}
-  //       onError={console.log}
-  //     />
-  //   )
-  // }
+  if (isLoading) {
+    return (
+      <AppLoading 
+        startAsync={() => loadAssetsAsync()}
+        onFinish={() => setIsLoading(false)}
+        onError={console.log}
+      />
+    )
+  }
 
   return (
     <MainStackScreen />
