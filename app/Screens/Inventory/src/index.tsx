@@ -23,10 +23,9 @@ import FastImage from 'react-native-fast-image'
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
-  activeItem: null | string;
 }
 
-type Item = { id: string, description: string, url: string };
+type Item = { id: string, description: string, url: string, spriteUrl: string };
 type Active = { ballySprite: string, id: null | string };
 
 let activeItem: Active = {
@@ -43,7 +42,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     super(props);
     this.state = { 
       items: JSON.parse(Cache.inventory.cache),
-      activeItem: null,
     };
   }
 
@@ -62,12 +60,20 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-  private selectItem = (id: string) => {
+  private selectItem = (id: string, sprite: string) => {
     // @note i can put this in async storage
-    activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
-    // activeItem.id = id;
-    // this.forceUpdate();
-    this.setState({ activeItem: id })
+
+    if (id === activeItem.id) {
+      activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
+      activeItem.id = null;
+    } else {
+      // activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
+      Image.prefetch(sprite);
+      activeItem.ballySprite = sprite;
+      activeItem.id = id;
+    }
+    
+    this.forceUpdate();
   }
 
   render() {
@@ -82,11 +88,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               renderItem={({ item }) => { return (
                 <View style={{
                   ...styles.item,
-                  backgroundColor: this.state.activeItem === item.id ? "green" : "#dfdddd59"
+                  backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"
                 }}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={() => this.selectItem(item.id)}>
+                    onPress={() => this.selectItem(item.id, item.spriteUrl)}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}

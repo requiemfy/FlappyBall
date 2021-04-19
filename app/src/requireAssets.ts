@@ -7,6 +7,5 @@ const images = [
   require('../Screens/Game/assets/vines/4.png'),
   require('../Screens/Game/assets/vines/static.png'),
   require('../Screens/Game/assets/bally/bally.png'),
-  require('../Screens/Game/assets/bally/item-1.png'),
 ];
 export { images };

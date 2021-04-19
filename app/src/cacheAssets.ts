@@ -15,12 +15,6 @@ async function loadAssetsAsync() {
   });
 }
 
-// function getCachedResources() {
-//   const cachedImgs = images.map(image => {
-//     return Asset.fromModule(image).name
-//   })
-// }
-
 async function loadUserAssetAsync() {
   const loadInventory = new Promise((resolve, reject) => {
     inventory.fetch(resolve, reject).catch(err => console.log("Error fetching inventory:", err));
@@ -54,6 +48,11 @@ const inventory = (() => {
       .storage()
       .ref('item_images/' + itemName + '.png')
       .getDownloadURL();
+
+    const getSpriteUrl = (itemName: string) => firebase
+      .storage()
+      .ref('item_sprites/' + itemName + '.png')
+      .getDownloadURL();
   
     const cacheInventory = async (inventoryResolve: any, inventoryReject: any) => {
       const user = firebase.auth().currentUser;
@@ -74,9 +73,9 @@ const inventory = (() => {
 
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
-                Promise.all([getItemDescription(item), getItemUrl(item)])
+                Promise.all([getItemDescription(item), getItemUrl(item), getSpriteUrl(item)])
                   .then(async arg => {
-                    itemResolve({ id: item, description: arg[0], url: arg[1] });
+                    itemResolve({ id: item, description: arg[0], url: arg[1], spriteUrl: arg[2] });
                     allItemUri.push({ uri: arg[1] });
                   })
                   .catch(err => itemReject(err));

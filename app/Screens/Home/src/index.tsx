@@ -197,8 +197,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
 }
 
-
-
 const styles = StyleSheet.create({
   HomeButton: {
     borderWidth: 1,
