@@ -27,7 +27,7 @@ async function loadUserAssetAsync() {
   });
   await Promise.all([loadInventory])
     .then(arg => console.log("SUCCESS USER LOAD", arg))
-    .catch(err => console.log(err))
+    .catch(err => console.log("[inventory] ", err))
 }
 
 

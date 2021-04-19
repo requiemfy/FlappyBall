@@ -7,6 +7,7 @@ import { NavigationParams, ThemeColors, } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase } from '../../../src/firebase'
 import * as Cache from '../../../src/cacheAssets'
+import { Asset } from 'expo-asset';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -196,6 +197,15 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
 }
 
+let ballySprite: string = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
+function setBallSprite(param: any) {
+  ballySprite = param;
+}
+
+function getBallSprite() {
+  return ballySprite;
+}
+
 const styles = StyleSheet.create({
   HomeButton: {
     borderWidth: 1,
@@ -216,3 +226,4 @@ const styles = StyleSheet.create({
   }
 })
 
+export { setBallSprite, getBallSprite }

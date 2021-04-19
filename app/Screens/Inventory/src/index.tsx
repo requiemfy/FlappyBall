@@ -19,6 +19,7 @@ import { Asset } from 'expo-asset';
 import CacheStorage from 'react-native-cache-storage';
 import CachedImage from '../../../Components/CachedImage';
 import FastImage from 'react-native-fast-image'
+import { setBallSprite } from '../../Home/src';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -54,10 +55,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-  private setSprite = (item: string) => {
-    ballySprite = item;
-  }
-
   render() {
     
     return(
@@ -71,7 +68,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 <View style={styles.item}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={() => this.setSprite(item.id)}>
+                    onPress={() => setBallSprite(Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri)}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}
@@ -100,11 +97,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 }
 
-let ballySprite: string | null = null;
-function getBallySprite() {
-  return ballySprite;
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -129,6 +121,6 @@ const styles = StyleSheet.create({
     elevation: 50,
     shadowColor: 'black',
   },
-})
+});
+
 export default withNavigation(InventoryScreen);
-export { getBallySprite };
