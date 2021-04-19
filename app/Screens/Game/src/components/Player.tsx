@@ -4,7 +4,7 @@ import { GameDimension } from '../utils/helpers/dimensions';
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Circle from './shapes/Circle';
 import { Asset } from 'expo-asset';
-import { getBallSprite } from '../../../Home/src';
+import { getBallSprite } from '../../../Inventory/src';
 
 interface Props { setRef: ((ref: any) => void) | null; }
 
@@ -155,7 +155,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       <Circle.default {...this.props}>
         <SpriteSheet
           ref={this.state.startSprite} // if went error, i edited SpriteSheet index.d.ts
-          // source={require('../../assets/bally/bally.png')} @remind clear
           source={{ uri: getBallSprite(), width: width, height: height }}
           columns={9}
           rows={10}

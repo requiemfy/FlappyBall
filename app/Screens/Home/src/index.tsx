@@ -197,14 +197,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
 }
 
-let ballySprite: string = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
-function setBallSprite(param: any) {
-  ballySprite = param;
-}
 
-function getBallSprite() {
-  return ballySprite;
-}
 
 const styles = StyleSheet.create({
   HomeButton: {
@@ -225,5 +218,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   }
 })
-
-export { setBallSprite, getBallSprite }

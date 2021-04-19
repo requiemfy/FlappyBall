@@ -19,7 +19,6 @@ import { Asset } from 'expo-asset';
 import CacheStorage from 'react-native-cache-storage';
 import CachedImage from '../../../Components/CachedImage';
 import FastImage from 'react-native-fast-image'
-import { setBallSprite } from '../../Home/src';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -27,6 +26,8 @@ interface State {
 }
 
 type Item = {id: string, description: string, url: string};
+
+let ballySprite: string = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
 
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
@@ -55,6 +56,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
+  private selectItem = () => {
+    // setBallSprite(Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri);
+    ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
+  }
+
   render() {
     
     return(
@@ -68,7 +74,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 <View style={styles.item}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={() => setBallSprite(Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri)}>
+                    onPress={this.selectItem}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}
@@ -97,6 +103,18 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 }
 
+
+// function setBallSprite(param: any) {
+//   ballySprite = param;
+// }
+
+function getBallSprite() {
+  return ballySprite;
+}
+
+
+// ===========================================================================================
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -124,3 +142,4 @@ const styles = StyleSheet.create({
 });
 
 export default withNavigation(InventoryScreen);
+export { getBallSprite }
