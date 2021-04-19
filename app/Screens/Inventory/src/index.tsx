@@ -23,11 +23,16 @@ import FastImage from 'react-native-fast-image'
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
+  activeItem: null | string;
 }
 
-type Item = {id: string, description: string, url: string};
+type Item = { id: string, description: string, url: string };
+type Active = { ballySprite: string, id: null | string };
 
-let ballySprite: string = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
+let activeItem: Active = {
+  ballySprite: Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri,
+  id: null
+};
 
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
@@ -38,6 +43,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     super(props);
     this.state = { 
       items: JSON.parse(Cache.inventory.cache),
+      activeItem: null,
     };
   }
 
@@ -56,9 +62,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true;
   }
 
-  private selectItem = () => {
-    // setBallSprite(Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri);
-    ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
+  private selectItem = (id: string) => {
+    // @note i can put this in async storage
+    activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
+    // activeItem.id = id;
+    // this.forceUpdate();
+    this.setState({ activeItem: id })
   }
 
   render() {
@@ -71,10 +80,13 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               contentContainerStyle={styles.flatlist}
               data={this.state.items}
               renderItem={({ item }) => { return (
-                <View style={styles.item}>
+                <View style={{
+                  ...styles.item,
+                  backgroundColor: this.state.activeItem === item.id ? "green" : "#dfdddd59"
+                }}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={this.selectItem}>
+                    onPress={() => this.selectItem(item.id)}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}
@@ -103,13 +115,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 }
 
-
-// function setBallSprite(param: any) {
-//   ballySprite = param;
-// }
-
 function getBallSprite() {
-  return ballySprite;
+  return activeItem.ballySprite;
 }
 
 
@@ -127,7 +134,7 @@ const styles = StyleSheet.create({
     height: 150,  
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#dfdddd59", 
+    // backgroundColor: "#dfdddd59", 
   },
   touchable: {
     borderRadius: 10,
