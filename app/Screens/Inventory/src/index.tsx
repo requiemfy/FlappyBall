@@ -62,17 +62,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private selectItem = (id: string, sprite: string) => {
     // @note i can put this in async storage
-
     if (id === activeItem.id) {
       activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
       activeItem.id = null;
     } else {
-      // activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/item-1.png')).uri;
       Image.prefetch(sprite);
       activeItem.ballySprite = sprite;
       activeItem.id = id;
     }
-    
     this.forceUpdate();
   }
 
