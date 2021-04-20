@@ -35,10 +35,19 @@ const inventory = (() => {
   
   const fetchInventory = (() => {
   
-    const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
+    // const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
+    //   firebase
+    //     .database()
+    //     .ref('items/' + itemName + '/description')
+    //     .once("value")
+    //     .then(snapshot => resolve(snapshot.val()))
+    //     .catch(err => reject(err));
+    // });
+
+    const getItemInfo = (itemName: string) => new Promise((resolve, reject) => {
       firebase
         .database()
-        .ref('items/' + itemName + '/description')
+        .ref('items/' + itemName)
         .once("value")
         .then(snapshot => resolve(snapshot.val()))
         .catch(err => reject(err));
@@ -73,9 +82,20 @@ const inventory = (() => {
 
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
-                Promise.all([getItemDescription(item), getItemUrl(item), getSpriteUrl(item)])
+                Promise.all([
+                  // getItemDescription(item), // @remind clear
+                  getItemUrl(item), 
+                  getSpriteUrl(item), 
+                  getItemInfo(item)
+                ])
                   .then(async arg => {
-                    itemResolve({ id: item, description: arg[0], url: arg[1], spriteUrl: arg[2] });
+                    itemResolve({ 
+                      id: item, 
+                      // description: arg[0], // @remind clear
+                      url: arg[0], 
+                      spriteUrl: arg[1], 
+                      info: arg[2] 
+                    });
                     allItemUri.push({ uri: arg[1] });
                   })
                   .catch(err => itemReject(err));

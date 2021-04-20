@@ -19,13 +19,20 @@ import { Asset } from 'expo-asset';
 import CacheStorage from 'react-native-cache-storage';
 import CachedImage from '../../../Components/CachedImage';
 import FastImage from 'react-native-fast-image'
+import { getCurrentGold } from '../../Home/src';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
 }
 
-type Item = { id: string, description: string, url: string, spriteUrl: string };
+type Item = { 
+  id: string, 
+  // description: string, // @remind clear
+  url: string, 
+  spriteUrl: string , 
+  info: any
+};
 type Active = { ballySprite: string, id: null | string };
 
 let activeItem: Active = {
@@ -77,6 +84,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     
     return(
       <SafeAreaView style={styles.safeArea}>
+        <View style={{ height: 100, justifyContent: "flex-end", alignItems: "center" }}>
+          <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
+            Gold: {getCurrentGold()}
+          </Text>
+        </View>
         {
           this.state.items.length
           ? <FlatList 
@@ -101,7 +113,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                         resizeMode={FastImage.resizeMode.contain}
                       />
 
-                    <Text>{item.description}</Text>
+                    <Text>{item.info.description}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => console.log("SELLING")}>
+                    <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>SELL FOR {item.info.buy/2}</Text>
                   </TouchableOpacity>
                 </View>
               )}}
@@ -112,7 +127,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               <Text style={{ color: "whitesmoke"}}>NO ITEMS</Text>
             </View>
         }
-        
       </SafeAreaView>
     );
   }
@@ -134,10 +148,10 @@ const styles = StyleSheet.create({
   flatlist: {flex: 1, justifyContent: "center",},
   item: {
     flex: 1,
-    height: 150,  
+    height: 180,  
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "#dfdddd59", 
+    // backgroundColor: "#dfdddd59", // @remind clear
   },
   touchable: {
     borderRadius: 10,

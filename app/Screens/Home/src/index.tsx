@@ -17,9 +17,11 @@ type HomeState = {
     loading: boolean; 
     error: boolean; 
     codeName: string; 
-    record: number 
+    record: number;
   }; 
 }
+
+let userGold: number;
 
 export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
   user = firebase.auth().currentUser;
@@ -32,7 +34,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         loading: true,
         error: true,
         codeName: "",
-        record: 0
+        record: 0,
       } 
     }
 
@@ -59,8 +61,10 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
           loading: false,
           error: false,
           codeName: user.codeName, 
-          record: user.record
-        }})
+          record: user.record,
+        }});
+
+        userGold = user.gold;
       })
       .catch(err => {
         this.setState({
@@ -197,6 +201,10 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
 }
 
+function getCurrentGold() {
+  return userGold;
+}
+
 const styles = StyleSheet.create({
   HomeButton: {
     borderWidth: 1,
@@ -215,4 +223,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   }
-})
+});
+
+
+export { getCurrentGold }
