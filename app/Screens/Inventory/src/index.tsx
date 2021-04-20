@@ -92,12 +92,22 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.forceUpdate();
   }
 
+  private resetInventoryCache = (id: string) => {
+    Cache.inventory.clear()
+      .then(async () => {
+        if (id === activeItem.id) this.normalSprite();
+        new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
+          .then(_ => this.setState({ items: JSON.parse(Cache.inventory.cache) }))
+          .catch(err => console.log("Selling Error 3", err));
+      });
+  }
+
   private sellItem = (id: string) => {
     firebase
       .database()
       .ref('users/' + this.user?.uid + '/inventory')
       .once('value')
-      .then(snapshot => {
+      .then(async snapshot => {
         const inventory = snapshot.val();
         inventory.splice(inventory.indexOf(id), 1);
 
@@ -105,19 +115,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           .database()
           .ref('users/' + this.user?.uid)
           .update({ inventory: inventory })
-          .then(arg => console.log("SUCCESS selling"))
-          .catch(err => console.log(err));
-        
-        Cache.inventory.clear()
-          .then(async () => {
-            if (id === activeItem.id) this.normalSprite();
-
-            await new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
-              .then(_ => this.setState({ items: JSON.parse(Cache.inventory.cache) }))
-              .catch(err => console.log("Selling Error:", err));
-          });
+          .then(arg => this.resetInventoryCache(id))
+          .catch(err => console.log("Selling Error 2", err));
       })
-      .catch(err => console.log("Selling", err))
+      .catch(err => console.log("Selling Error 1", err))
   }
 
   private trySell = async (id: string) => {
