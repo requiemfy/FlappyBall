@@ -34,15 +34,6 @@ const inventory = (() => {
   const cacheStorage = new CacheStorage();
   
   const fetchInventory = (() => {
-  
-    // const getItemDescription = (itemName: string) => new Promise((resolve, reject) => {
-    //   firebase
-    //     .database()
-    //     .ref('items/' + itemName + '/description')
-    //     .once("value")
-    //     .then(snapshot => resolve(snapshot.val()))
-    //     .catch(err => reject(err));
-    // });
 
     const getItemInfo = (itemName: string) => new Promise((resolve, reject) => {
       firebase
@@ -83,7 +74,6 @@ const inventory = (() => {
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
                 Promise.all([
-                  // getItemDescription(item), // @remind clear
                   getItemUrl(item), 
                   getSpriteUrl(item), 
                   getItemInfo(item)
@@ -91,7 +81,6 @@ const inventory = (() => {
                   .then(async arg => {
                     itemResolve({ 
                       id: item, 
-                      // description: arg[0], // @remind clear
                       url: arg[0], 
                       spriteUrl: arg[1], 
                       info: arg[2] 
