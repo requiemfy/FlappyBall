@@ -10,6 +10,8 @@ import { StatusBar } from 'react-native';
 import HomeScreen from '../../Screens/Home/src';
 import HallOfFameScreen from '../../Screens/HallOfFame/src';
 import InventoryScreen from '../../Screens/Inventory/src';
+import ShopScreen from '../../Screens/Shop/src';
+
 
 const RootStack = createStackNavigator();
 export default function MainStackScreen() {
@@ -62,6 +64,14 @@ export default function MainStackScreen() {
           options={{
             headerShown: true,
             title: 'Inventory'
+          }}
+        />
+        <RootStack.Screen
+          name="Shop"
+          component={ShopScreen}
+          options={{
+            headerShown: true,
+            title: 'Shop'
           }}
         />
         <RootStack.Screen

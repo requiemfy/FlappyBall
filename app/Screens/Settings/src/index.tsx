@@ -132,15 +132,26 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     this.navigation.navigate("Inventory");
   }
 
+  goShop = () => {
+    this.navigation.navigate("Shop");
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <View
-            style={[styles.button, { height: 100 }]}>
+            style={[styles.button, { height: 50 }]}>
             <Button
               onPress={this.goInventory}
               title='inventory'
+              color='rgba(66, 66, 66, 0.6)' />
+          </View>
+          <View
+            style={[styles.button, { height: 100 }]}>
+            <Button
+              onPress={this.goShop}
+              title='shop'
               color='rgba(66, 66, 66, 0.6)' />
           </View>
           {

@@ -48,7 +48,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   itemID!: string;
   itemSale!: number;
 
-  constructor(props: Props | any) {
+  constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
       items: JSON.parse(Cache.inventory.cache),
