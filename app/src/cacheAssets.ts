@@ -52,16 +52,6 @@ const inventory = (() => {
         .catch(err => reject(err));
     });
   
-    // const getItemUrl = (itemName: string) => firebase
-    //   .storage()
-    //   .ref('item_images/' + itemName + '.png')
-    //   .getDownloadURL();
-
-    // const getSpriteUrl = (itemName: string) => firebase
-    //   .storage()
-    //   .ref('item_sprites/' + itemName + '.png')
-    //   .getDownloadURL();
-  
     const cacheInventory = async (inventoryResolve: any, inventoryReject: any) => {
       const user = firebase.auth().currentUser;
   
@@ -82,8 +72,6 @@ const inventory = (() => {
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
                 Promise.all([
-                  // getItemUrl(item), 
-                  // getSpriteUrl(item), 
                   getFileUrl('item_images/' + item + '.png'),
                   getFileUrl('item_sprites/' + item + '.png'),
                   getItemInfo(item)
@@ -170,13 +158,9 @@ const shop = (() => {
         let url, spriteUrl, itemName, info!: string;
         // set itemName
         itemName = ref.name.replace('.png', '');
-        // set url
-        // url = await firebase.storage()
-        //   .ref(ref.fullPath)
-        //   .getDownloadURL();
+        // set file urls
         url = await getFileUrl(ref.fullPath);
         spriteUrl = await getFileUrl('item_sprites/' + ref.name)
-
         // set info
         await firebase
           .database()
