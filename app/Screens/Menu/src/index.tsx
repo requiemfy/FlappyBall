@@ -117,9 +117,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     this.database
       .ref('users/' + this.user?.uid)
       .update({ record: this.score })
-      .catch(err => {
-        console.log("High Score Error 2:", err);
-      });
+      .catch(err => console.log("High Score Error 2:", err));
   }
 
   calculateGold = (currentGold:number, currentRecord: number) => {
@@ -131,12 +129,9 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     earnedGold = highScoreBonus + streakBonus;
     this.setState({ earnedGold: earnedGold });
     this.earnGold(earnedGold + currentGold);
-
-    console.log("UPDATE EARNED GOLD NEW")
   }
 
   hasNewHighScore = () => {
-    console.log("CHECKING HIGH SCORE")
     this.database
       .ref('users/' + this.user?.uid)
       .once('value')
@@ -152,13 +147,9 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
         } else {
           this.setState({ earnedGold: this.score! * 2 });
           this.earnGold(currentGold + (this.score! * 2));
-
-          console.log("UPDATE EARNED GOLD OLD")
         }
       })
-      .catch(err => {
-        console.log("High Score Error 1:", err)
-      });
+      .catch(err => console.log("High Score Error 1:", err));
   }
 
   render() {
