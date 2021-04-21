@@ -117,8 +117,8 @@ const inventory = (() => {
     return async (resolve: any, reject: any) => {
       cacheStorage.getItem("inventory")
         .then(arg => {
-          console.log("CURRENT INVENTORY", arg)
-          if (arg) {
+          console.log("CURRENT INVENTORY", typeof arg, arg)
+          if (arg && JSON.parse(arg!).length) {
             cachedInventory = arg;
             resolve("Success Cache Inventory")
           } else {

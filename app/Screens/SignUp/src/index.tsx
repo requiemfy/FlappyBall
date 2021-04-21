@@ -72,6 +72,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
               const user = {
                 codeName: this.codeName,
                 record: 0,
+                gold: 0,
               };
               firebase
                 .database()

@@ -18,7 +18,7 @@ import { Asset } from 'expo-asset';
 import CacheStorage from 'react-native-cache-storage';
 import CachedImage from '../../../Components/CachedImage';
 import FastImage from 'react-native-fast-image'
-import { getCurrentGold } from '../../Home/src';
+import { getCurrentGold, setCurrentGold } from '../../Home/src';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
@@ -44,7 +44,9 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   navigation = this.props.navigation;
   user = firebase.auth().currentUser;
   backHandler!: NativeEventSubscription;
-  netInfo!: NetInfoSubscription ;
+  netInfo!: NetInfoSubscription;
+  itemID!: string;
+  itemSale!: number;
 
   constructor(props: Props | any) {
     super(props);
@@ -92,37 +94,52 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.forceUpdate();
   }
 
-  private resetInventoryCache = (id: string) => {
+  private resetInventoryCache = () => {
     Cache.inventory.clear()
       .then(async () => {
-        if (id === activeItem.id) this.normalSprite();
+        if (this.itemID === activeItem.id) this.normalSprite();
         new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
-          .then(_ => this.setState({ items: JSON.parse(Cache.inventory.cache) }))
+          .then(_ => {
+            setCurrentGold(getCurrentGold() + this.itemSale/2)
+            this.setState({ items: JSON.parse(Cache.inventory.cache) });
+            this.updateGold(getCurrentGold());
+          })
           .catch(err => console.log("Selling Error 3", err));
       });
   }
 
-  private sellItem = (id: string) => {
+  private updateGold = (updated: number) => {
+    firebase
+      .database()
+      .ref('users/' + this.user?.uid)
+      .update({ gold: updated })
+      .catch(err => console.log("Updating Gold Error", err));
+  }
+
+  private sellItem = () => {
     firebase
       .database()
       .ref('users/' + this.user?.uid + '/inventory')
       .once('value')
       .then(async snapshot => {
         const inventory = snapshot.val();
-        inventory.splice(inventory.indexOf(id), 1);
+        inventory.splice(inventory.indexOf(this.itemID), 1);
 
         firebase
           .database()
           .ref('users/' + this.user?.uid)
           .update({ inventory: inventory })
-          .then(arg => this.resetInventoryCache(id))
+          .then(arg => this.resetInventoryCache())
           .catch(err => console.log("Selling Error 2", err));
       })
       .catch(err => console.log("Selling Error 1", err))
   }
 
-  private trySell = async (id: string) => {
-    if (this.state.network) 
+  private trySell = async (id: string, sale: number) => {
+    if (this.state.network) {
+      this.itemID = id;
+      this.itemSale = sale;
+
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
           text: "Cancel",
@@ -130,9 +147,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           style: "cancel"
         },
         { 
-          text: "YES", onPress: () => this.sellItem(id)
+          text: "YES", onPress: () => this.sellItem()
         }
       ]);
+    }
     else
       Alert.alert("NO INTERNET", "connection!", [
         { 
@@ -176,7 +194,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
                     <Text>{item.info.description}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => this.trySell(item.id)}>
+                  <TouchableOpacity onPress={() => this.trySell(item.id, item.info.buy)}>
                     <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>SELL FOR {item.info.buy/2}</Text>
                   </TouchableOpacity>
                 </View>

@@ -205,6 +205,10 @@ function getCurrentGold() {
   return userGold;
 }
 
+function setCurrentGold(val: number) {
+  userGold = val;
+}
+
 const styles = StyleSheet.create({
   HomeButton: {
     borderWidth: 1,
@@ -226,4 +230,4 @@ const styles = StyleSheet.create({
 });
 
 
-export { getCurrentGold }
+export { getCurrentGold, setCurrentGold }
