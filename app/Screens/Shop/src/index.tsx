@@ -42,7 +42,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       network: true,
     };
 
-    console.log("TEST shop items", this.state.items)
+    console.log("TEST shop screen items", this.state.items)
   }
 
 

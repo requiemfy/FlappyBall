@@ -20,7 +20,7 @@ async function loadUserAssetAsync() {
   const loadInventory = new Promise((resolve, reject) => {
     inventory.fetch(resolve, reject).catch(err => console.log("Error fetching inventory 2:", err));
   }).catch(err => console.log("Error fetching inventory 2:", err));
-  
+
   await Promise.all([loadInventory, loadShop])
     .then(arg => console.log("SUCCESS USER LOAD", arg))
     .catch(err => console.log("[inventory, loadShop] ", err))
@@ -151,12 +151,11 @@ const shop = (() => {
   const
     reference = firebase.storage().ref('item_images'),
     cacheStorage = new CacheStorage();
-  // let cachedShop: string = JSON.stringify([]);
-  let items: Shop.Item[] = [];
+  let cachedShop: Shop.Item[]; // @note this is needed trust me, because local let items should be cleared
 
   const fetchShop = () => reference.list().then( async (result) => {
-    // let items: Shop.Item[] = [];
-    let allItemUri: any[] = [];
+    let items: Shop.Item[] = [],
+        allItemUri: any[] = [];
 
     await new Promise((resolve) => {
       result.items.forEach(async (ref) => {
@@ -191,27 +190,20 @@ const shop = (() => {
       })
     });
 
-    const stringItems = JSON.stringify(items);
-    allItemUri.length ? FastImage.preload(allItemUri) : null;
-    
-    cacheStorage.setItem('shop', stringItems, 60 * 60 * 24)
+    cachedShop = items;
+    const stringShop = JSON.stringify(items);
+
+    allItemUri.length && cachedShop.length ? FastImage.preload(allItemUri) : null;
+    cacheStorage.setItem('shop', stringShop, 60 * 60 * 24)
       .catch(err => console.log("Caching Shop Error 1:", err));
 
-      // .then(() => {
-      //   cacheStorage.getItem("shop").then(arg => {
-      //     cachedShop = arg!;
-      //     console.log("Success Caching Shop");
-      //   })
-      // })
-
-    console.log("TEST shop items", items)
   });
 
   return {
     fetch: fetchShop,
     
     get cache() {
-      return items;
+      return cachedShop;
     },
 
     clear: () => cacheStorage.clear()
