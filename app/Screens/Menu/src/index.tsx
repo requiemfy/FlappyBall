@@ -19,7 +19,7 @@ type Props = {
     }
   }
 }
-type State = { newHighScore: boolean}
+type State = { newHighScore: boolean, earnedGold: string | number}
 
 export default class MenuScreen extends React.PureComponent<Props, State> {
   database = firebase.database();
@@ -33,12 +33,13 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     super(props);
     this.state = {
       newHighScore: false,
+      earnedGold: "Calculating",
     }
   }
 
   componentDidMount() {
     console.log("MENU SCREEN WILL MOUNT");
-    this.score ? this.hasNewHighScore() : null;
+    this.score ? this.hasNewHighScore() : this.setState({ earnedGold: 0 });
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
@@ -105,27 +106,58 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     }) 
   }
 
-  hasNewHighScore = () => {
+  earnGold = (amount: number) => {
     this.database
-      .ref('users/' + this.user?.uid + "/record")
+      .ref('users/' + this.user?.uid)
+      .update({ gold: amount })
+      .catch(err => console.log("Earn Gold Error 1:", err))
+  }
+
+  updateHighScore = () => {
+    this.database
+      .ref('users/' + this.user?.uid)
+      .update({ record: this.score })
+      .catch(err => {
+        console.log("High Score Error 2:", err);
+      });
+  }
+
+  calculateGold = (currentGold:number, currentRecord: number) => {
+    let highScoreBonus = (currentRecord + 1) * 3, streakBonus = 0, earnedGold = 0;
+    if ((this.score! - (currentRecord + 1)) !== 0) {
+      streakBonus = this.score! * 4;
+    }
+
+    earnedGold = highScoreBonus + streakBonus;
+    this.setState({ earnedGold: earnedGold });
+    this.earnGold(earnedGold + currentGold);
+
+    console.log("UPDATE EARNED GOLD NEW")
+  }
+
+  hasNewHighScore = () => {
+    console.log("CHECKING HIGH SCORE")
+    this.database
+      .ref('users/' + this.user?.uid)
       .once('value')
       .then(snapshot => {
-        const record = snapshot.val() as number;
+        const 
+          userData = snapshot.val(),
+          record = userData.record as number,
+          currentGold = userData.gold as number;
         if ((record !== null) && (this.score! > record)) {
           this.setState({ newHighScore: true });
-          this.database
-            .ref('users/' + this.user?.uid)
-            .update({ record: this.score })
-            .then(snapshot => {
-              console.log("SIGN UP SUCCESS", snapshot);
-            })
-            .catch(err => {
-              console.log("SIGN UP FAILED", err);
-            })
+          this.updateHighScore();
+          this.calculateGold(currentGold, record)
+        } else {
+          this.setState({ earnedGold: this.score! * 2 });
+          this.earnGold(currentGold + (this.score! * 2));
+
+          console.log("UPDATE EARNED GOLD OLD")
         }
       })
       .catch(err => {
-        console.log(err)
+        console.log("High Score Error 1:", err)
       });
   }
 
@@ -150,6 +182,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
                           ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
                           : null
                       }
+                      <Text style={{ fontWeight: "bold", color: "yellow", fontSize: 12 }}>{this.state.earnedGold} Gold</Text>
                     </View>
                   : this.stateButton === "resume"
                     ? <Text style={styles.menuLabel}>PAUSED</Text>
