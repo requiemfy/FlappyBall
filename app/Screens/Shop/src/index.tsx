@@ -9,9 +9,11 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as Cache from '../../../src/cacheAssets'
-
+import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import FastImage from 'react-native-fast-image';
+import { getCurrentGold, setCurrentGold } from '../../Home/src';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -22,20 +24,14 @@ interface State {
 type Item = { 
   id: string;
   url: string;
-  description: string;
+  spriteUrl: string;
+  info: any;
 };
-
-// const reference = firebase.storage().ref('item_images')
-// let shopItems = [];
 
 class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
 
   constructor (props: Props | any) {
     super(props);
-
-    // this.getShopItems(reference).then(() => {
-    //   console.log('Finished listing');
-    // });
 
     this.state = { 
       items: Cache.shop.cache,
@@ -48,55 +44,79 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   render() {
     return(
-      <View style={{ backgroundColor: "red", width: "100%", height: "100%" }}>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={{ height: 100, justifyContent: "flex-end", alignItems: "center" }}>
+          <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
+            Gold: {getCurrentGold()}
+          </Text>
+        </View>
+        {
+          this.state.items.length
+          ? <FlatList 
+              contentContainerStyle={styles.flatlist}
+              data={this.state.items}
+              renderItem={({ item }) => { return (
+                <View style={styles.item}>
+                  <TouchableOpacity 
+                    style={styles.touchable} 
+                    onPress={() => null}>
+                      
+                      <FastImage
+                        style={{width: 100, height: 100}}
+                        source={{
+                            uri: item.url,
+                            headers: { Authorization: 'Nani?' },
+                            priority: FastImage.priority.high,
+                        }}
+                        resizeMode={FastImage.resizeMode.contain}
+                      />
+
+                    <Text>{item.info.description}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => null}>
+                    <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>BUY FOR {item.info.buy}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}}
+              keyExtractor={(item: any) => item.id}
+              numColumns={2}
+            />
+          : <View style={[styles.item, {flex: 0}]}>
+              <Text style={{ color: "whitesmoke"}}>Loading</Text>
+            </View>
+        }
+      </SafeAreaView>
     )
   }
 
 }
 
 
-// function getShopItems(): Promise<any> {
-//   return reference.list().then( async (result) => {
-//     let items: Item[] = [];
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#000",
+  },
+  flatlist: {flex: 1, justifyContent: "center",},
+  item: {
+    flex: 1,
+    height: 180,  
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#dfdddd59",
+  },
+  touchable: {
+    borderRadius: 10,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "gray", 
 
-//     await new Promise((resolve) => {
-//       result.items.forEach(async (ref) => {
-//         let url, itemName, description!: string;
-//         // set itemName
-//         itemName = ref.name.replace('.png', '');
-//         // set url
-//         url = await firebase.storage()
-//           .ref(ref.fullPath)
-//           .getDownloadURL();
-//         // set description
-//         await firebase
-//           .database()
-//           .ref('items/' + itemName + '/description')
-//           .once("value")
-//           .then(snapshot => {
-//             description = snapshot.val();
-//           });
-
-//         items.push({
-//           id: itemName,
-//           description: description,
-//           url: url,
-//         });
-
-//         if (result.items.indexOf(ref) === (result.items.length-1)) {
-//           resolve(null) 
-//         }
-//       })
-//     });
-
-//     console.log("items", items)
-//     shopItems = items;
-//     return Promise.resolve();
-//   });
-// }
-
+    elevation: 50,
+    shadowColor: 'black',
+  },
+});
 
 export default withNavigation(ShopScreen);
-// export { getShopItems }
 export { Item }

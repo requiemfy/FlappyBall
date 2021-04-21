@@ -26,6 +26,12 @@ async function loadUserAssetAsync() {
     .catch(err => console.log("[inventory, loadShop] ", err))
 }
 
+function getFileUrl(path: string) {
+  return firebase
+    .storage()
+    .ref(path)
+    .getDownloadURL();
+}
 
 // =======================================================================
 // INVENTORY CACHING
@@ -46,15 +52,15 @@ const inventory = (() => {
         .catch(err => reject(err));
     });
   
-    const getItemUrl = (itemName: string) => firebase
-      .storage()
-      .ref('item_images/' + itemName + '.png')
-      .getDownloadURL();
+    // const getItemUrl = (itemName: string) => firebase
+    //   .storage()
+    //   .ref('item_images/' + itemName + '.png')
+    //   .getDownloadURL();
 
-    const getSpriteUrl = (itemName: string) => firebase
-      .storage()
-      .ref('item_sprites/' + itemName + '.png')
-      .getDownloadURL();
+    // const getSpriteUrl = (itemName: string) => firebase
+    //   .storage()
+    //   .ref('item_sprites/' + itemName + '.png')
+    //   .getDownloadURL();
   
     const cacheInventory = async (inventoryResolve: any, inventoryReject: any) => {
       const user = firebase.auth().currentUser;
@@ -76,8 +82,10 @@ const inventory = (() => {
             inventory?.forEach(async (item: string) => {
               const promise = new Promise((itemResolve, itemReject) => {
                 Promise.all([
-                  getItemUrl(item), 
-                  getSpriteUrl(item), 
+                  // getItemUrl(item), 
+                  // getSpriteUrl(item), 
+                  getFileUrl('item_images/' + item + '.png'),
+                  getFileUrl('item_sprites/' + item + '.png'),
                   getItemInfo(item)
                 ])
                   .then(async arg => {
@@ -159,27 +167,31 @@ const shop = (() => {
 
     await new Promise((resolve) => {
       result.items.forEach(async (ref) => {
-        let url, itemName, description!: string;
+        let url, spriteUrl, itemName, info!: string;
         // set itemName
         itemName = ref.name.replace('.png', '');
         // set url
-        url = await firebase.storage()
-          .ref(ref.fullPath)
-          .getDownloadURL();
-        // set description
+        // url = await firebase.storage()
+        //   .ref(ref.fullPath)
+        //   .getDownloadURL();
+        url = await getFileUrl(ref.fullPath);
+        spriteUrl = await getFileUrl('item_sprites/' + ref.name)
+
+        // set info
         await firebase
           .database()
-          .ref('items/' + itemName + '/description')
+          .ref('items/' + itemName)
           .once("value")
           .then(snapshot => {
-            description = snapshot.val();
+            info = snapshot.val();
           })
           .catch(err => console.log("Database Error 1:", err));
 
         items.push({
           id: itemName,
-          description: description,
+          info: info,
           url: url,
+          spriteUrl: spriteUrl
         });
 
         allItemUri.push({ uri: url });
@@ -193,7 +205,7 @@ const shop = (() => {
     cachedShop = items;
     const stringShop = JSON.stringify(items);
 
-    allItemUri.length && cachedShop.length ? FastImage.preload(allItemUri) : null;
+    allItemUri.length && !cachedShop.length ? FastImage.preload(allItemUri) : null;
     cacheStorage.setItem('shop', stringShop, 60 * 60 * 24)
       .catch(err => console.log("Caching Shop Error 1:", err));
 
