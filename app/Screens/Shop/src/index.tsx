@@ -37,14 +37,11 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   constructor (props: Props | any) {
     super(props);
-
     this.state = { 
       items: Cache.shop.cache,
       network: true,
       preview: false,
     };
-
-    console.log("TEST shop screen items", this.state.items)
   }
 
   private togglePreview = (url?: string) => {
@@ -81,13 +78,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                   }}
                   onPress={() => this.togglePreview()}
                 >
-                  {/* <View style={{
-                    width: 200,
-                    height: 200,
-                    backgroundColor: "red"
-                  }}>
-                    @remind clear
-                  </View>   */} 
                   <Preview url={Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri}></Preview>
                 </TouchableOpacity>
               </View>

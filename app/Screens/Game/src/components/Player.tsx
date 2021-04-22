@@ -137,19 +137,10 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
-  // autoImageDim = (actualW: number, actualH: number) => { @remind clear
-  //   const win = Dimensions.get('window'),
-  //     ratio = win.width/actualW,
-  //     width = win.width,
-  //     height = actualH * ratio;
-  //   return { width, height }
-  // }
-
   render() {
     const
       left = this.state.left,
       top = this.state.top,
-      // { width, height } = this.autoImageDim(2700, 3000); @remind clear
       { width, height } = autoImageDim(2700, 3000);
 
     return (
