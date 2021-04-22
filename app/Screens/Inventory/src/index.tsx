@@ -95,7 +95,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private resetInventoryCache = () => {
-    // Cache.inventory.clear() // @remind clear
     Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
       .then(async () => {
         console.log("Selling: Cache Cleared");

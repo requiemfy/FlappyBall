@@ -138,8 +138,6 @@ const inventory = (() => {
       return cachedInventory;
     },
 
-    // clear: () => cacheStorage.clear(), // @remind
-
     storage: cacheStorage,
   }
 })();
