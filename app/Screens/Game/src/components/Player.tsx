@@ -5,6 +5,7 @@ import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Circle from './shapes/Circle';
 import { Asset } from 'expo-asset';
 import { getBallSprite } from '../../../Inventory/src';
+import { autoImageDim } from '../../../../src/helpers';
 
 interface Props { setRef: ((ref: any) => void) | null; }
 
@@ -62,7 +63,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       fps: fps,
       loop: loop,
       onFinish: cb
-
     })
   }
 
@@ -137,19 +137,20 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     );
   }
 
-  autoImageDim = () => {
-    const win = Dimensions.get('window'),
-      ratio = win.width/2700,
-      width = win.width,
-      height = 3000 * ratio;
-    return { width, height }
-  }
+  // autoImageDim = (actualW: number, actualH: number) => { @remind clear
+  //   const win = Dimensions.get('window'),
+  //     ratio = win.width/actualW,
+  //     width = win.width,
+  //     height = actualH * ratio;
+  //   return { width, height }
+  // }
 
   render() {
     const
       left = this.state.left,
       top = this.state.top,
-      { width, height } = this.autoImageDim();
+      // { width, height } = this.autoImageDim(2700, 3000); @remind clear
+      { width, height } = autoImageDim(2700, 3000);
 
     return (
       <Circle.default {...this.props}>

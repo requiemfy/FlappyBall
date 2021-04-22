@@ -14,6 +14,8 @@ import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import { getCurrentGold, setCurrentGold } from '../../Home/src';
+import Preview from '../components/Preview';
+import { Asset } from 'expo-asset';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -45,13 +47,13 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     console.log("TEST shop screen items", this.state.items)
   }
 
-
-  private togglePreview = () => {
-    console.log("Please preview")
+  private togglePreview = (url?: string) => {
     if (this.state.preview) {
       this.setState({ preview: false });
     } else {
       this.setState({ preview: true });
+
+      console.log("preivew", url)
     }
   }
 
@@ -70,8 +72,23 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                 zIndex: 99999,
               }}>
                 <TouchableOpacity 
-                  style={{ width: "100%", height: "100%" }}
-                  onPress={() => this.togglePreview}>
+                  style={{ 
+                    width: "100%", 
+                    height: "100%", 
+                    justifyContent: "center", 
+                    alignItems: "center",
+                    marginLeft: -50
+                  }}
+                  onPress={() => this.togglePreview()}
+                >
+                  {/* <View style={{
+                    width: 200,
+                    height: 200,
+                    backgroundColor: "red"
+                  }}>
+                    @remind clear
+                  </View>   */} 
+                  <Preview url={Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri}></Preview>
                 </TouchableOpacity>
               </View>
             : null
@@ -91,7 +108,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                 <View style={styles.item}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={this.togglePreview}>
+                    onPress={() => this.togglePreview(item.spriteUrl)}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}
