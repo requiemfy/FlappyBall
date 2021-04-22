@@ -1,3 +1,5 @@
+// @refresh reset
+
 import { Image } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as Assets from './requireAssets';
@@ -16,9 +18,6 @@ async function loadAssetsAsync() {
 }
 
 async function loadUserAssetAsync() {
-  // const loadShop = new Promise(() => shop.fetch())
-    // .catch(err => console.log("Load Shop Error 1:", err));
-
   new Promise((resolve, reject) => shop.fetch(resolve, reject))
     .then(resolve => console.log("CACHE SHOP RESOLVED:", resolve))
     .catch(reject => console.log("CACHE SHOP ERROR:", reject));
@@ -26,16 +25,6 @@ async function loadUserAssetAsync() {
   new Promise((resolve, reject) => inventory.fetch(resolve, reject))
     .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
     .catch(err => console.log("CACHE INVENTORY ERROR:", err));
-
-  // const loadInventory = new Promise((resolve, reject) => {
-  //   inventory.fetch()
-  //     // .then(resolve => console.log("Caching 1:", resolve))
-  //     // .catch(err => console.log("Error fetching inventory 2:", err));
-  // })
-
-  // await Promise.all([loadInventory, loadShop])
-  //   .then(arg => console.log("SUCCESS USER LOAD", arg))
-  //   .catch(err => console.log("[inventory, loadShop] ", err))
 }
 
 function getFileUrl(path: string) {

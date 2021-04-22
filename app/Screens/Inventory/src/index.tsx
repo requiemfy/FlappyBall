@@ -245,4 +245,4 @@ const styles = StyleSheet.create({
 });
 
 export default withNavigation(InventoryScreen);
-export { getBallSprite }
+export { getBallSprite, activeItem }

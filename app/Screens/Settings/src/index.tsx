@@ -13,6 +13,8 @@ import { firebase } from '../../../src/firebase'
 import { backOnlyOnce } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets'
+import { activeItem } from '../../Inventory/src';
+import { Asset } from 'expo-asset';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -117,6 +119,10 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
           .auth()
           .signOut()
           .then(() => {
+
+            activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
+            activeItem.id = null;
+
             this.clearCache();
             this.navigation.reset({
               index: 0,
