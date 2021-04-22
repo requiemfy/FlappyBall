@@ -31,6 +31,8 @@ type Item = {
 
 class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
 
+  previewSprite!: string;
+
   constructor (props: Props | any) {
     super(props);
 
@@ -58,13 +60,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       <SafeAreaView style={styles.safeArea}>
         {
           this.state.preview 
-            ? 
-              <View style={{
-                // flex: 1,
-                // width: Dimensions.get("window").width,
-                // height: Dimensions.get("window").height,
-                // width: 100,
-                // height: 100,
+            ? <View style={{
                 width: "100%",
                 height: "100%",
                 backgroundColor: 'rgba(52, 52, 52, 0.8)',
@@ -76,7 +72,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                 <TouchableOpacity 
                   style={{ width: "100%", height: "100%" }}
                   onPress={() => this.togglePreview}>
-                  
                 </TouchableOpacity>
               </View>
             : null

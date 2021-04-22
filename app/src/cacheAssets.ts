@@ -16,21 +16,34 @@ async function loadAssetsAsync() {
 }
 
 async function loadUserAssetAsync() {
-  const loadShop = new Promise(() => shop.fetch()).catch(err => console.log("Load Shop Error 1:", err));
-  const loadInventory = new Promise((resolve, reject) => {
-    inventory.fetch(resolve, reject).catch(err => console.log("Error fetching inventory 2:", err));
-  }).catch(err => console.log("Error fetching inventory 2:", err));
+  // const loadShop = new Promise(() => shop.fetch())
+    // .catch(err => console.log("Load Shop Error 1:", err));
 
-  await Promise.all([loadInventory, loadShop])
-    .then(arg => console.log("SUCCESS USER LOAD", arg))
-    .catch(err => console.log("[inventory, loadShop] ", err))
+  new Promise((resolve, reject) => shop.fetch(resolve, reject))
+    .then(resolve => console.log("CACHE SHOP RESOLVED:", resolve))
+    .catch(reject => console.log("CACHE SHOP ERROR:", reject));
+
+  new Promise((resolve, reject) => inventory.fetch(resolve, reject))
+    .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
+    .catch(err => console.log("CACHE INVENTORY ERROR:", err));
+
+  // const loadInventory = new Promise((resolve, reject) => {
+  //   inventory.fetch()
+  //     // .then(resolve => console.log("Caching 1:", resolve))
+  //     // .catch(err => console.log("Error fetching inventory 2:", err));
+  // })
+
+  // await Promise.all([loadInventory, loadShop])
+  //   .then(arg => console.log("SUCCESS USER LOAD", arg))
+  //   .catch(err => console.log("[inventory, loadShop] ", err))
 }
 
 function getFileUrl(path: string) {
   return firebase
     .storage()
     .ref(path)
-    .getDownloadURL();
+    .getDownloadURL()
+    .catch(err => console.log("Getting download URL Error:", err));
 }
 
 // =======================================================================
@@ -101,7 +114,7 @@ const inventory = (() => {
               .then(() => { // @remind refactor
                 cacheStorage.getItem("inventory").then(arg => {
                   cachedInventory = arg!;
-                  inventoryResolve("Success caching inventory");
+                  inventoryResolve("Success");
                 })
               })
               .catch(err => inventoryReject(err));
@@ -109,13 +122,14 @@ const inventory = (() => {
           })
           .catch(err => inventoryReject(err));
   
-        });
+        })
+        .catch(err => inventoryReject(err));
     }
   
     return async (resolve: any, reject: any) => {
       cacheStorage.getItem("inventory")
         .then(arg => {
-          console.log("CURRENT INVENTORY", typeof arg, arg)
+          console.log("CONSOLE: CURRENT INVENTORY", typeof arg, arg)
           if (arg && JSON.parse(arg!).length) {
             cachedInventory = arg;
             resolve("Inventory Already Cached");
@@ -149,50 +163,44 @@ const shop = (() => {
     cacheStorage = new CacheStorage();
   let cachedShop: Shop.Item[]; // @note this is needed trust me, because local let items should be cleared
 
-  const fetchShop = () => reference.list().then( async (result) => {
+  const fetchShop = async (resolve: any, reject: any) => reference.list().then( async (result) => {
     let items: Shop.Item[] = [],
         allItemUri: any[] = [];
 
-    await new Promise((resolve) => {
-      result.items.forEach(async (ref) => {
-        let url, spriteUrl, itemName, info!: string;
-        // set itemName
-        itemName = ref.name.replace('.png', '');
-        // set file urls
-        url = await getFileUrl(ref.fullPath);
-        spriteUrl = await getFileUrl('item_sprites/' + ref.name)
-        // set info
-        await firebase
-          .database()
-          .ref('items/' + itemName)
-          .once("value")
-          .then(snapshot => {
-            info = snapshot.val();
-          })
-          .catch(err => console.log("Database Error 1:", err));
+    result.items.forEach(async (ref) => {
+      let url, spriteUrl, itemName, info!: string;
+      // set itemName
+      itemName = ref.name.replace('.png', '');
+      // set file urls
+      url = await getFileUrl(ref.fullPath);
+      spriteUrl = await getFileUrl('item_sprites/' + ref.name)
+      // set info
+      await firebase
+        .database()
+        .ref('items/' + itemName)
+        .once("value")
+        .then(snapshot => info = snapshot.val())
+        .catch(err => reject(err));
 
-        items.push({
-          id: itemName,
-          info: info,
-          url: url,
-          spriteUrl: spriteUrl
-        });
+      items.push({
+        id: itemName,
+        info: info,
+        url: url,
+        spriteUrl: spriteUrl
+      });
 
-        allItemUri.push({ uri: url });
+      allItemUri.push({ uri: url });
 
-        if (result.items.indexOf(ref) === (result.items.length-1)) {
-          resolve(null) 
-        }
-      })
-    });
-
+      if (result.items.indexOf(ref) === (result.items.length-1)) {
+        resolve("Success") 
+      }
+    })
+    
     cachedShop = items;
     const stringShop = JSON.stringify(items);
 
     allItemUri.length && !cachedShop.length ? FastImage.preload(allItemUri) : null;
-    cacheStorage.setItem('shop', stringShop, 60 * 60 * 24)
-      .catch(err => console.log("Caching Shop Error 1:", err));
-
+    cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
   });
 
   return {
