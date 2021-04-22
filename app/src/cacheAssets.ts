@@ -116,6 +116,7 @@ const inventory = (() => {
     }
   
     return async (resolve: any, reject: any) => {
+      console.log("CONSOLE: Fetching inventory...")
       cacheStorage.getItem("inventory")
         .then(arg => {
           console.log("CONSOLE: CURRENT INVENTORY", typeof arg, arg)
@@ -137,7 +138,9 @@ const inventory = (() => {
       return cachedInventory;
     },
 
-    clear: () => cacheStorage.clear()
+    // clear: () => cacheStorage.clear(), // @remind
+
+    storage: cacheStorage,
   }
 })();
 
