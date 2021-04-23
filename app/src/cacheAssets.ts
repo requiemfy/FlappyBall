@@ -182,15 +182,18 @@ const shop = (() => {
       allItemUri.push({ uri: url });
 
       if (result.items.indexOf(ref) === (result.items.length-1)) {
+
+        cachedShop = items;
+        const stringShop = JSON.stringify(items);
+
+        allItemUri.length && !cachedShop.length ? FastImage.preload(allItemUri) : null;
+        cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+
         resolve("Success") 
       }
     })
     
-    cachedShop = items;
-    const stringShop = JSON.stringify(items);
-
-    allItemUri.length && !cachedShop.length ? FastImage.preload(allItemUri) : null;
-    cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+    
   });
 
   return {
@@ -200,7 +203,8 @@ const shop = (() => {
       return cachedShop;
     },
 
-    clear: () => cacheStorage.clear()
+    // clear: () => cacheStorage.clear()
+    storage: cacheStorage
   }
 })();
 

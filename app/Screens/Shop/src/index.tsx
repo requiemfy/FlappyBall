@@ -9,7 +9,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { Dimensions, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
@@ -21,7 +21,8 @@ interface Props { navigation: NavigationScreenProp<NavigationState, NavigationPa
 interface State { 
   items: Item[];
   network: boolean;
-  preview: boolean;
+  preview: {show: boolean, loading: boolean};
+  // loadingPreview: boolean;
 }
 
 type Item = { 
@@ -37,20 +38,27 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   constructor (props: Props | any) {
     super(props);
+
+    // let cache;
+    // Cache.shop.storage.getItem('shop').then(resolve => cache = resolve)
+
     this.state = { 
       items: Cache.shop.cache,
       network: true,
-      preview: false,
+      preview: {show: false, loading: true},
+      // loadingPreview: false,
     };
   }
 
   private togglePreview = (url?: string) => {
-    if (this.state.preview) {
-      this.setState({ preview: false });
+    if (this.state.preview.show) {
+      this.setState({ preview: {show: false, loading: true} });
     } else {
-      this.setState({ preview: true });
+      this.setState({ preview: {...this.state.preview, loading: true} })
+      Image.prefetch(url!).then(() => this.setState({ preview: {...this.state.preview, loading: false} }));
+      this.previewSprite = url!;
+      this.setState({ preview: {...this.state.preview, show: true} });
 
-      console.log("preivew", url)
     }
   }
 
@@ -58,7 +66,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     return(
       <SafeAreaView style={styles.safeArea}>
         {
-          this.state.preview 
+          this.state.preview.show
             ? <View style={{
                 width: "100%",
                 height: "100%",
@@ -74,11 +82,14 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                     height: "100%", 
                     justifyContent: "center", 
                     alignItems: "center",
-                    marginLeft: -50
                   }}
                   onPress={() => this.togglePreview()}
                 >
-                  <Preview url={Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri}></Preview>
+                  {
+                    this.state.preview.loading
+                      ? <ActivityIndicator size={100} color="gray" />
+                      : <Preview url={this.previewSprite}></Preview>
+                  }
                 </TouchableOpacity>
               </View>
             : null

@@ -28,7 +28,10 @@ export default function Preview(props: any) {
       columns={9}
       rows={10}
       width={200}
-      animations={{ idle: [0, 1, 2, 3, 4, 5, 6, 7, 8] }} />
+      animations={{ idle: [0, 1, 2, 3, 4, 5, 6, 7, 8] }} 
+      viewStyle={{
+        marginLeft: -100
+      }}/>
   )
 
 }
