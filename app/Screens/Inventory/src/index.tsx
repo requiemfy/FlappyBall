@@ -83,6 +83,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private selectItem = (id: string, sprite: string) => {
     if (id === activeItem.id) this.normalSprite() // disselect item
+
+    else if (!sprite)  
+      Alert.alert("", "Something went wrong", [
+        { 
+          text: "OK", onPress: () => null
+        }
+      ]);
+
     else {
       Image.prefetch(sprite)
         .then(arg => console.log("FETCHING SPRITE FINISHED", arg))
@@ -154,7 +162,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       ]);
     }
     else
-      Alert.alert("NO INTERNET", "connection!", [
+      Alert.alert("NO INTERNET", "Please make sure you have working connection", [
         { 
           text: "OK", onPress: () => null
         }

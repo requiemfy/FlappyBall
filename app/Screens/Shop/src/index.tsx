@@ -22,7 +22,6 @@ interface State {
   items: Item[];
   network: boolean;
   preview: {show: boolean, loading: boolean};
-  // loadingPreview: boolean;
 }
 
 type Item = { 
@@ -39,15 +38,13 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   constructor (props: Props | any) {
     super(props);
 
-    // let cache;
-    // Cache.shop.storage.getItem('shop').then(resolve => cache = resolve)
-
     this.state = { 
       items: Cache.shop.cache,
       network: true,
       preview: {show: false, loading: true},
-      // loadingPreview: false,
     };
+
+    console.log("TEST shop items", this.state.items)
   }
 
   private togglePreview = (url?: string) => {

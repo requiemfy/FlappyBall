@@ -97,7 +97,7 @@ const inventory = (() => {
           })
           .then(allItems => {
 
-            allItemUri.length ? FastImage.preload(allItemUri) : null;
+            allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
             const cacheItems = JSON.stringify(allItems);
             cacheStorage.setItem('inventory', cacheItems, 60 * 60 * 24)
               .then(() => { // @remind refactor
@@ -153,48 +153,242 @@ const shop = (() => {
     cacheStorage = new CacheStorage();
   let cachedShop: Shop.Item[]; // @note this is needed trust me, because local let items should be cleared
 
-  const fetchShop = async (resolve: any, reject: any) => reference.list().then( async (result) => {
+  const iterateFetch = async (config: {
+    list: string[],
+    from: keyof { database: string, storage: string },
+    database?: any
+
+  }, resolve: any, reject: any) => {
+
     let items: Shop.Item[] = [],
         allItemUri: any[] = [];
 
-    result.items.forEach(async (ref) => {
-      let url, spriteUrl, itemName, info!: string;
-      // set itemName
-      itemName = ref.name.replace('.png', '');
-      // set file urls
-      url = await getFileUrl(ref.fullPath);
-      spriteUrl = await getFileUrl('item_sprites/' + ref.name)
-      // set info
-      await firebase
-        .database()
-        .ref('items/' + itemName)
-        .once("value")
-        .then(snapshot => info = snapshot.val())
-        .catch(err => reject(err));
+    new Promise((allResolve, allReject) => {
+      
+      let promiseAllItems: Promise<unknown>[] = [];
 
-      items.push({
-        id: itemName,
-        info: info,
-        url: url,
-        spriteUrl: spriteUrl
+      config.list.forEach(async (item: any) => {
+        const itemName = config.from === "storage" ? item.name.replace('.png', '') : item;
+
+        const promise = new Promise((itemResolve, itemReject) => {
+          Promise.all(
+            config.from === "storage"
+            ? [
+                new Promise((res, rej) => {
+                  firebase
+                    .database()
+                    .ref('items/' + itemName)
+                    .once("value")
+                    .then(snapshot => res(snapshot.val()))
+                    .catch(err => rej(err));
+                }),
+
+                getFileUrl(item.fullPath),
+                getFileUrl('item_sprites/' + item.name)
+              ]
+            : [
+                config.database[itemName],
+                void 0,
+                void 0,
+              ]
+          
+          ).then(async resolve => {
+              itemResolve({ 
+                id: itemName,
+                info: resolve[0],
+                url: resolve[1],
+                spriteUrl: resolve[2]
+              });
+              allItemUri.push({ uri: resolve[1] });
+            })
+            .catch(err => itemReject(err));
+        });
+
+        promiseAllItems.push(promise);
       });
+      
+      Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
 
-      allItemUri.push({ uri: url });
-
-      if (result.items.indexOf(ref) === (result.items.length-1)) {
-
-        cachedShop = items;
-        const stringShop = JSON.stringify(items);
-
-        allItemUri.length && !cachedShop.length ? FastImage.preload(allItemUri) : null;
-        cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
-
-        resolve("Success") 
-      }
     })
+    .then(allItems => {
+
+      cachedShop = allItems as Shop.Item[];
+      const stringShop = JSON.stringify(allItems);
+
+      allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+      cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+
+      resolve("Finished all fetching, but not sure if all succeed") 
+
+    })
+    .catch(err => reject(err));
+      
+
+  }
+
+  const fetchShop = async (resolve: any, reject: any) => {
+
+    await new Promise((resolve, reject) => {
+      firebase
+        .database()
+        .ref('items/')
+        .once('value')
+        .then(snapshot => resolve(snapshot.val()))
+        .catch(err => reject(err))
+    }).then(res => {
+        const obj = res as any;
+        const itemNames = Object.keys(obj);
+        
+        new Promise((resolve, reject) => {
+          iterateFetch({
+            list: itemNames,
+            from: "database",
+            database: obj
+          }, resolve, reject)
+        }).catch(err => reject(err))
+
+        console.log("TEST shop database resolve:", itemNames, " => ", obj[itemNames[0]])
+
+      })
+      .catch(err => reject(err))
+
+    resolve("TEST shop fetch finished")
+  }
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  // reference.list().then( async (result) => {
+  //   let items: Shop.Item[] = [],
+  //       allItemUri: any[] = [];
+
+  //   // result.items.forEach(async (ref) => {
+  //   //   let url, spriteUrl, itemName: string, info!: string;
+  //   //   // set itemName
+  //   //   itemName = ref.name.replace('.png', '');
+
+  //   //   // set file urls
+  //   //   url = await getFileUrl(ref.fullPath);
+  //   //   spriteUrl = await getFileUrl('item_sprites/' + ref.name)
+  //   //   // set info
+  //     // await firebase
+  //     //   .database()
+  //     //   .ref('items/' + itemName)
+  //     //   .once("value")
+  //     //   .then(snapshot => info = snapshot.val())
+  //     //   .catch(err => reject(err));
+
+  //   //   items.push({
+  //   //     id: itemName,
+  //   //     info: info,
+  //   //     url: url,
+  //   //     spriteUrl: spriteUrl
+  //   //   });
+
+  //   //   allItemUri.push({ uri: url });
+
+  //   //   if (result.items.indexOf(ref) === (result.items.length-1)) {
+
+  //       // cachedShop = items;
+  //       // const stringShop = JSON.stringify(items);
+
+  //   //     allItemUri.length !== 0 && !cachedShop.length ? FastImage.preload(allItemUri) : null;
+  //   //     cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+
+  //       // resolve("Finished all fetching, but not sure if all succeed") 
+  //   //   }
+  //   // })
     
+
+  //   new Promise((allResolve, allReject) => {
+      
+  //     let promiseAllItems: Promise<unknown>[] = [];
+
+  //     result.items.forEach(async (item) => {
+  //       const itemName = item.name.replace('.png', '');
+
+  //       const promise = new Promise((itemResolve, itemReject) => {
+  //         Promise.all([
+  //           new Promise((res, rej) => {
+  //             firebase
+  //               .database()
+  //               .ref('items/' + itemName)
+  //               .once("value")
+  //               .then(snapshot => res(snapshot.val()))
+  //               .catch(err => rej(err));
+  //           }),
+
+  //           getFileUrl(item.fullPath),
+  //           getFileUrl('item_sprites/' + item.name)
+  //         ])
+  //           .then(async resolve => {
+  //             itemResolve({ 
+  //               id: itemName,
+  //               info: resolve[0],
+  //               url: resolve[1],
+  //               spriteUrl: resolve[2]
+  //             });
+  //             allItemUri.push({ uri: resolve[1] });
+  //           })
+  //           .catch(err => itemReject(err));
+  //       });
+
+  //       promiseAllItems.push(promise);
+  //     });
+      
+  //     Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
+
+  //   })
+  //   .then(allItems => {
+
+  //     cachedShop = allItems as Shop.Item[];
+  //     const stringShop = JSON.stringify(allItems);
+
+  //     allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+  //     cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+
+  //     resolve("Finished all fetching, but not sure if all succeed") 
+
+  //   })
+  //   .catch(err => reject(err));
     
-  });
+  // }).catch(err => reject(err));
 
   return {
     fetch: fetchShop,
@@ -203,7 +397,6 @@ const shop = (() => {
       return cachedShop;
     },
 
-    // clear: () => cacheStorage.clear()
     storage: cacheStorage
   }
 })();
