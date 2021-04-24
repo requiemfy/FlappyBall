@@ -190,12 +190,6 @@ const shop = (() => {
       Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
     })
     .then(allItems => {
-
-      // cachedShop = allItems as Shop.Item[];
-      // const stringShop = JSON.stringify(allItems);
-      // allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-      // cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
-    
       allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
     
       if ((allItemUri[0]?.uri !== void 0) || (config.from === "database")) {
@@ -206,7 +200,6 @@ const shop = (() => {
       } else {
         reject("Getting URL error");
       }
-
     })
     .catch(err => reject(err));
   }
@@ -247,17 +240,6 @@ const shop = (() => {
 
           resolve("succeed")
         })
-
-        
-
-        // await new Promise((resolve, reject) => {
-        //   iterateFetch({
-        //     list: itemNames,
-        //     from: "storage",
-        //     database: obj
-        //   }, resolve, reject)
-        // }).catch(err => reject(err))
-
       })
       .catch(err => reject(err))
   }

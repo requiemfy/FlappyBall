@@ -21,7 +21,7 @@ interface Props { navigation: NavigationScreenProp<NavigationState, NavigationPa
 interface State { 
   items: Item[];
   network: boolean;
-  preview: {show: boolean, loading: boolean};
+  preview: {show: boolean, loading: boolean, error: boolean};
 }
 
 type Item = { 
@@ -40,7 +40,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     this.state = { 
       items: Cache.shop.cache as Item[],
       network: true,
-      preview: {show: false, loading: true},
+      preview: {show: false, loading: true, error: false},
     };
 
     console.log("TEST shop cache in screen", this.state.items)
@@ -48,12 +48,16 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   private togglePreview = (url?: string) => {
     if (this.state.preview.show) {
-      this.setState({ preview: {show: false, loading: true} });
-    } else {
+      this.setState({ preview: {show: false, loading: true, error: false} });
+    } else if (url) {
       this.setState({ preview: {...this.state.preview, loading: true} })
-      Image.prefetch(url!).then(() => this.setState({ preview: {...this.state.preview, loading: false} }));
+      Image.prefetch(url)
+        .then(() => this.setState({ preview: {...this.state.preview, loading: false} }))
+        .catch(err => this.setState({ preview: {...this.state.preview, error: true} }))
       this.previewSprite = url!;
       this.setState({ preview: {...this.state.preview, show: true} });
+    } else {
+      this.setState({ preview: {...this.state.preview, show: true, error: true} })
     }
   }
 
@@ -81,8 +85,11 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                   onPress={() => this.togglePreview()}
                 >
                   {
+
                     this.state.preview.loading
-                      ? <ActivityIndicator size={100} color="gray" />
+                      ? this.state.preview.error
+                        ? <Text style={{color: "white"}}>Error Loading Preview</Text>
+                        : <ActivityIndicator size={100} color="gray" />
                       : <Preview url={this.previewSprite}></Preview>
                   }
                 </TouchableOpacity>
