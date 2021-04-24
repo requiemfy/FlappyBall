@@ -38,10 +38,12 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   constructor (props: Props | any) {
     super(props);
     this.state = { 
-      items: Cache.shop.cache,
+      items: Cache.shop.cache as Item[],
       network: true,
       preview: {show: false, loading: true},
     };
+
+    console.log("TEST shop cache in screen", this.state.items)
   }
 
   private togglePreview = (url?: string) => {

@@ -149,9 +149,10 @@ const inventory = (() => {
 
 const shop = (() => {
   const
-    reference = firebase.storage().ref('item_images'),
+    // reference = firebase.storage().ref('item_images'), // @remind clear
     cacheStorage = new CacheStorage();
-  let cachedShop: Shop.Item[]; // @note this is needed trust me, because local let items should be cleared
+  // purpose of this is not to rely on get method of cache
+  let cachedShop: Shop.Item[] | undefined; // @note this is needed trust me, because local let items should be cleared
 
   const iterateFetch = async (config: {
     list: string[],
@@ -165,21 +166,12 @@ const shop = (() => {
       let promiseAllItems: Promise<unknown>[] = [];
 
       config.list.forEach(async (item: any) => {
-        // const itemName = config.from === "storage" ? item.name.replace('.png', '') : item;
 
         const promise = new Promise((itemResolve, itemReject) => {
           Promise.all([
-            // new Promise((res, rej) => {
-            //   firebase
-            //     .database()
-            //     .ref('items/' + itemName)
-            //     .once("value")
-            //     .then(snapshot => res(snapshot.val()))
-            //     .catch(err => rej(err));
-            // }),
             config.database[item],
-            config.from === "storage" ? getFileUrl('item_images/' + item) : void 0,
-            config.from === "storage" ? getFileUrl('item_sprites/' + item) : void 0
+            config.from === "storage" ? getFileUrl('item_images/' + item + '.png') : void 0,
+            config.from === "storage" ? getFileUrl('item_sprites/' + item + '.png') : void 0
           ]).then(async resolve => {
               itemResolve({ 
                 id: item,
@@ -199,13 +191,22 @@ const shop = (() => {
     })
     .then(allItems => {
 
-      cachedShop = allItems as Shop.Item[];
-      const stringShop = JSON.stringify(allItems);
-
+      // cachedShop = allItems as Shop.Item[];
+      // const stringShop = JSON.stringify(allItems);
+      // allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+      // cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+    
       allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-      cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+    
+      if ((allItemUri[0]?.uri !== void 0) || (config.from === "database")) {
+        cachedShop = allItems as Shop.Item[];
+        const stringShop = JSON.stringify(allItems);
+        cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
+        resolve("success");
+      } else {
+        reject("Getting URL error");
+      }
 
-      resolve("success")
     })
     .catch(err => reject(err));
   }
@@ -223,13 +224,31 @@ const shop = (() => {
         const obj = res as any;
         const itemNames = Object.keys(obj);
         
-        await new Promise((resolve, reject) => {
-          iterateFetch({
-            list: itemNames,
-            from: "database",
-            database: obj
-          }, resolve, reject)
-        }).catch(err => reject(err))
+        cacheStorage.getItem('shop').then(async (arg) => {
+
+          console.log("TEST getting shop cache", arg)
+
+          !arg ? await new Promise((resolve, reject) => {
+              iterateFetch({
+                list: itemNames,
+                from: "database",
+                database: obj
+              }, resolve, reject)
+            }).catch(err => reject(err))
+          : cacheStorage.getItem('shop').then(arg => arg ? cachedShop = JSON.parse(arg) : null);
+
+          await new Promise((resolve, reject) => {
+            iterateFetch({
+              list: itemNames,
+              from: "storage",
+              database: obj
+            }, resolve, reject)
+          }).catch(err => reject(err))
+
+          resolve("succeed")
+        })
+
+        
 
         // await new Promise((resolve, reject) => {
         //   iterateFetch({
@@ -239,145 +258,9 @@ const shop = (() => {
         //   }, resolve, reject)
         // }).catch(err => reject(err))
 
-        resolve("succeed")
       })
       .catch(err => reject(err))
   }
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  // reference.list().then( async (result) => {
-  //   let items: Shop.Item[] = [],
-  //       allItemUri: any[] = [];
-
-  //   // result.items.forEach(async (ref) => {
-  //   //   let url, spriteUrl, itemName: string, info!: string;
-  //   //   // set itemName
-  //   //   itemName = ref.name.replace('.png', '');
-
-  //   //   // set file urls
-  //   //   url = await getFileUrl(ref.fullPath);
-  //   //   spriteUrl = await getFileUrl('item_sprites/' + ref.name)
-  //   //   // set info
-  //     // await firebase
-  //     //   .database()
-  //     //   .ref('items/' + itemName)
-  //     //   .once("value")
-  //     //   .then(snapshot => info = snapshot.val())
-  //     //   .catch(err => reject(err));
-
-  //   //   items.push({
-  //   //     id: itemName,
-  //   //     info: info,
-  //   //     url: url,
-  //   //     spriteUrl: spriteUrl
-  //   //   });
-
-  //   //   allItemUri.push({ uri: url });
-
-  //   //   if (result.items.indexOf(ref) === (result.items.length-1)) {
-
-  //       // cachedShop = items;
-  //       // const stringShop = JSON.stringify(items);
-
-  //   //     allItemUri.length !== 0 && !cachedShop.length ? FastImage.preload(allItemUri) : null;
-  //   //     cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
-
-  //       // resolve("Finished all fetching, but not sure if all succeed") 
-  //   //   }
-  //   // })
-    
-
-  //   new Promise((allResolve, allReject) => {
-      
-  //     let promiseAllItems: Promise<unknown>[] = [];
-
-  //     result.items.forEach(async (item) => {
-  //       const itemName = item.name.replace('.png', '');
-
-  //       const promise = new Promise((itemResolve, itemReject) => {
-  //         Promise.all([
-  //           new Promise((res, rej) => {
-  //             firebase
-  //               .database()
-  //               .ref('items/' + itemName)
-  //               .once("value")
-  //               .then(snapshot => res(snapshot.val()))
-  //               .catch(err => rej(err));
-  //           }),
-
-  //           getFileUrl(item.fullPath),
-  //           getFileUrl('item_sprites/' + item.name)
-  //         ])
-  //           .then(async resolve => {
-  //             itemResolve({ 
-  //               id: itemName,
-  //               info: resolve[0],
-  //               url: resolve[1],
-  //               spriteUrl: resolve[2]
-  //             });
-  //             allItemUri.push({ uri: resolve[1] });
-  //           })
-  //           .catch(err => itemReject(err));
-  //       });
-
-  //       promiseAllItems.push(promise);
-  //     });
-      
-  //     Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
-
-  //   })
-  //   .then(allItems => {
-
-  //     cachedShop = allItems as Shop.Item[];
-  //     const stringShop = JSON.stringify(allItems);
-
-  //     allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-  //     cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
-
-  //     resolve("Finished all fetching, but not sure if all succeed") 
-
-  //   })
-  //   .catch(err => reject(err));
-    
-  // }).catch(err => reject(err));
 
   return {
     fetch: fetchShop,
