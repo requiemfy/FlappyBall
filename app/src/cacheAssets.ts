@@ -157,14 +157,11 @@ const shop = (() => {
     list: string[],
     from: keyof { database: string, storage: string },
     database?: any
-
   }, resolve: any, reject: any) => {
 
-    let items: Shop.Item[] = [],
-        allItemUri: any[] = [];
+    let allItemUri: any[] = [];
 
     new Promise((allResolve, allReject) => {
-      
       let promiseAllItems: Promise<unknown>[] = [];
 
       config.list.forEach(async (item: any) => {
@@ -191,7 +188,6 @@ const shop = (() => {
                 void 0,
                 void 0,
               ]
-          
           ).then(async resolve => {
               itemResolve({ 
                 id: itemName,
@@ -208,7 +204,6 @@ const shop = (() => {
       });
       
       Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
-
     })
     .then(allItems => {
 
@@ -218,12 +213,9 @@ const shop = (() => {
       allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
       cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
 
-      resolve("Finished all fetching, but not sure if all succeed") 
-
+      resolve("success")
     })
     .catch(err => reject(err));
-      
-
   }
 
   const fetchShop = async (resolve: any, reject: any) => {

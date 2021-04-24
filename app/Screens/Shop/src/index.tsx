@@ -37,14 +37,11 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   constructor (props: Props | any) {
     super(props);
-
     this.state = { 
       items: Cache.shop.cache,
       network: true,
       preview: {show: false, loading: true},
     };
-
-    console.log("TEST shop items", this.state.items)
   }
 
   private togglePreview = (url?: string) => {
@@ -55,7 +52,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       Image.prefetch(url!).then(() => this.setState({ preview: {...this.state.preview, loading: false} }));
       this.previewSprite = url!;
       this.setState({ preview: {...this.state.preview, show: true} });
-
     }
   }
 
