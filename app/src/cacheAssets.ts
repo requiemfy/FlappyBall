@@ -165,32 +165,24 @@ const shop = (() => {
       let promiseAllItems: Promise<unknown>[] = [];
 
       config.list.forEach(async (item: any) => {
-        const itemName = config.from === "storage" ? item.name.replace('.png', '') : item;
+        // const itemName = config.from === "storage" ? item.name.replace('.png', '') : item;
 
         const promise = new Promise((itemResolve, itemReject) => {
-          Promise.all(
-            config.from === "storage"
-            ? [
-                new Promise((res, rej) => {
-                  firebase
-                    .database()
-                    .ref('items/' + itemName)
-                    .once("value")
-                    .then(snapshot => res(snapshot.val()))
-                    .catch(err => rej(err));
-                }),
-
-                getFileUrl(item.fullPath),
-                getFileUrl('item_sprites/' + item.name)
-              ]
-            : [
-                config.database[itemName],
-                void 0,
-                void 0,
-              ]
-          ).then(async resolve => {
+          Promise.all([
+            // new Promise((res, rej) => {
+            //   firebase
+            //     .database()
+            //     .ref('items/' + itemName)
+            //     .once("value")
+            //     .then(snapshot => res(snapshot.val()))
+            //     .catch(err => rej(err));
+            // }),
+            config.database[item],
+            config.from === "storage" ? getFileUrl('item_images/' + item) : void 0,
+            config.from === "storage" ? getFileUrl('item_sprites/' + item) : void 0
+          ]).then(async resolve => {
               itemResolve({ 
-                id: itemName,
+                id: item,
                 info: resolve[0],
                 url: resolve[1],
                 spriteUrl: resolve[2]
@@ -220,18 +212,18 @@ const shop = (() => {
 
   const fetchShop = async (resolve: any, reject: any) => {
 
-    await new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       firebase
         .database()
         .ref('items/')
         .once('value')
         .then(snapshot => resolve(snapshot.val()))
         .catch(err => reject(err))
-    }).then(res => {
+    }).then(async (res) => {
         const obj = res as any;
         const itemNames = Object.keys(obj);
         
-        new Promise((resolve, reject) => {
+        await new Promise((resolve, reject) => {
           iterateFetch({
             list: itemNames,
             from: "database",
@@ -239,12 +231,17 @@ const shop = (() => {
           }, resolve, reject)
         }).catch(err => reject(err))
 
-        console.log("TEST shop database resolve:", itemNames, " => ", obj[itemNames[0]])
+        // await new Promise((resolve, reject) => {
+        //   iterateFetch({
+        //     list: itemNames,
+        //     from: "storage",
+        //     database: obj
+        //   }, resolve, reject)
+        // }).catch(err => reject(err))
 
+        resolve("succeed")
       })
       .catch(err => reject(err))
-
-    resolve("TEST shop fetch finished")
   }
   
   
