@@ -11,7 +11,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce } from '../../../src/helpers';
+import { backOnlyOnce, updateGold } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets';
 import { Asset } from 'expo-asset';
@@ -51,7 +51,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
-      items: JSON.parse(Cache.inventory.cache),
+      // items: JSON.parse(Cache.inventory.cache), // @remind clear
+      items: Cache.inventory.cache,
       network: true,
     };
   }
@@ -102,29 +103,36 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.forceUpdate();
   }
 
-  private resetInventoryCache = () => {
+  private updateInventoryCache = () => {
+    // @note need to clear inventory cache before fetching - because new data will not be stored if it has value
     Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
       .then(async () => {
-        console.log("Selling: Cache Cleared");
+        console.log("TEST Selling: Cache Cleared");
         if (this.itemID === activeItem.id) this.normalSprite();
         new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
-          .then(resolve => {
+          .then(_ => {
             setCurrentGold(getCurrentGold() + this.itemSale/2)
-            this.setState({ items: JSON.parse(Cache.inventory.cache) });
-            this.updateGold(getCurrentGold());
-            console.log("CACHE SHOP RESOLVED:", resolve)
+            this.setState({ items: Cache.inventory.cache });
+
+            // this.updateGold(getCurrentGold());
+            // updateGold(this.user?.uid, getCurrentGold())
+            new Promise((resolve, reject) => {
+              updateGold(this.user?.uid, getCurrentGold(), resolve, reject)
+            }).then(_ => null)
+              .catch(_ => null)
+            
           })
-          .catch(err => console.log("Selling Error 3", err));
+          .catch(err => console.log("TEST Selling Error 3", err));
       });
   }
 
-  private updateGold = (updated: number) => {
-    firebase
-      .database()
-      .ref('users/' + this.user?.uid)
-      .update({ gold: updated })
-      .catch(err => console.log("Updating Gold Error", err));
-  }
+  // private updateGold = (updated: number) => { // @remind clear
+  //   firebase
+  //     .database()
+  //     .ref('users/' + this.user?.uid)
+  //     .update({ gold: updated })
+  //     .catch(err => console.log("Updating Gold Error", err));
+  // }
 
   private sellItem = () => {
     firebase
@@ -139,13 +147,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           .database()
           .ref('users/' + this.user?.uid)
           .update({ inventory: inventory })
-          .then(arg => this.resetInventoryCache())
+          .then(arg => this.updateInventoryCache())
           .catch(err => console.log("Selling Error 2", err));
       })
       .catch(err => console.log("Selling Error 1", err))
   }
 
   private trySell = async (id: string, sale: number) => {
+    // @remind what if has signal but netwok (limited)
     if (this.state.network) {
       this.itemID = id;
       this.itemSale = sale;

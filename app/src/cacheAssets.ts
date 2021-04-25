@@ -40,7 +40,7 @@ function getFileUrl(path: string) {
 
 const inventory = (() => {
 
-  let cachedInventory: string = JSON.stringify([]);
+  let cachedInventory: Shop.Item[];
   const cacheStorage = new CacheStorage();
   
   const fetchInventory = (() => {
@@ -102,7 +102,7 @@ const inventory = (() => {
             cacheStorage.setItem('inventory', cacheItems, 60 * 60 * 24)
               .then(() => { // @remind refactor
                 cacheStorage.getItem("inventory").then(arg => {
-                  cachedInventory = arg!;
+                  cachedInventory = JSON.parse(arg!);
                   inventoryResolve("Success");
                 })
               })
@@ -121,7 +121,7 @@ const inventory = (() => {
         .then(arg => {
           console.log("CONSOLE: CURRENT INVENTORY", typeof arg, arg)
           if (arg && JSON.parse(arg!).length) {
-            cachedInventory = arg;
+            cachedInventory = JSON.parse(arg);
             resolve("Inventory Already Cached");
           } else {
             cacheInventory(resolve, reject);
@@ -134,6 +134,11 @@ const inventory = (() => {
   return {
     fetch: fetchInventory,
     
+    update: (item: Shop.Item[]) => {
+      cachedInventory = item;
+      cacheStorage.setItem('inventory', JSON.stringify(item), 60 * 60 * 24)
+    },
+
     get cache() {
       return cachedInventory;
     },

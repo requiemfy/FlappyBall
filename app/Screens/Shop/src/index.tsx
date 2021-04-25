@@ -9,18 +9,21 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { ActivityIndicator, Dimensions, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ActivityIndicator, Dimensions, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import { getCurrentGold, setCurrentGold } from '../../Home/src';
 import Preview from '../components/Preview';
 import { Asset } from 'expo-asset';
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
+import { updateGold } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
-  network: boolean;
+  inventoryItems: string[];
+  network: { connected: boolean, reachable: boolean | null | undefined };
   preview: {show: boolean, loading: boolean, error: boolean};
 }
 
@@ -32,18 +35,34 @@ type Item = {
 };
 
 class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
-
+  user = firebase.auth().currentUser;
   previewSprite!: string;
+  netInfo!: NetInfoSubscription;
+  item!: Item;
+  inventoryCache: Item[];
 
   constructor (props: Props | any) {
     super(props);
     this.state = { 
       items: Cache.shop.cache as Item[],
-      network: true,
+      inventoryItems: [],
+      network: { connected: true, reachable: true },
       preview: {show: false, loading: true, error: false},
     };
 
-    console.log("TEST shop cache in screen", this.state.items)
+    this.inventoryCache = Cache.inventory.cache as Item[];
+    this.inventoryCache?.forEach(item => this.state.inventoryItems.push(item.id));
+    console.log("TEST inventory items", this.state.inventoryItems); // @remind clear
+  }
+
+  componentDidMount() {
+    this.netInfo = NetInfo.addEventListener(state => {
+      this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } })
+    });
+  }
+
+  componentWillUnmount() {
+    this.netInfo();
   }
 
   private togglePreview = (url?: string) => {
@@ -59,6 +78,95 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     } else {
       this.setState({ preview: {...this.state.preview, show: true, error: true} })
     }
+  }
+
+  private updateInventoryCache = () => {
+    // Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
+    //   .then(_ => {
+    //     new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
+    //       .then(_ => {
+            
+    //       })
+    //       .catch(err => console.log("CONSOLE Buying Error 3", err));
+    //   });
+
+
+    this.inventoryCache.push(this.item);
+
+    // Cache.inventory.cache = this.inventoryCache;
+    // Cache.inventory.storage.setItem('inventory', JSON.stringify(this.inventoryCache), 60 * 60 * 24)
+    Cache.inventory.update(this.inventoryCache);
+
+    this.setState({ inventoryItems: [...this.state.inventoryItems, this.item.id] });
+  }
+
+  private buy = () => {
+    if (this.item.spriteUrl) {
+      Image.prefetch(this.item.spriteUrl)
+        .then(_ => {
+          firebase
+            .database()
+            .ref('users/' + this.user?.uid + '/inventory')
+            .once('value')
+            .then(async snapshot => {
+              const inventory = snapshot.val();
+              inventory.push(this.item.id)
+
+              // firebase
+              //   .database()
+              //   .ref('users/' + this.user?.uid + '/inventory/')
+              //   // .update(this.itemID)
+              //   // .push()
+              //   .set(inventory)
+              //   .then(_ => this.updateInventoryCache())
+              //   .catch(_ => this.alert("Processing Error", "Something went wrong"));
+
+
+              firebase
+                .database()
+                .ref('users/' + this.user?.uid)
+                .update({
+                  inventory: inventory,
+                  gold: getCurrentGold() - this.item.info.buy
+                })
+                .then(_ => this.updateInventoryCache())
+                .catch(_ => this.alert("Processing Error", "Something went wrong"));
+
+            })
+          
+          this.alert("Purchase Successful", "You can now equip the item")
+        })
+        .catch(_ => {
+          console.log("TEST issue in prefetch", _)
+          this.alert("Processing Error", "Something went wrong")
+        })
+    } 
+    else this.alert("Processing Error", "Something went wrong")
+  }
+
+  private tryBuy = (item: Item) => {
+    if (this.state.network.connected && this.state.network.reachable) {
+      this.item = item;
+      Alert.alert("Hold on!", "Are you sure you want to buy?", [
+        {
+          text: "Cancel",
+          onPress: () => null,
+          style: "cancel"
+        },
+        { 
+          text: "YES", onPress: this.buy
+        }
+      ]);
+    }
+    else this.alert("NO INTERNET", "Please make sure you have working connection")
+  }
+
+  private alert = (one: string, two: string) => {
+    Alert.alert(one, two, [
+      { 
+        text: "OK", onPress: () => null
+      }
+    ]);
   }
 
   render() {
@@ -125,9 +233,19 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
                     <Text>{item.info.description}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => null}>
-                    <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>BUY FOR {item.info.buy}</Text>
-                  </TouchableOpacity>
+                  
+                  {
+                    !this.state.inventoryItems.includes(item.id)
+                    ? <TouchableOpacity onPress={() => this.tryBuy(item)}>
+                        <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>
+                          BUY FOR {item.info.buy}
+                        </Text>
+                      </TouchableOpacity>
+                    : <Text style={{ color:"gray", fontSize: 12, fontWeight: "bold" }}>
+                        PURCHASED FOR {item.info.buy}
+                      </Text>
+                  }
+                  
                 </View>
               )}}
               keyExtractor={(item: any) => item.id}
