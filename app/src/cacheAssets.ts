@@ -148,9 +148,7 @@ const inventory = (() => {
 // SHOP CACHING
 
 const shop = (() => {
-  const
-    // reference = firebase.storage().ref('item_images'), // @remind clear
-    cacheStorage = new CacheStorage();
+  const cacheStorage = new CacheStorage();
   // purpose of this is not to rely on get method of cache
   let cachedShop: Shop.Item[] | undefined; // @note this is needed trust me, because local let items should be cleared
 
@@ -166,7 +164,6 @@ const shop = (() => {
       let promiseAllItems: Promise<unknown>[] = [];
 
       config.list.forEach(async (item: any) => {
-
         const promise = new Promise((itemResolve, itemReject) => {
           Promise.all([
             config.database[item],
@@ -218,8 +215,6 @@ const shop = (() => {
         const itemNames = Object.keys(obj);
         
         cacheStorage.getItem('shop').then(async (arg) => {
-
-          console.log("TEST getting shop cache", arg)
 
           !arg ? await new Promise((resolve, reject) => {
               iterateFetch({
