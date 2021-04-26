@@ -6,7 +6,7 @@ import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 import FastImage from 'react-native-fast-image';
 import * as Shop from '../Screens/Shop/src';
-import { loggedIn } from '../Screens/Login/src';
+// import { loggedIn } from '../Screens/Login/src';
 
 function cacheStaticImg(images: any[]) {
   return images.map(image => Asset.fromModule(image).downloadAsync());
@@ -43,7 +43,7 @@ async function loadUserAssetAsync() {
 }
 
 function retrieveCache() {
-  if(!cacheRetrieved && loggedIn){
+  if(!cacheRetrieved){
     console.log("TEST cacheRetrieved")
     shop.storage.getItem('shop').then(resolve => shop.cache = JSON.parse(resolve!));
     inventory.storage.getItem('inventory').then(resolve => inventory.cache = JSON.parse(resolve!));
@@ -65,43 +65,43 @@ function getFileUrl(path: string) {
 
 const inventory = (() => {
 
-  let cachedInventory: Shop.Item[] = [];
+  let cachedInventory: Shop.Item[] = [], cancelRequest: () => any = () => null;
   const cacheStorage = new CacheStorage();
   
-  const fetchInventory = (() => {
+  const fetchInventory = async (resolve: any, reject: any) => {
+    console.log("CONSOLE: Fetching inventory...")
 
-    const cacheInventory = (resolve: any, reject: any) => {
-      const user = firebase.auth().currentUser;
+    const user = firebase.auth().currentUser;
+    let loggedIn = true;
 
-      firebase
-        .database()
-        .ref('users/' + user?.uid + '/inventory')
-        .once('value')
-        .then(snapshot => {
-          if (loggedIn) {
-            const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
-            shop.cache?.forEach(item => {
-              if (inventory.includes(item.id)) {
-                cachedInventory.push(item);
-                allItemUri.push({ uri: item.url })
-              }
-            });
-  
-            allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-            cacheStorage.setItem('inventory', JSON.stringify(cachedInventory), 60 * 60 * 24);
+    firebase
+      .database()
+      .ref('users/' + user?.uid + '/inventory')
+      .once('value')
+      .then(snapshot => {
+        if (loggedIn) {
+          const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
+          cachedInventory = [];
 
-            retrieveInventory = false
-            resolve("success")
-          }
-        })
-        .catch(err => reject(err));
-    }
-  
-    return async (resolve: any, reject: any) => {
-      console.log("CONSOLE: Fetching inventory...")
-      cacheInventory(resolve, reject);
-    }
-  })();
+          shop.cache?.forEach(item => {
+            if (inventory.includes(item.id)) {
+              cachedInventory.push(item);
+              allItemUri.push({ uri: item.url })
+            }
+          });
+
+          allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+          cacheStorage.setItem('inventory', JSON.stringify(cachedInventory), 60 * 60 * 24);
+
+          retrieveInventory = false
+          resolve("success")
+        }
+        else reject("User not logged-in")
+      })
+      .catch(err => reject(err));
+
+    cancelRequest = () => loggedIn = false;
+  }
   
   return {
     fetch: fetchInventory,
@@ -122,6 +122,7 @@ const inventory = (() => {
     storage: cacheStorage,
 
     clear: () => {
+      cancelRequest();
       cacheStorage.setItem('shop', '');
       cacheStorage.clear();
       cachedInventory = [];
@@ -137,8 +138,13 @@ const inventory = (() => {
 
 const shop = (() => {
   const cacheStorage = new CacheStorage();
-  // purpose of this is not to rely on get method of cache
-  let cachedShop: Shop.Item[] | undefined; // @note this is needed trust me, because local let items should be cleared
+
+  // purpose of cachedShop is not to rely on get method of cache
+  // @note this is needed trust me, because local let items should be cleared
+  let 
+    cachedShop: Shop.Item[] | undefined, 
+    cancelFetchShop: () => any = () => null,
+    cancelIterate: () => any = () => null; 
 
   cacheStorage.setItem('fetch-again', 'true', 60 * 60 * 24);
 
@@ -148,7 +154,7 @@ const shop = (() => {
     database?: any
   }, resolve: any, reject: any) => {
 
-    let allItemUri: any[] = [];
+    let allItemUri: any[] = [], loggedIn = true;
 
     new Promise((allResolve, allReject) => {
       let promiseAllItems: Promise<unknown>[] = [];
@@ -160,8 +166,9 @@ const shop = (() => {
             config.from === "storage" ? getFileUrl('item_images/' + item + '.png') : void 0,
             config.from === "storage" ? getFileUrl('item_sprites/' + item + '.png') : void 0
           ]).then(async resolve => {
+              console.log("TEST 1 shop loggedIn", loggedIn)
               if (loggedIn) {
-                resolve[1] || (config.from === "database") ? null : itemReject("rejected since undefined url")
+                (resolve[1] || (config.from === "database")) ? null : itemReject("rejected since undefined url")
                 itemResolve({ 
                   id: item,
                   info: resolve[0],
@@ -182,25 +189,17 @@ const shop = (() => {
       Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
     })
     .then(allItems => {
+      console.log("TEST 2 shop loggedIn", loggedIn)
+
       if (loggedIn) {
         allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-      
-        // if ((allItemUri[0]?.uri !== void 0) || (config.from === "database")) {
-        //   cachedShop = allItems as Shop.Item[];
-        //   const stringShop = JSON.stringify(allItems);
-        //   cacheStorage.setItem('shop', stringShop, 60 * 60 * 24).catch(err => reject(err));
-        //   resolve("success");
-        // } else {
-        //   reject("Getting URL error");
-        // }
-
         cachedShop = allItems as Shop.Item[];
         cacheStorage.setItem('shop', JSON.stringify(allItems), 60 * 60 * 24).catch(err => reject(err));
 
         if (allItemUri[0]?.uri !== void 0) {
           cacheStorage.setItem('fetch-again', 'false', 60 * 60 * 24);
           retrieveInventory = true;
-          resolve("success");
+          resolve("success GETTING urls");
         } else if (config.from === "database") {
           resolve("success undefined url")
         } else {
@@ -211,10 +210,13 @@ const shop = (() => {
       }
     })
     .catch(err => reject(err));
+
+    cancelIterate = () => loggedIn = false;
   }
 
   const fetchShop = async (resolve: any, reject: any) => {
-    
+    let loggedIn = true;
+
     firebase
       .database()
       .ref('items/')
@@ -240,7 +242,7 @@ const shop = (() => {
               .then(res => {
                 console.log("TEST set cacheRetrieved = true");
                 retrieveInventory = true;
-                cacheRetrieved = true;
+                // cacheRetrieved = true;
                 resolve(res)
               })
               .catch(err => reject(err))
@@ -249,19 +251,29 @@ const shop = (() => {
               retrieveCache();
             }
 
+            // resolve or reject of this won't take effect, because of top promise FIRST
             await new Promise((resolve, reject) => {
               iterateFetch({
                 list: itemNames,
                 from: "storage",
                 database: obj
               }, resolve, reject)
-            }).catch(err => reject(err))
+            }).then(res => {
+                console.log("CONSOLE getting url resolve:", res);
+                resolve(res);
+              })
+              .catch(err => {
+                console.log("CONSOLE getting url reject:", err);
+                reject(err);
+              })
 
-            resolve("succeed");
           })
         }
+        else reject("User NOT logged-in")
       })
-      .catch(err => reject(err))
+      .catch(err => reject(err));
+    
+    cancelFetchShop = () => loggedIn = false;
   }
 
   return {
@@ -278,6 +290,8 @@ const shop = (() => {
     storage: cacheStorage,
 
     clear: () => {
+      cancelIterate();
+      cancelFetchShop();
       cacheStorage.setItem('shop', '');
       cacheStorage.clear();
       cachedShop = [];

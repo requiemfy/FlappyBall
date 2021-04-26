@@ -1,3 +1,7 @@
+if (!__DEV__) {
+  console.log = () => null;
+}
+
 import * as React from 'react';
 import * as Firebase from './firebase';
 import AppLoading from 'expo-app-loading';
