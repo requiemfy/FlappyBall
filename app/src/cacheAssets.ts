@@ -17,24 +17,24 @@ async function loadAssetsAsync() {
   await Promise.all([...imageAssets]).catch(err => console.log("Load Assets Error:", err));
 }
 
-let cacheRetrieved = false, // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
-    retrieveInventory = false; // retrieve once = undefined, when = has url
+let cacheRetrieved = false; // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
+    // retrieveInventory = false; // retrieve once = undefined, when = has url@remind
 
 async function loadUserAssetAsync() {
   shop.storage.getItem('fetch-again').then(async resolve => {
     if (!(resolve === "false")) {
       console.log("TEST cache - fetch again", resolve, typeof resolve)
 
-      await new Promise((resolve, reject) => shop.fetch(resolve, reject))
+      new Promise((resolve, reject) => shop.fetch(resolve, reject))
         .then(resolve => console.log("CACHE SHOP RESOLVED:", resolve))
         .catch(reject => console.log("CACHE SHOP ERROR:", reject));
 
-      if (retrieveInventory) {
-        console.log("TEST prepare fetch inventory WTF")
-        new Promise((resolve, reject) => inventory.fetch(resolve, reject))
-          .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
-          .catch(err => console.log("CACHE INVENTORY ERROR:", err));
-      }
+      // if (retrieveInventory) {@remind
+      //   console.log("TEST prepare fetch inventory WTF")
+      //   new Promise((resolve, reject) => inventory.fetch(resolve, reject))
+      //     .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
+      //     .catch(err => console.log("CACHE INVENTORY ERROR:", err));
+      // }
       
     }
     else retrieveCache();
@@ -48,6 +48,8 @@ function retrieveCache() {
     shop.storage.getItem('shop').then(resolve => shop.cache = JSON.parse(resolve!));
     inventory.storage.getItem('inventory').then(resolve => inventory.cache = JSON.parse(resolve!));
     cacheRetrieved = true;
+  } else {
+    console.log("TEST already retrieved cache")
   }
   
 }
@@ -68,7 +70,7 @@ const inventory = (() => {
   let cachedInventory: Shop.Item[] = [], cancelRequest: () => any = () => null;
   const cacheStorage = new CacheStorage();
   
-  const fetchInventory = async (resolve: any, reject: any) => {
+  const request = async (resolve: any, reject: any) => {
     console.log("CONSOLE: Fetching inventory...")
 
     const user = firebase.auth().currentUser;
@@ -93,8 +95,8 @@ const inventory = (() => {
           allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
           cacheStorage.setItem('inventory', JSON.stringify(cachedInventory), 60 * 60 * 24);
 
-          retrieveInventory = false
-          resolve("success")
+          // retrieveInventory = false@remind
+          resolve("success retrieve invent")
         }
         else reject("User not logged-in")
       })
@@ -103,6 +105,13 @@ const inventory = (() => {
     cancelRequest = () => loggedIn = false;
   }
   
+  const fetchInventory = () => {
+    console.log("TEST prepare fetch inventory WTF")
+    new Promise((resolve, reject) => request(resolve, reject))
+      .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
+        .catch(err => console.log("CACHE INVENTORY ERROR:", err));
+  }
+
   return {
     fetch: fetchInventory,
     
@@ -198,7 +207,8 @@ const shop = (() => {
 
         if (allItemUri[0]?.uri !== void 0) {
           cacheStorage.setItem('fetch-again', 'false', 60 * 60 * 24);
-          retrieveInventory = true;
+          // retrieveInventory = true;@remind
+          inventory.fetch();
           resolve("success GETTING urls");
         } else if (config.from === "database") {
           resolve("success undefined url")
@@ -241,8 +251,9 @@ const shop = (() => {
               })
               .then(res => {
                 console.log("TEST set cacheRetrieved = true");
-                retrieveInventory = true;
-                // cacheRetrieved = true;
+                // retrieveInventory = true; @remind
+                inventory.fetch();
+                // cacheRetrieved = true;@remind
                 resolve(res)
               })
               .catch(err => reject(err))

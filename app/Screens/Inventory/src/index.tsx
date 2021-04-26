@@ -46,6 +46,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
   item!: Item;
+  prefetches: any;
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
@@ -54,6 +55,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       network: {connected: true, reachable: true},
       loading: false,
     };
+
+    this.prefetches = [];
   }
 
   componentDidMount() {
@@ -70,6 +73,18 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.backHandler.remove();
     this.netInfo();
     this.thisMounted = false;
+
+    Object.keys(this.prefetches).forEach(id => {
+      Image.abortPrefetch!(this.prefetches[id]);
+      console.log("TEST aborted prefetch", id, this.prefetches[id]);
+    })
+  }
+
+  private safeSetState(update: any) {
+    console.log("TEST in safeSetState thisMounted", this.thisMounted)
+    if (this.thisMounted) {
+      this.setState(update);
+    }
   }
 
   private backAction = () => {
@@ -82,10 +97,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     activeItem.id = null;
   } 
 
-  private selectItem = (id: string, sprite: string) => {
-    if (id === activeItem.id) this.normalSprite() // disselect item
+  private selectItem = (item: Item) => {
+    if (item.id === activeItem.id) this.normalSprite() // disselect item
 
-    else if (!sprite)  
+    else if (!item.spriteUrl)  
       Alert.alert("", "Something went wrong", [
         { 
           text: "OK", onPress: () => null
@@ -94,15 +109,17 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
     else {
       this.setState({ loading: true });
-      Image.prefetch(sprite)
-        .then(_ => this.thisMounted ? this.setState({ loading: false }) : null)
+      // @ts-ignore: Unreachable code error
+      Image.prefetch(item.spriteUrl, (id: number) => this.prefetches.sprite = id) 
+        .then(_ => {
+          activeItem.ballySprite = item.spriteUrl;
+          activeItem.id = item.id;
+          this.safeSetState({ loading: false })
+        })
         .catch(_ => {
-          this.thisMounted ? this.setState({ loading: false }) : null;
+          this.safeSetState({ loading: false });
           this.alert("Processing Failed", "Something went wrong");
         });
-
-      activeItem.ballySprite = sprite;
-      activeItem.id = id;
     }
     this.forceUpdate();
   }
@@ -117,7 +134,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       else return false;
     });
     Cache.inventory.update(inventory);
-    this.thisMounted ? this.setState({ items: inventory, loading: false }) : null;
+    this.safeSetState({ items: inventory, loading: false });
   }
 
   private sellItem = () => {
@@ -139,12 +156,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           })
           .then(_ => this.updateCache())
           .catch(_ => {
-            this.thisMounted ? this.setState({ loading: false }) : null;
+            this.safeSetState({ loading: false });
             this.alert("Processing Error", "Something went wrong");
           });
       })
       .catch(err => {
-        this.thisMounted ? this.setState({ loading: false }) : null;
+        this.safeSetState({ loading: false });
         this.alert("Processing Error", "Something went wrong")
     })
   }
@@ -221,7 +238,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 }}>
                   <TouchableOpacity 
                     style={styles.touchable} 
-                    onPress={() => this.selectItem(item.id, item.spriteUrl)}>
+                    onPress={() => this.selectItem(item)}>
                       
                       <FastImage
                         style={{width: 100, height: 100}}
