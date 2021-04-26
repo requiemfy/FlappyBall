@@ -9,13 +9,12 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { Alert, ActivityIndicator, Dimensions, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ActivityIndicator, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
-import { getCurrentGold, setCurrentGold } from '../../Home/src';
+import { getCurrentGold } from '../../Home/src';
 import Preview from '../components/Preview';
-import { Asset } from 'expo-asset';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }

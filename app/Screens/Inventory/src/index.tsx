@@ -1,7 +1,7 @@
 
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
-import { FlatList, ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { Alert, Image, StyleSheet, View, ActivityIndicator, Text, NativeEventSubscription, BackHandler } from 'react-native';
+import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -15,8 +15,6 @@ import { backOnlyOnce } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets';
 import { Asset } from 'expo-asset';
-import CacheStorage from 'react-native-cache-storage';
-import CachedImage from '../../../Components/CachedImage';
 import FastImage from 'react-native-fast-image'
 import { getCurrentGold, setCurrentGold } from '../../Home/src';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
@@ -52,7 +50,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
-      // items: JSON.parse(Cache.inventory.cache), // @remind clear
       items: Cache.inventory.cache,
       network: {connected: true, reachable: true},
       loading: false,
@@ -73,8 +70,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.backHandler.remove();
     this.netInfo();
     this.thisMounted = false;
-
-    this.normalSprite;
   }
 
   private backAction = () => {
@@ -113,27 +108,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private updateCache = () => {
-    // Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
-    //   .then(async () => {
-    //     console.log("TEST Selling: Cache Cleared");
-    //     if (this.item.id === activeItem.id) this.normalSprite();
-    //     new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
-    //       .then(_ => {
-    //         setCurrentGold(getCurrentGold() + this.item.info.buy/2)
-    //         this.setState({ items: Cache.inventory.cache });
-
-    //         // this.updateGold(getCurrentGold());
-    //         // updateGold(this.user?.uid, getCurrentGold())
-
-    //         // new Promise((resolve, reject) => {
-    //         //   updateGold(this.user?.uid, getCurrentGold(), resolve, reject)
-    //         // }).then(_ => null)
-    //         //   .catch(_ => null)
-            
-    //       })
-    //       .catch(err => console.log("TEST Selling Error 3", err));
-    //   });
-
     const inventory = this.state.items;
     this.state.items.some(item => {
       if (item.id === this.item.id) {
@@ -144,19 +118,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     });
     Cache.inventory.update(inventory);
     this.thisMounted ? this.setState({ items: inventory, loading: false }) : null;
-
-    // this.inventoryCache.push(this.item);
-    // Cache.inventory.update(this.inventoryCache);
-    // this.setState({ items: [...this.state.items] });
   }
-
-  // private updateGold = (updated: number) => { // @remind clear
-  //   firebase
-  //     .database()
-  //     .ref('users/' + this.user?.uid)
-  //     .update({ gold: updated })
-  //     .catch(err => console.log("Updating Gold Error", err));
-  // }
 
   private sellItem = () => {
     this.setState({ loading: true });
@@ -188,10 +150,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private trySell = async (item: Item) => {
-    // @remind what if has signal but netwok (limited)
     if (this.state.network.connected && this.state.network.reachable) {
-      // this.itemID = id;
-      // this.itemSale = sale;
       this.item = item;
 
       Alert.alert("Hold on!", "Are you sure you want to sell?", [

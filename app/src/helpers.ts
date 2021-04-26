@@ -14,14 +14,4 @@ function autoImageDim(actualW: number, actualH: number) {
   return { width, height }
 }
 
-
-// function updateGold(userID: string | undefined, updated: number, resolve: any, reject: any) {
-//   firebase
-//     .database()
-//     .ref('users/' + userID)
-//     .update({ gold: updated })
-//     .then(_ => resolve(_))
-//     .catch(_ => reject(_));
-// }
-
 export { backOnlyOnce, autoImageDim }

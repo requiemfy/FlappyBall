@@ -1,6 +1,5 @@
 // @refresh reset
 
-import { Image } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as Assets from './requireAssets';
 import { firebase } from './firebase';
@@ -20,6 +19,7 @@ async function loadAssetsAsync() {
 
 let cacheRetrieved = false, // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
     retrieveInventory = false; // retrieve once = undefined, when = has url
+
 async function loadUserAssetAsync() {
   shop.storage.getItem('fetch-again').then(async resolve => {
     if (!(resolve === "false")) {
@@ -70,76 +70,6 @@ const inventory = (() => {
   
   const fetchInventory = (() => {
 
-    // const getItemInfo = (itemName: string) => new Promise((resolve, reject) => {
-    //   firebase
-    //     .database()
-    //     .ref('items/' + itemName)
-    //     .once("value")
-    //     .then(snapshot => resolve(snapshot.val()))
-    //     .catch(err => reject(err));
-    // });
-  
-    // const cacheInventory = async (inventoryResolve: any, inventoryReject: any) => {
-      // const user = firebase.auth().currentUser;
-  
-      // firebase
-      //   .database()
-      //   .ref('users/' + user?.uid + '/inventory')
-      //   .once('value')
-      //   .then(snapshot => {
-    //       if (!snapshot) return ;
-
-    //       let allItemUri: any[] = [];
-
-    //       new Promise((allResolve, allReject) => {
-            
-    //         const inventory: string[] = snapshot.val();
-    //         let promiseAllItems: Promise<unknown>[] = [];
-
-    //         inventory?.forEach(async (item: string) => {
-    //           const promise = new Promise((itemResolve, itemReject) => {
-    //             Promise.all([
-    //               getFileUrl('item_images/' + item + '.png'),
-    //               getFileUrl('item_sprites/' + item + '.png'),
-    //               getItemInfo(item)
-    //             ])
-    //               .then(async arg => {
-    //                 itemResolve({ 
-    //                   id: item, 
-    //                   url: arg[0], 
-    //                   spriteUrl: arg[1], 
-    //                   info: arg[2] 
-    //                 });
-    //                 allItemUri.push({ uri: arg[0] });
-    //               })
-    //               .catch(err => itemReject(err));
-    //           });
-    //           promiseAllItems.push(promise);
-
-    //         });
-    //         Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
-  
-    //       })
-    //       .then(allItems => {
-
-    //         allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-    //         const cacheItems = JSON.stringify(allItems);
-    //         cacheStorage.setItem('inventory', cacheItems, 60 * 60 * 24)
-    //           .then(() => { // @remind refactor
-    //             cacheStorage.getItem("inventory").then(arg => {
-    //               cachedInventory = JSON.parse(arg!);
-    //               inventoryResolve("Success");
-    //             })
-    //           })
-    //           .catch(err => inventoryReject(err));
-  
-    //       })
-    //       .catch(err => inventoryReject(err));
-  
-    //     })
-    //     .catch(err => inventoryReject(err));
-    // }
-
     const cacheInventory = (resolve: any, reject: any) => {
       const user = firebase.auth().currentUser;
 
@@ -169,19 +99,6 @@ const inventory = (() => {
   
     return async (resolve: any, reject: any) => {
       console.log("CONSOLE: Fetching inventory...")
-
-      // cacheStorage.getItem("inventory")
-      //   .then(arg => {
-      //     console.log("CONSOLE: CURRENT INVENTORY", typeof arg, arg)
-      //     if (arg && JSON.parse(arg!).length) {
-      //       cachedInventory = JSON.parse(arg);
-      //       resolve("Inventory Already Cached");
-      //     } else {
-      //       cacheInventory(resolve, reject);
-      //     }
-      //   })
-      //   .catch(err => reject(err));
-
       cacheInventory(resolve, reject);
     }
   })();
@@ -297,15 +214,6 @@ const shop = (() => {
   }
 
   const fetchShop = async (resolve: any, reject: any) => {
-
-    // new Promise((resolve, reject) => {
-    //   firebase
-    //     .database()
-    //     .ref('items/')
-    //     .once('value')
-    //     .then(snapshot => resolve(snapshot.val()))
-    //     .catch(err => reject(err))
-    // })
     
     firebase
       .database()
@@ -337,7 +245,6 @@ const shop = (() => {
               })
               .catch(err => reject(err))
             } else {
-              // cacheStorage.getItem('shop').then(arg => arg ? cachedShop = JSON.parse(arg) : null); @remind lcear
               console.log("TEST in fetch again retrieveCache", cacheRetrieved)
               retrieveCache();
             }
