@@ -15,13 +15,13 @@ function autoImageDim(actualW: number, actualH: number) {
 }
 
 
-function updateGold(userID: string | undefined, updated: number, resolve: any, reject: any) {
-  firebase
-    .database()
-    .ref('users/' + userID)
-    .update({ gold: updated })
-    .then(_ => resolve(_))
-    .catch(_ => reject(_));
-}
+// function updateGold(userID: string | undefined, updated: number, resolve: any, reject: any) {
+//   firebase
+//     .database()
+//     .ref('users/' + userID)
+//     .update({ gold: updated })
+//     .then(_ => resolve(_))
+//     .catch(_ => reject(_));
+// }
 
-export { backOnlyOnce, autoImageDim, updateGold }
+export { backOnlyOnce, autoImageDim }

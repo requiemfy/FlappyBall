@@ -108,7 +108,8 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   clearCache = () => {
-    Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
+    Cache.inventory.clear();
+    Cache.shop.clear();
   }
 
   logout = () => {

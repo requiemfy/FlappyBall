@@ -17,7 +17,6 @@ import { getCurrentGold, setCurrentGold } from '../../Home/src';
 import Preview from '../components/Preview';
 import { Asset } from 'expo-asset';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
-import { updateGold } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -49,10 +48,8 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       network: { connected: true, reachable: true },
       preview: {show: false, loading: true, error: false},
     };
-
     this.inventoryCache = Cache.inventory.cache as Item[];
     this.inventoryCache?.forEach(item => this.state.inventoryItems.push(item.id));
-    console.log("TEST inventory items", this.state.inventoryItems); // @remind clear
   }
 
   componentDidMount() {
@@ -80,23 +77,9 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     }
   }
 
-  private updateInventoryCache = () => {
-    // Cache.inventory.storage.setItem('inventory', '', 60 * 60 * 24)
-    //   .then(_ => {
-    //     new Promise((resolve, reject) => Cache.inventory.fetch(resolve, reject))
-    //       .then(_ => {
-            
-    //       })
-    //       .catch(err => console.log("CONSOLE Buying Error 3", err));
-    //   });
-
-
+  private updateCache = () => {
     this.inventoryCache.push(this.item);
-
-    // Cache.inventory.cache = this.inventoryCache;
-    // Cache.inventory.storage.setItem('inventory', JSON.stringify(this.inventoryCache), 60 * 60 * 24)
     Cache.inventory.update(this.inventoryCache);
-
     this.setState({ inventoryItems: [...this.state.inventoryItems, this.item.id] });
   }
 
@@ -112,16 +95,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
               const inventory = snapshot.val();
               inventory.push(this.item.id)
 
-              // firebase
-              //   .database()
-              //   .ref('users/' + this.user?.uid + '/inventory/')
-              //   // .update(this.itemID)
-              //   // .push()
-              //   .set(inventory)
-              //   .then(_ => this.updateInventoryCache())
-              //   .catch(_ => this.alert("Processing Error", "Something went wrong"));
-
-
               firebase
                 .database()
                 .ref('users/' + this.user?.uid)
@@ -129,11 +102,9 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                   inventory: inventory,
                   gold: getCurrentGold() - this.item.info.buy
                 })
-                .then(_ => this.updateInventoryCache())
+                .then(_ => this.updateCache())
                 .catch(_ => this.alert("Processing Error", "Something went wrong"));
-
             })
-          
           this.alert("Purchase Successful", "You can now equip the item")
         })
         .catch(_ => {

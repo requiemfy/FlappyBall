@@ -21,6 +21,8 @@ interface State {
   connectState: string;
 }
 
+let loggedIn: boolean = false;
+
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   user: firebase.User | null = null;
   email = "";
@@ -70,9 +72,13 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
 
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
       this.user = user;
-      user && this.connection.current
-        ? this.goLogin()
-        : null;
+
+      if (user && this.connection.current) {
+        this.goLogin();
+        loggedIn = true;
+      } else {
+        loggedIn = false;
+      }
     });
 
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
@@ -233,3 +239,4 @@ const styles = StyleSheet.create({
   }
 })
 export default withNavigation(LoginScreen);
+export { loggedIn }
