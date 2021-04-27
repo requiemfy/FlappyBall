@@ -55,33 +55,34 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       network: {connected: true, reachable: true},
       loading: false,
     };
-
     this.prefetches = [];
   }
 
   componentDidMount() {
     console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
-
     this.netInfo = NetInfo.addEventListener(state => {
-      this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } })
+      this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } });
     });
   }
 
   componentWillUnmount() {
-    console.log("Inventorys UN-MOUNT")
+    console.log("== inventory: UN-MOUNT")
     this.backHandler.remove();
     this.netInfo();
     this.thisMounted = false;
 
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
-      console.log("TEST aborted prefetch", id, this.prefetches[id]);
-    })
+    });
+
+    firebase
+      .database()
+      .ref('users/' + this.user?.uid)
+      .off();
   }
 
   private safeSetState(update: any) {
-    console.log("TEST in safeSetState thisMounted", this.thisMounted)
     if (this.thisMounted) {
       this.setState(update);
     }
@@ -89,7 +90,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private backAction = () => {
     backOnlyOnce(this);
-    return true;
+    return true; // @note this has purpose
   }
 
   private normalSprite = () => {
@@ -99,14 +100,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private selectItem = (item: Item) => {
     if (item.id === activeItem.id) this.normalSprite() // disselect item
-
     else if (!item.spriteUrl)  
       Alert.alert("", "Something went wrong", [
         { 
           text: "OK", onPress: () => null
         }
       ]);
-
     else {
       this.setState({ loading: true });
       // @ts-ignore: Unreachable code error
@@ -129,9 +128,9 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.state.items.some(item => {
       if (item.id === this.item.id) {
         inventory.splice(inventory.indexOf(item), 1);
-        return true;
+        return true; // @note has purpose
       }
-      else return false;
+      else return false; // @note has purpose
     });
     Cache.inventory.update(inventory);
     this.safeSetState({ items: inventory, loading: false });
@@ -146,7 +145,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       .then(async snapshot => {
         const inventory = snapshot.val();
         inventory.splice(inventory.indexOf(this.item.id), 1);
-
         firebase
           .database()
           .ref('users/' + this.user?.uid)
@@ -163,13 +161,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       .catch(err => {
         this.safeSetState({ loading: false });
         this.alert("Processing Error", "Something went wrong")
-    })
+    });
   }
 
   private trySell = async (item: Item) => {
     if (this.state.network.connected && this.state.network.reachable) {
       this.item = item;
-
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
           text: "Cancel",
@@ -198,31 +195,15 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       <SafeAreaView style={styles.safeArea}>
         {
           this.state.loading
-          ? <View style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              justifyContent: "center",
-              backgroundColor: 'rgba(52, 52, 52, 0.2)',
-              alignItems: "center",
-              zIndex: 99999,
-            }}>
-              <View style={{
-                width: "90%",
-                height: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: 'rgba(52, 52, 52, 0.8)',
-                elevation: 5,
-                borderRadius: 50,
-              }}>
+          ? <View style={styles.loading1}>
+              <View style={styles.loading2}>
                 <ActivityIndicator size={100} color="gray" />
               </View>
             </View>
           : null
         }
-        <View style={{ height: 100, justifyContent: "flex-end", alignItems: "center" }}>
-          <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
+        <View style={styles.gold1}>
+          <Text style={styles.gold2}>
             Gold: {getCurrentGold()}
           </Text>
         </View>
@@ -298,6 +279,26 @@ const styles = StyleSheet.create({
     elevation: 50,
     shadowColor: 'black',
   },
+  loading1: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.2)',
+    alignItems: "center",
+    zIndex: 99999,
+  },
+  loading2: {
+    width: "90%",
+    height: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    elevation: 5,
+    borderRadius: 50,
+  },
+  gold1: { height: 100, justifyContent: "flex-end", alignItems: "center" },
+  gold2: { color: "yellow", fontSize: 20, fontWeight: "bold" }
 });
 
 export default withNavigation(InventoryScreen);
