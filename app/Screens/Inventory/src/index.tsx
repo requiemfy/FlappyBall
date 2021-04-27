@@ -42,11 +42,11 @@ let activeItem: Active = {
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
   user = firebase.auth().currentUser;
-  thisMounted = true;
+  mounted = true;
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
   item!: Item;
-  prefetches: any;
+  prefetches: any = {};
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
@@ -55,7 +55,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       network: {connected: true, reachable: true},
       loading: false,
     };
-    this.prefetches = [];
   }
 
   componentDidMount() {
@@ -70,20 +69,21 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("== inventory: UN-MOUNT")
     this.backHandler.remove();
     this.netInfo();
-    this.thisMounted = false;
+    this.mounted = false;
 
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
+      console.log("== inventory: aborted prefetches id", id);
     });
 
-    firebase
+    firebase // @remind refactor firebase references
       .database()
       .ref('users/' + this.user?.uid)
-      .off();
+      .off(); // @remind test if this is working
   }
 
   private safeSetState(update: any) {
-    if (this.thisMounted) {
+    if (this.mounted) {
       this.setState(update);
     }
   }
@@ -111,13 +111,16 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       // @ts-ignore: Unreachable code error
       Image.prefetch(item.spriteUrl, (id: number) => this.prefetches.sprite = id) 
         .then(_ => {
+          console.log("== inventory: succeed prefetch promise (then)");
           activeItem.ballySprite = item.spriteUrl;
           activeItem.id = item.id;
-          this.safeSetState({ loading: false })
         })
         .catch(_ => {
-          this.safeSetState({ loading: false });
           this.alert("Processing Failed", "Something went wrong");
+        })
+        .finally(() => {
+          delete this.prefetches.sprite;
+          this.safeSetState({ loading: false });
         });
     }
     this.forceUpdate();
@@ -142,7 +145,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       .database()
       .ref('users/' + this.user?.uid + '/inventory')
       .once('value')
-      .then(async snapshot => {
+      .then(async snapshot => { // @remind test if this can be aborted
         const inventory = snapshot.val();
         inventory.splice(inventory.indexOf(this.item.id), 1);
         firebase
@@ -154,7 +157,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           })
           .then(_ => this.updateCache())
           .catch(_ => {
-            this.safeSetState({ loading: false });
+            this.safeSetState({ loading: false }); // @remind refactore use promises
             this.alert("Processing Error", "Something went wrong");
           });
       })

@@ -23,6 +23,7 @@ interface State {
   inventoryItems: string[];
   network: { connected: boolean, reachable: boolean | null | undefined };
   preview: {show: boolean, loading: boolean, error: boolean};
+  loading: boolean;
 }
 
 type Item = { 
@@ -34,10 +35,13 @@ type Item = {
 
 class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   user = firebase.auth().currentUser;
+  db = firebase.database();
   previewSprite!: string;
   netInfo!: NetInfoSubscription;
   item!: Item;
   inventoryCache: Item[];
+  mounted = true;
+  prefetches: any = {};
 
   constructor (props: Props | any) {
     super(props);
@@ -46,6 +50,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       inventoryItems: [],
       network: { connected: true, reachable: true },
       preview: {show: false, loading: true, error: false},
+      loading: false,
     };
     this.inventoryCache = Cache.inventory.cache as Item[];
     this.inventoryCache?.forEach(item => this.state.inventoryItems.push(item.id));
@@ -58,7 +63,17 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.netInfo();
+    this.db.ref('users/' + this.user?.uid).off() // @note trust me, this will abort listeners - I have tested it
+    Object.keys(this.prefetches).forEach(id => {
+      Image.abortPrefetch!(this.prefetches[id]);
+      console.log("== shop: abort prefetch id", id);
+    });
+  }
+
+  private safeSetState(update: any) {
+    if (this.mounted) this.setState(update);
   }
 
   private togglePreview = (url?: string) => {
@@ -66,9 +81,14 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       this.setState({ preview: {show: false, loading: true, error: false} });
     } else if (url) {
       this.setState({ preview: {...this.state.preview, loading: true} })
-      Image.prefetch(url)
-        .then(() => this.setState({ preview: {...this.state.preview, loading: false} }))
-        .catch(err => this.setState({ preview: {...this.state.preview, error: true} }))
+      // @ts-ignore: Unreachable code error
+      Image.prefetch(url, (id: number) => this.prefetches.preview = id)
+        .then(() => {
+          console.log("== shop: succeed prefetch PREVIEW promise (then)");
+          this.safeSetState({ preview: {...this.state.preview, loading: false} });
+        })
+        .catch(_ => this.safeSetState({ preview: {...this.state.preview, error: true} }))
+        .finally(() => delete this.prefetches.preview);
       this.previewSprite = url!;
       this.setState({ preview: {...this.state.preview, show: true} });
     } else {
@@ -79,37 +99,73 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   private updateCache = () => {
     this.inventoryCache.push(this.item);
     Cache.inventory.update(this.inventoryCache);
-    this.setState({ inventoryItems: [...this.state.inventoryItems, this.item.id] });
+    this.safeSetState({ 
+      inventoryItems: [...this.state.inventoryItems, this.item.id], 
+      loading: false 
+    });
+    this.alert("Purchase Successful", "You can now equip the item");
+    console.log("== shop: done update cache after buying");
   }
 
   private buy = () => {
     if (this.item.spriteUrl) {
-      Image.prefetch(this.item.spriteUrl)
-        .then(_ => {
-          firebase
-            .database()
-            .ref('users/' + this.user?.uid + '/inventory')
-            .once('value')
-            .then(async snapshot => {
-              const inventory = snapshot.val();
-              inventory.push(this.item.id)
+      this.safeSetState({ loading: true });
+      // @ts-ignore: Unreachable code error
+      // Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.sprite = id)
+      //   .then(_ => {
+      //     console.log("== shop: succeed prefetch promise (then)");
+      //     this.db.ref('users/' + this.user?.uid)
+      //       .once('value')
+      //       .then(async snapshot => {
+      //         const inventory = snapshot.val().inventory || [];
+      //         inventory.push(this.item.id)
+      //         this.db.ref('users/' + this.user?.uid)
+      //           .update({
+      //             inventory: inventory,
+      //             gold: getCurrentGold() - this.item.info.buy
+      //           })
+      //           .then(_ => this.updateCache())
+      //           .catch(_ => {
+      //             this.safeSetState({ loading: false });
+      //             this.alert("Processing Error", "Something went wrong");
+      //           });
+      //       })
+      //       .catch(_ => {
+      //         this.safeSetState({ loading: false });
+      //         this.alert("Processing Error", "Something went wrong");
+      //       });
+      //   })
+      //   .catch(_ => {
+      //     this.safeSetState({ loading: false });
+      //     this.alert("Processing Error", "Something went wrong");
+      //   })
+      //   .finally(() => delete this.prefetches.sprite);
 
-              firebase
-                .database()
-                .ref('users/' + this.user?.uid)
-                .update({
-                  inventory: inventory,
-                  gold: getCurrentGold() - this.item.info.buy
-                })
-                .then(_ => this.updateCache())
-                .catch(_ => this.alert("Processing Error", "Something went wrong"));
-            })
-          this.alert("Purchase Successful", "You can now equip the item")
-        })
-        .catch(_ => {
-          console.log("TEST issue in prefetch", _)
-          this.alert("Processing Error", "Something went wrong")
-        })
+      new Promise((_, reject) => {
+        // @ts-ignore: Unreachable code error
+        Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.buy = id)
+          .then(_ => {
+            console.log("== shop: succeed prefetch promise BUY (then)");
+            this.db.ref('users/' + this.user?.uid)
+              .once('value')
+              .then(async snapshot => {
+                console.log("== shop: succeed firebase (user/uid).once BUY (then)")
+                const inventory = snapshot.val().inventory || [];
+                inventory.push(this.item.id)
+                this.db.ref('users/' + this.user?.uid)
+                  .update({
+                    inventory: inventory,
+                    gold: getCurrentGold() - this.item.info.buy
+                  })
+                  .then(_ => this.updateCache()) // @note loading false for resolve
+                  .catch(err => reject(err));
+              }).catch(err => reject(err));
+          }).catch(err => reject(err))
+            .finally(() => delete this.prefetches.buy);
+      }).catch(_ => {
+        this.safeSetState({ loading: false }); // @note loading false for reject
+        this.alert("Processing Error", "Something went wrong");
+      })
     } 
     else this.alert("Processing Error", "Something went wrong")
   }
@@ -143,27 +199,22 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     return(
       <SafeAreaView style={styles.safeArea}>
         {
+          this.state.loading
+          ? <View style={styles.loading1}>
+              <View style={styles.loading2}>
+                <ActivityIndicator size={100} color="gray" />
+              </View>
+            </View>
+          : null
+        }
+        {
           this.state.preview.show
-            ? <View style={{
-                width: "100%",
-                height: "100%",
-                backgroundColor: 'rgba(52, 52, 52, 0.8)',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 99999,
-              }}>
+            ? <View style={styles.preview1}>
                 <TouchableOpacity 
-                  style={{ 
-                    width: "100%", 
-                    height: "100%", 
-                    justifyContent: "center", 
-                    alignItems: "center",
-                  }}
+                  style={styles.preview2}
                   onPress={() => this.togglePreview()}
                 >
                   {
-
                     this.state.preview.loading
                       ? this.state.preview.error
                         ? <Text style={{color: "white"}}>Error Loading Preview</Text>
@@ -255,6 +306,39 @@ const styles = StyleSheet.create({
 
     elevation: 50,
     shadowColor: 'black',
+  },
+  loading1: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.2)',
+    alignItems: "center",
+    zIndex: 99999,
+  },
+  loading2: {
+    width: "90%",
+    height: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    elevation: 5,
+    borderRadius: 50,
+  },
+  preview1: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: 99999,
+  },
+  preview2: { 
+    width: "100%", 
+    height: "100%", 
+    justifyContent: "center", 
+    alignItems: "center",
   },
 });
 

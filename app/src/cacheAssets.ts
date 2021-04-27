@@ -71,7 +71,7 @@ const inventory = (() => {
           const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
           cachedInventory = [];
           shop.cache?.forEach(item => {
-            if (inventory.includes(item.id)) {
+            if (inventory?.includes(item.id)) {
               cachedInventory.push(item);
               allItemUri.push({ uri: item.url })
             }

@@ -86,5 +86,7 @@ i've already done that in Wall Class
 then disable the wall move method in physics
 
 -----------------------------------
-
 edited security rules of firebase, beware if it cause error
+
+-----------------------------------
+user data cache - especially gold
