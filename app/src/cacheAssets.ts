@@ -128,7 +128,7 @@ const shop = (() => {
     cachedShop: Shop.Item[] | undefined, 
     cancelFetchShop: () => any = () => null,
     cancelIterate: () => any = () => null; 
-  cacheStorage.setItem('fetch-again', 'true', 60 * 60 * 24);
+  // cacheStorage.setItem('fetch-again', 'true', 60 * 60 * 24); @remind clear
 
   const iterateFetch = async (config: {
     list: string[],

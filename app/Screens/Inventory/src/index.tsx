@@ -40,13 +40,15 @@ let activeItem: Active = {
 };
 
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
-  navigation = this.props.navigation;
   user = firebase.auth().currentUser;
+  db = firebase.database();
+  navigation = this.props.navigation;
   mounted = true;
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
   item!: Item;
   prefetches: any = {};
+  network: boolean | null | undefined = true;
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
@@ -61,6 +63,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     this.netInfo = NetInfo.addEventListener(state => {
+      this.network = state.isConnected && state.isInternetReachable;
       this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } });
     });
   }
@@ -70,16 +73,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.backHandler.remove();
     this.netInfo();
     this.mounted = false;
-
+    this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @remind test if this is working
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== inventory: aborted prefetches id", id);
     });
-
-    firebase // @remind refactor firebase references
-      .database()
-      .ref('users/' + this.user?.uid)
-      .off(); // @remind test if this is working
   }
 
   private safeSetState(update: any) {
@@ -137,33 +135,29 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     });
     Cache.inventory.update(inventory);
     this.safeSetState({ items: inventory, loading: false });
+    console.log("== inventory: done update cache after selling");
   }
 
   private sellItem = () => {
     this.setState({ loading: true });
-    firebase
-      .database()
-      .ref('users/' + this.user?.uid + '/inventory')
-      .once('value')
-      .then(async snapshot => { // @remind test if this can be aborted
-        const inventory = snapshot.val();
-        inventory.splice(inventory.indexOf(this.item.id), 1);
-        firebase
-          .database()
-          .ref('users/' + this.user?.uid)
-          .update({ 
-            inventory: inventory,
-            gold: getCurrentGold() + (this.item.info.buy / 2),
-          })
-          .then(_ => this.updateCache())
-          .catch(_ => {
-            this.safeSetState({ loading: false }); // @remind refactore use promises
-            this.alert("Processing Error", "Something went wrong");
-          });
-      })
-      .catch(err => {
-        this.safeSetState({ loading: false });
-        this.alert("Processing Error", "Something went wrong")
+    new Promise((_, reject) => {
+      console.log("== inventory: trying to fetch firebase in selling...")
+      this.db.ref('users/' + this.user?.uid + '/inventory').once('value')
+        .then(async snapshot => {
+          console.log("== inventory: succeed to fetch firebase in selling")
+          const inventory = snapshot.val();
+          inventory.splice(inventory.indexOf(this.item.id), 1);
+          if (this.network) this.db.ref('users/' + this.user?.uid)
+            .update({ 
+              inventory: inventory,
+              gold: getCurrentGold() + (this.item.info.buy / 2),
+            })
+            .then(_ => this.updateCache()) // @note resolve loading false
+            .catch(err => reject(err));
+        }).catch(err => reject(err));
+    }).catch(_ => {
+      this.safeSetState({ loading: false }); // @note reject loading false
+      this.alert("Processing Error", "Something went wrong")
     });
   }
 

@@ -110,37 +110,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   private buy = () => {
     if (this.item.spriteUrl) {
       this.safeSetState({ loading: true });
-      // @ts-ignore: Unreachable code error
-      // Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.sprite = id)
-      //   .then(_ => {
-      //     console.log("== shop: succeed prefetch promise (then)");
-      //     this.db.ref('users/' + this.user?.uid)
-      //       .once('value')
-      //       .then(async snapshot => {
-      //         const inventory = snapshot.val().inventory || [];
-      //         inventory.push(this.item.id)
-      //         this.db.ref('users/' + this.user?.uid)
-      //           .update({
-      //             inventory: inventory,
-      //             gold: getCurrentGold() - this.item.info.buy
-      //           })
-      //           .then(_ => this.updateCache())
-      //           .catch(_ => {
-      //             this.safeSetState({ loading: false });
-      //             this.alert("Processing Error", "Something went wrong");
-      //           });
-      //       })
-      //       .catch(_ => {
-      //         this.safeSetState({ loading: false });
-      //         this.alert("Processing Error", "Something went wrong");
-      //       });
-      //   })
-      //   .catch(_ => {
-      //     this.safeSetState({ loading: false });
-      //     this.alert("Processing Error", "Something went wrong");
-      //   })
-      //   .finally(() => delete this.prefetches.sprite);
-
       new Promise((_, reject) => {
         // @ts-ignore: Unreachable code error
         Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.buy = id)
@@ -149,7 +118,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
             this.db.ref('users/' + this.user?.uid)
               .once('value')
               .then(async snapshot => {
-                console.log("== shop: succeed firebase (user/uid).once BUY (then)")
+                console.log("== shop: succeed firebase (user/uid).once BUY (then)");
                 const inventory = snapshot.val().inventory || [];
                 inventory.push(this.item.id)
                 this.db.ref('users/' + this.user?.uid)
@@ -165,9 +134,9 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       }).catch(_ => {
         this.safeSetState({ loading: false }); // @note loading false for reject
         this.alert("Processing Error", "Something went wrong");
-      })
+      });
     } 
-    else this.alert("Processing Error", "Something went wrong")
+    else this.alert("Processing Error", "Something went wrong");
   }
 
   private tryBuy = (item: Item) => {
