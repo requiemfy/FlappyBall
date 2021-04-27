@@ -18,7 +18,6 @@ async function loadAssetsAsync() {
 }
 
 let cacheRetrieved = false; // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
-    // retrieveInventory = false; // retrieve once = undefined, when = has url@remind
 
 async function loadUserAssetAsync() {
   shop.storage.getItem('fetch-again').then(async resolve => {
@@ -28,13 +27,6 @@ async function loadUserAssetAsync() {
       new Promise((resolve, reject) => shop.fetch(resolve, reject))
         .then(resolve => console.log("CACHE SHOP RESOLVED:", resolve))
         .catch(reject => console.log("CACHE SHOP ERROR:", reject));
-
-      // if (retrieveInventory) {@remind
-      //   console.log("TEST prepare fetch inventory WTF")
-      //   new Promise((resolve, reject) => inventory.fetch(resolve, reject))
-      //     .then(resolve => console.log("CACHE INVENTORY RESOLVED:", resolve))
-      //     .catch(err => console.log("CACHE INVENTORY ERROR:", err));
-      // }
       
     }
     else retrieveCache();
@@ -94,8 +86,6 @@ const inventory = (() => {
 
           allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
           cacheStorage.setItem('inventory', JSON.stringify(cachedInventory), 60 * 60 * 24);
-
-          // retrieveInventory = false@remind
           resolve("success retrieve invent")
         }
         else reject("User not logged-in")
@@ -162,7 +152,6 @@ const shop = (() => {
     from: keyof { database: string, storage: string },
     database?: any
   }, resolve: any, reject: any) => {
-
     let allItemUri: any[] = [], loggedIn = true;
 
     new Promise((allResolve, allReject) => {
@@ -175,7 +164,6 @@ const shop = (() => {
             config.from === "storage" ? getFileUrl('item_images/' + item + '.png') : void 0,
             config.from === "storage" ? getFileUrl('item_sprites/' + item + '.png') : void 0
           ]).then(async resolve => {
-              console.log("TEST 1 shop loggedIn", loggedIn)
               if (loggedIn) {
                 (resolve[1] || (config.from === "database")) ? null : itemReject("rejected since undefined url")
                 itemResolve({ 
@@ -198,8 +186,6 @@ const shop = (() => {
       Promise.all(promiseAllItems).then(allItems => allResolve(allItems)).catch(err => allReject(err))
     })
     .then(allItems => {
-      console.log("TEST 2 shop loggedIn", loggedIn)
-
       if (loggedIn) {
         allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
         cachedShop = allItems as Shop.Item[];
@@ -207,7 +193,6 @@ const shop = (() => {
 
         if (allItemUri[0]?.uri !== void 0) {
           cacheStorage.setItem('fetch-again', 'false', 60 * 60 * 24);
-          // retrieveInventory = true;@remind
           inventory.fetch();
           resolve("success GETTING urls");
         } else if (config.from === "database") {
@@ -247,18 +232,16 @@ const shop = (() => {
                   list: itemNames,
                   from: "database",
                   database: obj
-                }, resolve, reject)
+                }, resolve, reject);
               })
               .then(res => {
                 console.log("TEST set cacheRetrieved = true");
-                // retrieveInventory = true; @remind
                 inventory.fetch();
-                // cacheRetrieved = true;@remind
-                resolve(res)
+                resolve(res);
               })
               .catch(err => reject(err))
             } else {
-              console.log("TEST in fetch again retrieveCache", cacheRetrieved)
+              console.log("TEST in fetch again retrieveCache", cacheRetrieved);
               retrieveCache();
             }
 
@@ -268,7 +251,7 @@ const shop = (() => {
                 list: itemNames,
                 from: "storage",
                 database: obj
-              }, resolve, reject)
+              }, resolve, reject);
             }).then(res => {
                 console.log("CONSOLE getting url resolve:", res);
                 resolve(res);
@@ -276,11 +259,11 @@ const shop = (() => {
               .catch(err => {
                 console.log("CONSOLE getting url reject:", err);
                 reject(err);
-              })
+              });
 
           })
         }
-        else reject("User NOT logged-in")
+        else reject("User NOT logged-in");
       })
       .catch(err => reject(err));
     
