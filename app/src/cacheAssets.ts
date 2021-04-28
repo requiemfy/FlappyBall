@@ -59,7 +59,7 @@ const inventory = (() => {
   const cacheStorage = new CacheStorage();
 
   const request = async (resolve: any, reject: any) => {
-    console.log("== cacheAssets: Fetching inventory...")
+    console.log("== cacheAssets: Fetching inventory...");
     const user = firebase.auth().currentUser;
     let loggedIn = true;
     firebase
@@ -73,7 +73,7 @@ const inventory = (() => {
           shop.cache?.forEach(item => {
             if (inventory?.includes(item.id)) {
               cachedInventory.push(item);
-              allItemUri.push({ uri: item.url })
+              allItemUri.push({ uri: item.url });
             }
           });
           allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
@@ -128,7 +128,6 @@ const shop = (() => {
     cachedShop: Shop.Item[] | undefined, 
     cancelFetchShop: () => any = () => null,
     cancelIterate: () => any = () => null; 
-  // cacheStorage.setItem('fetch-again', 'true', 60 * 60 * 24); @remind clear
 
   const iterateFetch = async (config: {
     list: string[],
