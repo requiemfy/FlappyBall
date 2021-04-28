@@ -6,7 +6,6 @@ import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 import FastImage from 'react-native-fast-image';
 import * as Shop from '../Screens/Shop/src';
-// import { loggedIn } from '../Screens/Login/src';
 
 function cacheStaticImg(images: any[]) {
   return images.map(image => Asset.fromModule(image).downloadAsync());

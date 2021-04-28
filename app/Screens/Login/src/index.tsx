@@ -1,5 +1,12 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, LogBox, NativeEventSubscription, BackHandler } from 'react-native';
+import { 
+  Button, 
+  StyleSheet, 
+  View, 
+  Text,
+  NativeEventSubscription, 
+  BackHandler 
+} from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import { 
   NavigationScreenProp, 
@@ -7,9 +14,8 @@ import {
   NavigationInjectedProps, 
   withNavigation, 
   NavigationParams,
-  NavigationActions, 
 } from 'react-navigation';
-import { CommonActions, StackActions } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
@@ -21,10 +27,7 @@ interface State {
   connectState: string;
 }
 
-let loggedIn: boolean = false;
-
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
-  user: firebase.User | null = null;
   email = "";
   password = "";
   connection = { 
@@ -38,8 +41,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
 
   constructor(props: Props | any) {
     super(props);
-    LogBox.ignoreLogs(['Setting a timer']);
-
     this.state = { 
       invalidCreds: false, 
       error: "Invalid Credentials",
@@ -57,9 +58,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
             showConnectionState: true,
             connectState: "You are now connected to " + state.type
           });
-          this.user
-            ? this.goLogin()
-            : setTimeout(() => this.setState({ showConnectionState: false }), 2000);
+          setTimeout(() => this.setState({ showConnectionState: false }), 2000);
         }
       } else {
         this.connection.current = false;
@@ -71,14 +70,9 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     });
 
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
-      this.user = user;
-
       if (user && this.connection.current) {
         this.goLogin();
-        loggedIn = true;
-      } else {
-        loggedIn = false;
-      }
+      } 
     });
 
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
@@ -239,4 +233,3 @@ const styles = StyleSheet.create({
   }
 })
 export default withNavigation(LoginScreen);
-export { loggedIn }

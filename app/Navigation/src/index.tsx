@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlappyBallGame from '../../Screens/Game/src';
 import MenuScreen from '../../Screens/Menu/src';
@@ -12,12 +12,12 @@ import HallOfFameScreen from '../../Screens/HallOfFame/src';
 import InventoryScreen from '../../Screens/Inventory/src';
 import ShopScreen from '../../Screens/Shop/src';
 
-
 const RootStack = createStackNavigator();
-export default function MainStackScreen() {
+export default function MainStackScreen(props: { initRoute: string }) {
   return (
     <NavigationContainer>
       <RootStack.Navigator
+        initialRouteName={props.initRoute}
         screenOptions={{
           headerShown: false,
           headerStyle: {

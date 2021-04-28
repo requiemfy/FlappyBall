@@ -1,13 +1,17 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, Dimensions, ImageBackground, StyleSheet, LogBox } from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../Game/src';
-import { NavigationParams, ThemeColors, } from 'react-navigation';
+import { 
+  View, 
+  Text, 
+  Button, 
+  BackHandler, Alert,
+  ImageBackground, 
+  StyleSheet
+} from 'react-native';
+import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import { firebase } from '../../../src/firebase'
 import * as Cache from '../../../src/cacheAssets'
-import { Asset } from 'expo-asset';
+import CacheStorage from 'react-native-cache-storage';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -21,10 +25,13 @@ type HomeState = {
   }; 
 }
 
+const cache = new CacheStorage();
 let userGold: number;
 
 export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
   user = firebase.auth().currentUser;
+  db = firebase.database();
+  mounted = true;
 
   constructor(props: HomeProps) {
     super(props);
@@ -43,31 +50,40 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   }
 
   componentDidMount() {
-    console.log("Home SCREEN WILL MOUNT");
+    console.log("Home MOUNT");
   }
 
   componentWillUnmount() {
-    console.log("Home SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    console.log("== home: UN-MOUNT");
   }
 
-  getUserData = () => {
-    firebase
-      .database()
-      .ref('users/' + this.user?.uid)
+  private safeSetState = (update: any) => {
+    if (this.mounted) this.setState(update);
+  }
+
+  private fetchUser = () => {
+    this.db.ref('users/' + this.user?.uid)
       .once('value')
       .then(snapshot => {
-        const user = snapshot.val();
-        this.setState({ user: {
+        const 
+          user = snapshot.val(), 
+          homeData = {
+            codeName: user.codeName, 
+            record: user.record,
+          };
+        cache.setItem('current-user', JSON.stringify({
+          ...homeData,
+          gold: user.gold,
+        }), 0);
+        this.safeSetState({ user: {
           loading: false,
           error: false,
-          codeName: user.codeName, 
-          record: user.record,
+          ...homeData,
         }});
-
         userGold = user.gold;
       })
       .catch(err => {
-        this.setState({
+        this.safeSetState({
           user: {
             ...this.state.user, 
             loading: false, 
@@ -75,6 +91,24 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
           }
         })
       });
+  }
+
+  private getUserData = () => {
+    // @remind to clear user data cache in log out
+    cache.getItem('current-user').then(arg => {
+      if (arg) {
+        const userData = JSON.parse(arg)
+        this.safeSetState({ user: {
+          loading: false,
+          error: false,
+          codeName: userData.codeName,
+          record: userData.record,
+        }});
+        userGold = userData.gold;
+      } else {
+        this.fetchUser();
+      }
+    })
   }
 
   alertQuit = (cb: any, lastWords: string) => {
@@ -230,4 +264,5 @@ const styles = StyleSheet.create({
 });
 
 
-export { getCurrentGold, setCurrentGold }
+export { getCurrentGold, setCurrentGold };
+export { cache };
