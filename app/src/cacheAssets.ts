@@ -27,7 +27,7 @@ async function loadUserAssetAsync() {
         .catch(reject => console.log("== cacheAssets: CACHE SHOP ERROR -", reject));
     }
     else {
-      console.log("cacheAssets: DONT fetch urls again")
+      console.log("cacheAssets: DONT fetch urls again, resolve status:", resolve)
       retrieveCache();
     }
   })
@@ -251,6 +251,7 @@ const shop = (() => {
       cancelIterate();
       cancelFetchShop();
       cacheStorage.setItem('shop', '');
+      cacheStorage.setItem('fetch-again', '');
       cacheStorage.clear();
       cachedShop = [];
     }

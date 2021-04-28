@@ -90,3 +90,6 @@ edited security rules of firebase, beware if it cause error
 
 -----------------------------------
 user data cache - especially gold
+cache hall of fame
+
+sell/buy all selected

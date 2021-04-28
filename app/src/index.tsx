@@ -36,7 +36,7 @@ export default function Game() {
         startAsync={() => loadAssetsAsync()}
         onFinish={() => {
           setLoadingAsset(false);
-          console.log("== app index: finished loading user");
+          console.log("== app index: finished loading asset");
         }}
         onError={console.log}
       />

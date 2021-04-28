@@ -81,6 +81,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
           ...homeData,
         }});
         userGold = user.gold;
+        console.log("== home: success fetching user data, done caching");
       })
       .catch(err => {
         this.safeSetState({
@@ -89,14 +90,17 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
             loading: false, 
             error: true
           }
-        })
+        });
+        console.log("== home: failed fetching user data");
       });
   }
 
   private getUserData = () => {
     // @remind to clear user data cache in log out
+    console.log('== home: checking if user data has cache');
     cache.getItem('current-user').then(arg => {
       if (arg) {
+        console.log('== home: has cache of user data, retreived');
         const userData = JSON.parse(arg)
         this.safeSetState({ user: {
           loading: false,
@@ -106,12 +110,13 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         }});
         userGold = userData.gold;
       } else {
+        console.log('== home: NO cache of user data, fetch it');
         this.fetchUser();
       }
     })
   }
 
-  alertQuit = (cb: any, lastWords: string) => {
+  private alertQuit = (cb: any, lastWords: string) => {
     Alert.alert("Hold on!", lastWords, [
       {
         text: "Cancel",
@@ -124,13 +129,13 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     ]);
   }
 
-  quit = () => {
+  private quit = () => {
     this.alertQuit(() => {
       this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
     }, "Are you sure you want to quit?");
   }
 
-  play = () => {
+  private play = () => {
     this.props.navigation.reset({
       index: 0,
       routes: [
@@ -139,11 +144,11 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     });
   }
 
-  goSettings = () => {
+  private goSettings = () => {
     this.props.navigation.navigate('Settings');
   }
 
-  goHallOfFame = () => {
+  private goHallOfFame = () => {
     this.props.navigation.navigate('HallOfFame');
   }
 
