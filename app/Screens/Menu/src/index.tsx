@@ -62,10 +62,8 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   private isGameOver = () => {
-    // if(this.user) this.score ? this.checkScore() : this.setState({ earnedGold: 0 }); @remind
     if (this.user && (this.stateButton === "restart")) {
       console.log("== menu: GAME OVER user has score", this.score);
-      // this.score ? this.checkScore() : this.setState({ earnedGold: 0 }); @remind
       if(this.score) this.checkScore()
       else if (this.score === 0) this.setState({ earnedGold: 0 })
     } else {
@@ -131,18 +129,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     }) 
   }
 
-  // earnGold = (amount: number) => {
-  //   this.dbUser.update({ gold: amount })
-  //     .then(_ => Cache.user.update({ gold: amount }))
-  //     .catch(err => console.log("Earn Gold Error 1:", err)); @remind
-  // }
-
-  // updateHighScore = () => {
-    // this.dbUser.update({ record: this.score })
-    //   .then(_ => Cache.user.update({ record: this.score }))
-    //   .catch(err => console.log("High Score Error 2:", err));
-  // }
-
   updateUserData = (val: {newScore?: number, gold: number}) => {
     console.log("== menu: trying to update user data in firebase")
     const update = (() => {
@@ -164,9 +150,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     }
     earnedGold = highScoreBonus + streakBonus;
     this.safeSetState({ earnedGold: earnedGold });
-    // this.earnGold(earnedGold + currentGold); @remind
     this.updateUserData({ newScore: this.score, gold: earnedGold + currentGold });
-
   }
 
   checkScore = () => {
@@ -182,13 +166,11 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
         if ((record !== null) && (this.score! > record)) {
           console.log("== menu: HAS new high score", this.score);
           this.safeSetState({ newHighScore: true });
-          // this.updateHighScore(); @remind
           this.goldByNewRecord(currentGold, record)
         } else {
           console.log("== menu: NO new high score", this.score);
           const earnedGold = this.score! * 2;
           this.safeSetState({ earnedGold: earnedGold });
-          // this.earnGold(currentGold + (earnedGold)); @remind
           this.updateUserData({ gold: currentGold + earnedGold })
         }
       })
@@ -230,17 +212,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
                   ? <View style={{ alignItems: "center" }}>
                       <Text style={styles.menuLabel}>That's Life</Text>
                       <Text style={{ ...styles.menuLabel, fontSize: 50 }}>{this.score}</Text>
-                      {
-                        // this.state.newHighScore
-                        //   ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
-                        //   : null
-                        // this.user 
-                        // ? <Text style={{ fontWeight: "bold", color: "yellow", fontSize: 12 }}>{this.state.earnedGold} Gold</Text>
-                        // : null
-                        // this.user
-                        // ? this.newHighScoreComp()
-                        this.showUserAchievement()
-                      }
+                      { this.showUserAchievement() }
                     </View>
                   : this.stateButton === "resume"
                     ? <Text style={styles.menuLabel}>PAUSED</Text>
