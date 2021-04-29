@@ -13,14 +13,15 @@ import { Alert, ActivityIndicator, Image, SafeAreaView, StyleSheet, Text, View }
 import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
-import { getCurrentGold } from '../../Home/src';
+// import { getCurrentGold } from '../../Home/src'; @remind
 import Preview from '../components/Preview';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
-  inventoryItems: string[];
+  gold: number;
+  inventoryList: string[];
   network: { connected: boolean, reachable: boolean | null | undefined };
   preview: {show: boolean, loading: boolean, error: boolean};
   loading: boolean;
@@ -40,20 +41,23 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   netInfo!: NetInfoSubscription;
   item!: Item;
   inventoryCache: Item[];
+  inventoryListTemp!: string[]; 
+  goldTemp!: number; 
   mounted = true;
   prefetches: any = {};
 
   constructor (props: Props | any) {
     super(props);
     this.state = { 
-      items: Cache.shop.cache as Item[],
-      inventoryItems: [],
+      items: Cache.shop.data as Item[],
+      gold: Cache.user.data?.gold as number,
+      inventoryList: Cache.user.data?.inventory || [],
       network: { connected: true, reachable: true },
       preview: {show: false, loading: true, error: false},
       loading: false,
     };
-    this.inventoryCache = Cache.inventory.cache as Item[];
-    this.inventoryCache?.forEach(item => this.state.inventoryItems.push(item.id));
+    this.inventoryCache = Cache.inventory.data as Item[];
+    // this.inventoryCache?.forEach(item => this.state.inventoryList.push(item.id)); @remind
   }
 
   componentDidMount() {
@@ -99,10 +103,19 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   private updateCache = () => {
     this.inventoryCache.push(this.item);
     Cache.inventory.update(this.inventoryCache);
+
+    Cache.user.update({
+      gold: this.goldTemp,
+      inventory: this.inventoryListTemp,
+    });
+
     this.safeSetState({ 
-      inventoryItems: [...this.state.inventoryItems, this.item.id], 
+      // inventoryList: [...this.state.inventoryList, this.item.id], @remind
+      inventoryList: this.inventoryListTemp,
+      gold: this.goldTemp,
       loading: false 
     });
+    
     this.alert("Purchase Successful", "You can now equip the item");
     console.log("== shop: done update cache after buying");
   }
@@ -115,16 +128,18 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.buy = id)
           .then(_ => {
             console.log("== shop: succeed prefetch promise BUY (then)");
-            this.db.ref('users/' + this.user?.uid)
+            this.db.ref('users/' + this.user?.uid) // @note possibly, inventory is undefined
               .once('value')
               .then(async snapshot => {
                 console.log("== shop: succeed firebase (user/uid).once BUY (then)");
-                const inventory = snapshot.val().inventory || [];
-                inventory.push(this.item.id)
+                const user = snapshot.val();
+                this.inventoryListTemp = user.inventory as string[] || [];
+                this.inventoryListTemp.push(this.item.id);
+                this.goldTemp = user.gold - this.item.info.buy;
                 this.db.ref('users/' + this.user?.uid)
                   .update({
-                    inventory: inventory,
-                    gold: getCurrentGold() - this.item.info.buy
+                    inventory: this.inventoryListTemp,
+                    gold: this.goldTemp
                   })
                   .then(_ => this.updateCache()) // @note loading false for resolve
                   .catch(err => reject(err));
@@ -197,7 +212,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
         <View style={{ height: 100, justifyContent: "flex-end", alignItems: "center" }}>
           <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
-            Gold: {getCurrentGold()}
+            Gold: {this.state.gold}
           </Text>
         </View>
         {
@@ -225,7 +240,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                   </TouchableOpacity>
                   
                   {
-                    !this.state.inventoryItems.includes(item.id)
+                    !this.state.inventoryList.includes(item.id)
                     ? <TouchableOpacity onPress={() => this.tryBuy(item)}>
                         <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>
                           BUY FOR {item.info.buy}

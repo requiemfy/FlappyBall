@@ -15,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets'
 import { activeItem } from '../../Inventory/src';
 import { Asset } from 'expo-asset';
-import * as User from '../../Home/src';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -111,8 +110,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   clearCache = () => {
     Cache.inventory.clear();
     Cache.shop.clear();
-    User.cache.setItem('current-user', '', 1)
-      .then(_ => console.log("== Settings: user cache CLEARED"));
+    Cache.user.clear();
   }
 
   logout = () => {

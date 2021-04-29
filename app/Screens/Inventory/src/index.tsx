@@ -1,6 +1,14 @@
-
 import * as React from 'react';
-import { Alert, Image, StyleSheet, View, ActivityIndicator, Text, NativeEventSubscription, BackHandler } from 'react-native';
+import { 
+  Alert, 
+  Image, 
+  StyleSheet, 
+  View, 
+  ActivityIndicator, 
+  Text, 
+  NativeEventSubscription, 
+  BackHandler 
+} from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
@@ -16,12 +24,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets';
 import { Asset } from 'expo-asset';
 import FastImage from 'react-native-fast-image'
-import { getCurrentGold, setCurrentGold } from '../../Home/src';
+// import { getCurrentGold, setCurrentGold } from '../../Home/src'; @remind
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
+  gold: number;
   network: {connected: boolean; reachable: boolean | null | undefined;};
   loading: boolean;
 }
@@ -47,13 +56,16 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
   item!: Item;
+  inventoryListTemp!: string[];
+  goldTemp!: number;
   prefetches: any = {};
   network: boolean | null | undefined = true;
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
-      items: Cache.inventory.cache,
+      items: Cache.inventory.data,
+      gold: Cache.user.data?.gold as number,
       network: {connected: true, reachable: true},
       loading: false,
     };
@@ -73,7 +85,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.backHandler.remove();
     this.netInfo();
     this.mounted = false;
-    this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @remind test if this is working
+    this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @note trust me this is working
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== inventory: aborted prefetches id", id);
@@ -125,32 +137,39 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private updateCache = () => {
-    const inventory = this.state.items;
+    const inventoryTmp = this.state.items;
     this.state.items.some(item => {
       if (item.id === this.item.id) {
-        inventory.splice(inventory.indexOf(item), 1);
+        inventoryTmp.splice(inventoryTmp.indexOf(item), 1);
         return true; // @note has purpose
       }
       else return false; // @note has purpose
     });
-    Cache.inventory.update(inventory);
-    this.safeSetState({ items: inventory, loading: false });
+    Cache.inventory.update(inventoryTmp);
+
+    Cache.user.update({
+      gold: this.goldTemp,
+      inventory: this.inventoryListTemp,
+    });
+
+    this.safeSetState({ items: inventoryTmp, gold: this.goldTemp, loading: false });
     console.log("== inventory: done update cache after selling");
   }
 
   private sellItem = () => {
     this.setState({ loading: true });
     new Promise((_, reject) => {
-      console.log("== inventory: trying to fetch firebase in selling...")
-      this.db.ref('users/' + this.user?.uid + '/inventory').once('value')
+      console.log("== inventory: trying to fetch firebase in selling...");
+      this.db.ref('users/' + this.user?.uid + '/inventory').once('value') // @note prefered to get fresh data
         .then(async snapshot => {
-          console.log("== inventory: succeed to fetch firebase in selling")
-          const inventory = snapshot.val();
-          inventory.splice(inventory.indexOf(this.item.id), 1);
+          console.log("== inventory: succeed to fetch firebase in selling");
+          this.inventoryListTemp = snapshot.val();
+          this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
+          this.goldTemp = this.state.gold + (this.item.info.buy / 2);
           if (this.network) this.db.ref('users/' + this.user?.uid)
             .update({ 
-              inventory: inventory,
-              gold: getCurrentGold() + (this.item.info.buy / 2),
+              inventory: this.inventoryListTemp,
+              gold: this.goldTemp,
             })
             .then(_ => this.updateCache()) // @note resolve loading false
             .catch(err => reject(err));
@@ -201,7 +220,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }
         <View style={styles.gold1}>
           <Text style={styles.gold2}>
-            Gold: {getCurrentGold()}
+            Gold: {this.state.gold}
           </Text>
         </View>
         {

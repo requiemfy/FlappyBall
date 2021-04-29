@@ -1,12 +1,17 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, NativeEventSubscription } from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../Game/src';
+import { 
+  View,
+  Text, 
+  Button, 
+  BackHandler, 
+  Alert, 
+  StyleSheet, 
+  NativeEventSubscription 
+} from 'react-native';
 import { NavigationParams, } from 'react-navigation';
-import { PulseIndicator } from 'react-native-indicators';
-import { firebase, UserData } from '../../../src/firebase';
+import { firebase } from '../../../src/firebase';
 import { backOnlyOnce } from '../../../src/helpers';
+import * as Cache from '../../../src/cacheAssets';
 
 type MenuButton = keyof { resume: string, restart: string };
 type Props = { 
@@ -28,6 +33,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   stateButton = this.props.route.params.button;
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
+  dbUser = this.database.ref('users/' + this.user?.uid);
 
   constructor(props: Props) {
     super(props);
@@ -107,17 +113,15 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   earnGold = (amount: number) => {
-    this.database
-      .ref('users/' + this.user?.uid)
-      .update({ gold: amount })
-      .catch(err => console.log("Earn Gold Error 1:", err))
+    this.dbUser.update({ gold: amount })
+      .catch(err => console.log("Earn Gold Error 1:", err));
+    Cache.user.update({ gold: amount });
   }
 
   updateHighScore = () => {
-    this.database
-      .ref('users/' + this.user?.uid)
-      .update({ record: this.score })
+    this.dbUser.update({ record: this.score })
       .catch(err => console.log("High Score Error 2:", err));
+    Cache.user.update({ record: this.score });
   }
 
   calculateGold = (currentGold:number, currentRecord: number) => {
@@ -125,15 +129,13 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     if ((this.score! - (currentRecord + 1)) !== 0) {
       streakBonus = this.score! * 4;
     }
-
     earnedGold = highScoreBonus + streakBonus;
     this.setState({ earnedGold: earnedGold });
     this.earnGold(earnedGold + currentGold);
   }
 
   hasNewHighScore = () => {
-    this.database
-      .ref('users/' + this.user?.uid)
+    this.dbUser
       .once('value')
       .then(snapshot => {
         const 

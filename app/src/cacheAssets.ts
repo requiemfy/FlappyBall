@@ -13,33 +13,35 @@ function cacheStaticImg(images: any[]) {
 
 async function loadAssetsAsync() {
   const imageAssets: any = cacheStaticImg(Assets.images);
-  await Promise.all([...imageAssets]).catch(err => console.log("cacheAssets: loadAssetsAsync Error:", err));
+  await Promise.all([...imageAssets]).catch(err => console.log("cache: loadAssetsAsync Error:", err));
 }
 
-let cacheRetrieved = false; // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
+let cacheAssetRetrieved = false; // this is useful to detect when the app is closed while LOG IN, therefore need to get cache ONCE
 
-async function loadUserAssetAsync() {
+async function loadUserAsync(resolve: any, reject: any) {
+  await user.fetch(resolve, reject);
+
   shop.storage.getItem('fetch-again').then(async resolve => {
     if (!(resolve === "false")) {
-      console.log("cacheAssets: fetch urls again", resolve, typeof resolve)
+      console.log("cache: fetch urls again", resolve, typeof resolve)
       new Promise((resolve, reject) => shop.fetch(resolve, reject))
-        .then(resolve => console.log("== cacheAssets: CACHE SHOP RESOLVED -", resolve))
-        .catch(reject => console.log("== cacheAssets: CACHE SHOP ERROR -", reject));
+        .then(resolve => console.log("== cache: CACHE SHOP RESOLVED -", resolve))
+        .catch(reject => console.log("== cache: CACHE SHOP ERROR -", reject));
     }
     else {
-      console.log("cacheAssets: DONT fetch urls again, resolve status:", resolve)
-      retrieveCache();
+      console.log("cache: DONT fetch urls again, resolve status:", resolve)
+      retrieveAssetCache();
     }
   })
 }
 
-function retrieveCache() {
-  if(!cacheRetrieved){
-    shop.storage.getItem('shop').then(resolve => shop.cache = JSON.parse(resolve!));
-    inventory.storage.getItem('inventory').then(resolve => inventory.cache = JSON.parse(resolve!));
-    cacheRetrieved = true;
+function retrieveAssetCache() {
+  if(!cacheAssetRetrieved){
+    shop.storage.getItem('shop').then(resolve => shop.data = JSON.parse(resolve!));
+    inventory.storage.getItem('inventory').then(resolve => inventory.data = JSON.parse(resolve!));
+    cacheAssetRetrieved = true;
   }
-  console.log("== cacheAssets: cacheRetrieved", cacheRetrieved)
+  console.log("== cache: cacheAssetRetrieved", cacheAssetRetrieved)
 }
 
 function getFileUrl(path: string) {
@@ -47,69 +49,80 @@ function getFileUrl(path: string) {
     .storage()
     .ref(path)
     .getDownloadURL()
-    .catch(err => console.log("== cacheAssets: getFileUrl Error ", err));
+    .catch(err => console.log("== cache: getFileUrl Error ", err));
 }
 
 // =======================================================================
 // INVENTORY CACHING
 
 const inventory = (() => {
-  let cachedInventory: Shop.Item[] = [], cancelRequest: () => any = () => null;
+  let inventoryCache: Shop.Item[] = [];
+  // cancelRequest: () => any = () => null; // @remind clear
   const cacheStorage = new CacheStorage();
 
-  const request = async (resolve: any, reject: any) => {
-    console.log("== cacheAssets: Fetching inventory...");
-    const user = firebase.auth().currentUser;
-    let loggedIn = true;
-    firebase
-      .database()
-      .ref('users/' + user?.uid + '/inventory')
-      .once('value')
-      .then(snapshot => {
-        if (loggedIn) {
-          const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
-          cachedInventory = [];
-          shop.cache?.forEach(item => {
-            if (inventory?.includes(item.id)) {
-              cachedInventory.push(item);
-              allItemUri.push({ uri: item.url });
-            }
-          });
-          allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-          cacheStorage.setItem('inventory', JSON.stringify(cachedInventory), 60 * 60 * 24);
-          resolve("success retrieve invent")
+  // const request = async (resolve: any, reject: any) => { // @remind clear
+  const fetchInventory = () => {
+    console.log("== cache: Fetching inventory...");
+    // const user = firebase.auth().currentUser; // @remind clear
+    // let loggedIn = true;
+
+    // firebase
+    //   .database()
+    //   .ref('users/' + user?.uid + '/inventory')
+    //   .once('value')
+    //   .then(snapshot => {
+        // if (loggedIn) {
+        //   const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
+        //   inventoryCache = [];
+        //   shop.cache?.forEach(item => {
+        //     if (inventory?.includes(item.id)) {
+        //       inventoryCache.push(item);
+        //       allItemUri.push({ uri: item.url });
+        //     }
+        //   });
+        //   allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+        //   cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 60 * 60 * 24);
+        //   resolve("success retrieve invent")
+        // }
+        // else reject("User not logged-in")
+    //   })
+    //   .catch(err => reject(err));
+
+      const inventory = user.data?.inventory, allItemUri: {uri: string}[] = [];
+      inventoryCache = [];
+      shop.data?.forEach(item => {
+        if (inventory?.includes(item.id)) {
+          inventoryCache.push(item);
+          allItemUri.push({ uri: item.url });
         }
-        else reject("User not logged-in")
-      })
-      .catch(err => reject(err));
-    cancelRequest = () => loggedIn = false;
+      });
+      allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
+      cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 60 * 60 * 24);
+      console.log("== cache: CACHE INVENTORY DONE <3");
   }
   
-  const fetchInventory = () => {
-    console.log("== cacheAssets: going to fetch inventory")
-    new Promise((resolve, reject) => request(resolve, reject))
-      .then(resolve => console.log("== cacheAssets: CACHE INVENTORY RESOLVED:", resolve))
-        .catch(err => console.log("== cacheAssets: CACHE INVENTORY ERROR:", err));
-  }
+  // const fetchInventory = () => { // @remind clear
+  //   console.log("== cache: going to fetch inventory")
+  //   new Promise((resolve, reject) => request(resolve, reject))
+  //     .then(resolve => console.log("== cache: CACHE INVENTORY RESOLVED:", resolve))
+  //       .catch(err => console.log("== cache: CACHE INVENTORY ERROR:", err));
+  // }
 
   return {
     fetch: fetchInventory,
-    update: (item: Shop.Item[]) => {
-      cachedInventory = item;
-      cacheStorage.setItem('inventory', JSON.stringify(item), 60 * 60 * 24)
+    update: (items: Shop.Item[]) => {
+      inventoryCache = items;
+      cacheStorage.setItem('inventory', JSON.stringify(items), 60 * 60 * 24)
     },
-    get cache() {
-      return cachedInventory;
-    },
-    set cache(val: Shop.Item[]) {
-      cachedInventory = val;
+    get data() {return inventoryCache;},
+    set data(items: Shop.Item[]) {
+      inventoryCache = items;
     },
     storage: cacheStorage,
     clear: () => {
-      cancelRequest();
-      cacheStorage.setItem('shop', '');
+      cacheStorage.setItem('inventory', '', 1);
       cacheStorage.clear();
-      cachedInventory = [];
+      inventoryCache = [];
     }
   }
 })();
@@ -121,10 +134,10 @@ const inventory = (() => {
 
 const shop = (() => {
   const cacheStorage = new CacheStorage();
-  // purpose of cachedShop is not to rely on get method of cache
+  // purpose of shopCache is not to rely on get method of cache
   // @note this is needed trust me, because local let items should be cleared
   let 
-    cachedShop: Shop.Item[] | undefined, 
+    shopCache: Shop.Item[] | undefined, 
     cancelFetchShop: () => any = () => null,
     cancelIterate: () => any = () => null; 
 
@@ -165,7 +178,7 @@ const shop = (() => {
     .then(allItems => {
       if (loggedIn) {
         allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-        cachedShop = allItems as Shop.Item[];
+        shopCache = allItems as Shop.Item[];
         cacheStorage.setItem('shop', JSON.stringify(allItems), 60 * 60 * 24).catch(err => reject(err));
         if (allItemUri[0]?.uri !== void 0) {
           cacheStorage.setItem('fetch-again', 'false', 60 * 60 * 24);
@@ -191,14 +204,14 @@ const shop = (() => {
       .ref('items/')
       .once('value')
       .then(async (snapshot) => {
-        console.log("== cacheAssets: logged in", loggedIn)
+        console.log("== cache: logged in", loggedIn)
         if (loggedIn) {
           const obj = snapshot.val() as any;
           const itemNames = Object.keys(obj);
           cacheStorage.getItem('shop').then(async (arg) => {
-            console.log("== cacheAssets: trying to fetch undefined urls first", arg)
+            console.log("== cache: trying to fetch undefined urls first", arg)
             if (!arg) {
-              console.log("== cacheAssets: fetching undefined urls")
+              console.log("== cache: fetching undefined urls")
               await new Promise((resolve, reject) => {
                 iterateFetch({
                   list: itemNames,
@@ -211,8 +224,8 @@ const shop = (() => {
                 })
                 .catch(err => reject(err))
             } else {
-              console.log("== cacheAssets: don't fetch urls again, just get from cache");
-              retrieveCache();
+              console.log("== cache: don't fetch urls again, just get from cache");
+              retrieveAssetCache();
             }
             // resolve or reject of this won't take effect, because of top promise FIRST
             new Promise((resolve, reject) => {
@@ -222,11 +235,11 @@ const shop = (() => {
                 database: obj
               }, resolve, reject);
             }).then(res => {
-                console.log("== cacheAssets: getting url resolve:", res);
+                console.log("== cache: getting url resolve:", res);
                 resolve(res);
               })
               .catch(err => {
-                console.log("== cacheAssets: getting url reject:", err);
+                console.log("== cache: getting url reject:", err);
                 reject(err);
               });
           })
@@ -240,20 +253,18 @@ const shop = (() => {
 
   return {
     fetch: fetchShop,
-    get cache() {
-      return cachedShop;
-    },
-    set cache(val: Shop.Item[] | undefined) {
-      cachedShop = val;
+    get data() {return shopCache},
+    set data(val: Shop.Item[] | undefined) {
+      shopCache = val;
     },
     storage: cacheStorage,
     clear: () => {
       cancelIterate();
       cancelFetchShop();
-      cacheStorage.setItem('shop', '');
-      cacheStorage.setItem('fetch-again', '');
+      cacheStorage.setItem('shop', '', 1);
+      cacheStorage.setItem('fetch-again', '', 1);
       cacheStorage.clear();
-      cachedShop = [];
+      shopCache = [];
     }
   }
 })();
@@ -261,9 +272,76 @@ const shop = (() => {
 // CACHE SHOP
 // =======================================================================
 
+const user = (() => {
+  const cacheStorage = new CacheStorage();
+  let userCache: {codeName: string, record: number, inventory?: string[], gold: number} | null;
+
+  const request = (resolve: any, reject: any) => {
+    const user = firebase.auth().currentUser;
+    console.log("== cache: fetching firebase for user data...");
+    firebase.database().ref('users/' + user?.uid)
+      .once('value')
+      .then(snapshot => {
+        userCache = snapshot.val();
+        cacheStorage.setItem('current-user', JSON.stringify(userCache), 0);
+        resolve(userCache);
+        console.log("== cache: success fetching user data, done caching");
+      })
+      .catch(err => {
+        reject(err);
+        console.log("== cache: failed fetching user data");
+      });
+  }
+
+  const fetchUser = async (resolve: any, reject: any) => {
+    console.log('== cache: checking if let static user var has value');
+    if (userCache) {
+      resolve(userCache);
+      console.log("== cache: static user var has value, use it instead (of cache)");
+      return;
+    } else {
+      console.log("== cache: NO value static user var, try to use cache")
+    }
+    console.log('== cache: checking if user data has cache');
+    cacheStorage.getItem('current-user').then(arg => {
+      if (arg) {
+        console.log('== cache: has cache of user data, retreived', arg);
+        userCache = JSON.parse(arg);
+        resolve(userCache);
+      } else {
+        console.log('== cache: NO cache of user data, fetch it');
+        request(resolve, reject);
+      }
+    });
+  }
+
+  return {
+    fetch: fetchUser,
+    
+    get data() {return userCache;},
+
+    update: (val: {record?: number, gold?: number, inventory?: string[]}) => {
+      // val.gold ? userCache!.gold = val.gold : null; @remind
+      // val.record ? userCache!.record = val.record : null;
+      // val.inventory ? userCache!.inventory = val.inventory : null;
+      userCache = { ...userCache!, ...val };
+      cacheStorage.setItem('current-user', JSON.stringify(userCache), 0);
+    },
+    
+    storage: cacheStorage,
+    
+    clear: () => {
+      cacheStorage.setItem('current-user', '', 1);
+      cacheStorage.clear();
+      userCache = null;
+    }
+  }
+})()
+
 export { 
   loadAssetsAsync, 
-  loadUserAssetAsync, 
+  loadUserAsync, 
   inventory,
   shop,
+  user,
 }
