@@ -8,7 +8,7 @@ import {
   StyleSheet, 
   NativeEventSubscription 
 } from 'react-native';
-import { NavigationParams, ThemeContext, } from 'react-navigation';
+import { NavigationParams } from 'react-navigation';
 import { firebase } from '../../../src/firebase';
 import { backOnlyOnce } from '../../../src/helpers';
 import * as Cache from '../../../src/cacheAssets';
@@ -34,6 +34,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
   dbUser = this.database.ref('users/' + this.user?.uid);
+  mounted = true;
 
   constructor(props: Props) {
     super(props);
@@ -45,13 +46,31 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     console.log("MENU SCREEN WILL MOUNT");
-    this.score ? this.hasNewHighScore() : this.setState({ earnedGold: 0 });
+    this.isGameOver();
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
     console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
     this.backHandler.remove();
+    this.mounted = false;
+    this.dbUser.off();
+  }
+
+  private safeSetState = (update: any) => {
+    if (this.mounted) this.setState(update);
+  }
+
+  private isGameOver = () => {
+    // if(this.user) this.score ? this.checkScore() : this.setState({ earnedGold: 0 }); @remind
+    if (this.user && (this.stateButton === "restart")) {
+      console.log("== menu: GAME OVER user has score", this.score);
+      // this.score ? this.checkScore() : this.setState({ earnedGold: 0 }); @remind
+      if(this.score) this.checkScore()
+      else if (this.score === 0) this.setState({ earnedGold: 0 })
+    } else {
+      console.log("== menu: just opening menu")
+    }
   }
 
   backAction = () => {
@@ -112,47 +131,87 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     }) 
   }
 
-  earnGold = (amount: number) => {
-    this.dbUser.update({ gold: amount })
-      .then(_ => Cache.user.update({ gold: amount }))
-      .catch(err => console.log("Earn Gold Error 1:", err));
-    
-  }
+  // earnGold = (amount: number) => {
+  //   this.dbUser.update({ gold: amount })
+  //     .then(_ => Cache.user.update({ gold: amount }))
+  //     .catch(err => console.log("Earn Gold Error 1:", err)); @remind
+  // }
 
-  updateHighScore = () => {
-    this.dbUser.update({ record: this.score })
-      .then(_ => Cache.user.update({ record: this.score }))
+  // updateHighScore = () => {
+    // this.dbUser.update({ record: this.score })
+    //   .then(_ => Cache.user.update({ record: this.score }))
+    //   .catch(err => console.log("High Score Error 2:", err));
+  // }
+
+  updateUserData = (val: {newScore?: number, gold: number}) => {
+    console.log("== menu: trying to update user data in firebase")
+    const update = (() => {
+      if (val.newScore) return { record: val.newScore, gold: val.gold }
+      else return { gold: val.gold }
+    })();
+    this.dbUser.update(update)
+      .then(_ => {
+        Cache.user.update(update);
+        console.log("== menu: finished updating user data in firebase")
+      })
       .catch(err => console.log("High Score Error 2:", err));
   }
 
-  calculateGold = (currentGold:number, currentRecord: number) => {
+  goldByNewRecord = (currentGold:number, currentRecord: number) => {
     let highScoreBonus = (currentRecord + 1) * 3, streakBonus = 0, earnedGold = 0;
     if ((this.score! - (currentRecord + 1)) !== 0) {
       streakBonus = this.score! * 4;
     }
     earnedGold = highScoreBonus + streakBonus;
-    this.setState({ earnedGold: earnedGold });
-    this.earnGold(earnedGold + currentGold);
+    this.safeSetState({ earnedGold: earnedGold });
+    // this.earnGold(earnedGold + currentGold); @remind
+    this.updateUserData({ newScore: this.score, gold: earnedGold + currentGold });
+
   }
 
-  hasNewHighScore = () => {
+  checkScore = () => {
+    console.log("== menu: fetching firebase high score");
     this.dbUser
       .once('value')
       .then(snapshot => {
+        console.log("== menu: succeed fetching firebase high score, check if beaten...");
         const 
           userData = snapshot.val(),
           record = userData.record as number,
           currentGold = userData.gold as number;
         if ((record !== null) && (this.score! > record)) {
-          this.setState({ newHighScore: true });
-          this.updateHighScore();
-          this.calculateGold(currentGold, record)
+          console.log("== menu: HAS new high score", this.score);
+          this.safeSetState({ newHighScore: true });
+          // this.updateHighScore(); @remind
+          this.goldByNewRecord(currentGold, record)
         } else {
-          this.setState({ earnedGold: this.score! * 2 });
-          this.earnGold(currentGold + (this.score! * 2));
+          console.log("== menu: NO new high score", this.score);
+          const earnedGold = this.score! * 2;
+          this.safeSetState({ earnedGold: earnedGold });
+          // this.earnGold(currentGold + (earnedGold)); @remind
+          this.updateUserData({ gold: currentGold + earnedGold })
         }
       })
       .catch(err => console.log("High Score Error 1:", err));
+  }
+
+  private showUserAchievement = () => {
+    if (this.user) {
+      console.log("== menu: ONLINE PLAY, show high score & gold")
+      return (
+        <>
+          {
+            this.state.newHighScore
+            ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
+            : null
+          }
+          <Text style={{ fontWeight: "bold", color: "yellow", fontSize: 12 }}>{this.state.earnedGold} Gold</Text>
+        </>
+      )
+    } else {
+      console.log("== menu: OFFLINE PLAY, only score shown");
+      return null
+    };
   }
 
   render() {
@@ -172,11 +231,16 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
                       <Text style={styles.menuLabel}>That's Life</Text>
                       <Text style={{ ...styles.menuLabel, fontSize: 50 }}>{this.score}</Text>
                       {
-                        this.state.newHighScore
-                          ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
-                          : null
+                        // this.state.newHighScore
+                        //   ? <Text style={{...styles.menuLabel, fontSize: 15}}>Oh it's a NEW HIGH SCORE!!</Text>
+                        //   : null
+                        // this.user 
+                        // ? <Text style={{ fontWeight: "bold", color: "yellow", fontSize: 12 }}>{this.state.earnedGold} Gold</Text>
+                        // : null
+                        // this.user
+                        // ? this.newHighScoreComp()
+                        this.showUserAchievement()
                       }
-                      <Text style={{ fontWeight: "bold", color: "yellow", fontSize: 12 }}>{this.state.earnedGold} Gold</Text>
                     </View>
                   : this.stateButton === "resume"
                     ? <Text style={styles.menuLabel}>PAUSED</Text>
