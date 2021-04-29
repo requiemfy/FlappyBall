@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import {
   NavigationScreenProp,
@@ -13,7 +12,6 @@ import { Alert, ActivityIndicator, Image, SafeAreaView, StyleSheet, Text, View }
 import * as Cache from '../../../src/cacheAssets'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
-// import { getCurrentGold } from '../../Home/src'; @remind
 import Preview from '../components/Preview';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
@@ -57,7 +55,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       loading: false,
     };
     this.inventoryCache = Cache.inventory.data as Item[];
-    // this.inventoryCache?.forEach(item => this.state.inventoryList.push(item.id)); @remind
   }
 
   componentDidMount() {
@@ -103,19 +100,15 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   private updateCache = () => {
     this.inventoryCache.push(this.item);
     Cache.inventory.update(this.inventoryCache);
-
     Cache.user.update({
       gold: this.goldTemp,
       inventory: this.inventoryListTemp,
     });
-
     this.safeSetState({ 
-      // inventoryList: [...this.state.inventoryList, this.item.id], @remind
       inventoryList: this.inventoryListTemp,
       gold: this.goldTemp,
       loading: false 
     });
-    
     this.alert("Purchase Successful", "You can now equip the item");
     console.log("== shop: done update cache after buying");
   }

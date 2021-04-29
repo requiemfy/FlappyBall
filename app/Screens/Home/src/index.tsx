@@ -9,9 +9,7 @@ import {
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
-import { firebase } from '../../../src/firebase'
 import * as Cache from '../../../src/cacheAssets'
-import CacheStorage from 'react-native-cache-storage';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -25,13 +23,7 @@ type HomeState = {
   }; 
 }
 
-// const cache = new CacheStorage(); @remind
-// let userGold: number;
-// let userData: {codeName: string, record: number, inventory: string[], gold: number};
-
 export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
-  // user = firebase.auth().currentUser; @remind
-  // db = firebase.database();
   mounted = true;
 
   constructor(props: HomeProps) {
@@ -45,8 +37,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         record: 0,
       } 
     }
-
-    // Cache.loadUserAssetAsync();@remind
     this.getUserData();
   }
 
@@ -61,73 +51,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   private safeSetState = (update: any) => {
     if (this.mounted) this.setState(update);
   }
-
-  // private fetchUser = () => {@remind
-    // this.db.ref('users/' + this.user?.uid)
-    //   .once('value')
-    //   .then(snapshot => {
-    //     userData = snapshot.val();
-
-    //     // this.safeSetState({ user: {
-    //     //   loading: false,
-    //     //   error: false,
-    //     //   codeName: userData.codeName, 
-    //     //   record: userData.record,
-    //     // }});
-    //     this.setStateUserData(userData);
-
-    //     cache.setItem('current-user', JSON.stringify({userData}), 0);
-    //     // userGold = user.gold; @remind clear
-
-    //     Cache.loadUserAssetAsync();
-    //     console.log("== home: success fetching user data, done caching");
-    //   })
-    //   .catch(err => {
-    //     this.safeSetState({
-    //       user: {
-    //         ...this.state.user, 
-    //         loading: false, 
-    //         error: true
-    //       }
-    //     });
-    //     console.log("== home: failed fetching user data");
-    //   });
-  // }
-
-  // private getUserData = () => {
-  //   console.log('== home: checking if let variable userData has value');
-  //   if (userData) {
-  //     console.log("== home: userData has value, use it instead (of cache)");
-  //     this.setStateUserData(userData); // @note set state user
-  //     return;
-  //   } else {
-  //     console.log("== home: NO value userData, try to use cache")
-  //   }
-  //   console.log('== home: checking if user data has cache');
-  //   cache.getItem('current-user').then(arg => {
-  //     if (arg) {
-  //       console.log('== home: has cache of user data, retreived');
-  //       // ======= @note this is combination =======
-  //       userData = JSON.parse(arg);
-        
-        
-  //       // this.safeSetState({ user: { @remind clear
-  //       //   loading: false,
-  //       //   error: false,
-  //       //   codeName: userData.codeName,
-  //       //   record: userData.record,
-  //       // }});
-
-  //       this.setStateUserData(userData);
-  //       // ==========================================
-
-  //       // userGold = userData.gold; @remind clear
-  //     } else {
-  //       console.log('== home: NO cache of user data, fetch it');
-  //       this.fetchUser();
-  //     }
-  //   });
-  // }
 
   private getUserData = () => {
     console.log("home: Getting user data...")
@@ -146,15 +69,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
       })
     .catch(err => console.log("== home: USER DATA REJECT", err))
   }
-
-  // private setStateUserData = (user: any) => { @remind
-  //   this.safeSetState({ user: {
-  //     loading: false,
-  //     error: false,
-  //     codeName: user.codeName,
-  //     record: user.record,
-  //   }});
-  // }
 
   private alertQuit = (cb: any, lastWords: string) => {
     Alert.alert("Hold on!", lastWords, [
@@ -194,29 +108,16 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
   render() {
     return (
-      <View style={{ ...styles.flexCenter, }}>
-        <View style={{
-          backgroundColor: "black",
-          width: "100%",
-          height: "100%",
-          borderRadius: 10,
-        }}>
+      <View style={styles.flexCenter}>
+        <View style={styles.container1}>
           <ImageBackground 
             source={require('../assets/bg.png')}
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-            }}
+            style={styles.bg}
             onLoadEnd={() => this.setState({ loadingBG: false })}>
           </ImageBackground>
           <View style={{ ...styles.flexCenter, }}>
             <View style={{ flex: 1, justifyContent: "center", }}>
-              <Text style={{ 
-                fontSize: 40, 
-                fontWeight: "bold", 
-                color: "white" 
-              }}>FLAPPY BALL</Text>
+              <Text style={styles.flappyball}>FLAPPY BALL</Text>
             </View>
             <View style={{ flex: 1, justifyContent: "center", }}>
               <View style={[styles.HomeButton]}>
@@ -280,16 +181,6 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
 
 }
 
-// function getUserData() {
-//   // return userGold; @remind clear
-//   return userData;
-// }
-
-// function setCurrentGold(val: number) {
-//   // userGold = val; @remind clear
-//   userData.gold = val;
-// }
-
 const styles = StyleSheet.create({
   HomeButton: {
     borderWidth: 1,
@@ -307,8 +198,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  container1: {
+    backgroundColor: "black",
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  bg: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+  flappyball: { 
+    fontSize: 40, 
+    fontWeight: "bold", 
+    color: "white" 
   }
 });
-
-
-// export { getUserData, setCurrentGold, cache };@remind

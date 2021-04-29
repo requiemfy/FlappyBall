@@ -8,7 +8,7 @@ import {
   StyleSheet, 
   NativeEventSubscription 
 } from 'react-native';
-import { NavigationParams, } from 'react-navigation';
+import { NavigationParams, ThemeContext, } from 'react-navigation';
 import { firebase } from '../../../src/firebase';
 import { backOnlyOnce } from '../../../src/helpers';
 import * as Cache from '../../../src/cacheAssets';
@@ -114,14 +114,15 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   earnGold = (amount: number) => {
     this.dbUser.update({ gold: amount })
+      .then(_ => Cache.user.update({ gold: amount }))
       .catch(err => console.log("Earn Gold Error 1:", err));
-    Cache.user.update({ gold: amount });
+    
   }
 
   updateHighScore = () => {
     this.dbUser.update({ record: this.score })
+      .then(_ => Cache.user.update({ record: this.score }))
       .catch(err => console.log("High Score Error 2:", err));
-    Cache.user.update({ record: this.score });
   }
 
   calculateGold = (currentGold:number, currentRecord: number) => {

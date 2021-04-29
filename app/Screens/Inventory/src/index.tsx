@@ -24,7 +24,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cacheAssets';
 import { Asset } from 'expo-asset';
 import FastImage from 'react-native-fast-image'
-// import { getCurrentGold, setCurrentGold } from '../../Home/src'; @remind
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }

@@ -1,10 +1,14 @@
 import * as React from 'react';
-import { View, Text, Button, StatusBar, BackHandler, Alert, BackHandlerStatic, Dimensions, ImageBackground, StyleSheet, ActivityIndicator, Image, NativeEventSubscription } from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import FlappyBallGame from '../../Game/src';
+import { 
+  View, 
+  Text, 
+  Button, 
+  BackHandler, 
+  StyleSheet, 
+  ActivityIndicator, 
+  NativeEventSubscription 
+} from 'react-native';
 import { NavigationParams, } from 'react-navigation';
-import { PulseIndicator } from 'react-native-indicators';
 import { FlatList } from 'react-native-gesture-handler';
 import { firebase, UserData } from '../../../src/firebase'
 import { backOnlyOnce } from '../../../src/helpers';

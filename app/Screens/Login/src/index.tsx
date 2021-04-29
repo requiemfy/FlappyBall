@@ -68,13 +68,11 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         });
       }
     });
-
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
       if (user && this.connection.current) {
         this.goLogin();
       } 
     });
-
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
@@ -111,6 +109,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.navigation.navigate('SignUp');
   }
 
+  // @remind
   playOffline = () => {
     this.navigation.reset({ 
       index: 0,
