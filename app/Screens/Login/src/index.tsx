@@ -70,7 +70,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     });
     this.authSubscriber = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
       if (user && this.connection.current) {
-        this.goLogin();
+        this.goHome();
       } 
     });
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
@@ -98,7 +98,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
       });
   }
 
-  goLogin = () => {
+  goHome = () => {
     this.navigation.reset({ 
       index: 0,
       routes: [{ name: 'Home' }],

@@ -1,9 +1,8 @@
-import React, { createRef, MutableRefObject } from 'react';
-import { Dimensions, Image, Platform } from 'react-native';
+import React from 'react';
+import { Dimensions } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Circle from './shapes/Circle';
-import { Asset } from 'expo-asset';
 import { getBallSprite } from '../../../Inventory/src';
 import { autoImageDim } from '../../../../src/helpers';
 
@@ -142,6 +141,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       left = this.state.left,
       top = this.state.top,
       { width, height } = autoImageDim(2700, 3000);
+    console.log("== player: active sprite is", getBallSprite());
 
     return (
       <Circle.default {...this.props}>

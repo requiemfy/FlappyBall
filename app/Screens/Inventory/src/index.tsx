@@ -102,13 +102,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true; // @note this has purpose
   }
 
-  private normalSprite = () => {
-    activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
-    activeItem.id = null;
-  } 
+  // private normalSprite = () => { @remind
+  //   activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
+  //   activeItem.id = null;
+  // } 
 
   private selectItem = (item: Item) => {
-    if (item.id === activeItem.id) this.normalSprite() // disselect item
+    // if (item.id === activeItem.id) this.normalSprite() // disselect item @remind
+    if (item.id === activeItem.id) resetBallSprite() // disselect item
     else if (!item.spriteUrl)  
       Alert.alert("", "Something went wrong", [
         { 
@@ -170,7 +171,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               inventory: this.inventoryListTemp,
               gold: this.goldTemp,
             })
-            .then(_ => this.updateCache()) // @note resolve loading false
+            .then(_ => {
+              this.updateCache()
+              if (this.item.id === activeItem.id) {
+                console.log("== inventory: sprite was sold, deactivating")
+                resetBallSprite();
+                this.forceUpdate();
+              }
+            }) // @note resolve loading false
             .catch(err => reject(err));
         }).catch(err => reject(err));
     }).catch(_ => {
@@ -269,6 +277,14 @@ function getBallSprite() {
   return activeItem.ballySprite;
 }
 
+function resetBallSprite() {
+  console.log("== inventory: reset sprite")
+  activeItem = {
+    ballySprite: Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri,
+    id: null
+  };
+}
+
 // ===========================================================================================
 
 const styles = StyleSheet.create({
@@ -317,4 +333,4 @@ const styles = StyleSheet.create({
 });
 
 export default withNavigation(InventoryScreen);
-export { getBallSprite, activeItem }
+export { getBallSprite, resetBallSprite, activeItem }
