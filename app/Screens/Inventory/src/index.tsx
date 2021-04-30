@@ -102,13 +102,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     return true; // @note this has purpose
   }
 
-  // private normalSprite = () => { @remind
-  //   activeItem.ballySprite = Asset.fromModule(require('../../Game/assets/bally/bally.png')).uri;
-  //   activeItem.id = null;
-  // } 
-
   private selectItem = (item: Item) => {
-    // if (item.id === activeItem.id) this.normalSprite() // disselect item @remind
     if (item.id === activeItem.id) resetBallSprite() // disselect item
     else if (!item.spriteUrl)  
       Alert.alert("", "Something went wrong", [
