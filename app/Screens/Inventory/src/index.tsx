@@ -19,9 +19,9 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce } from '../../../src/helpers';
+import { backOnlyOnce, safeSetState } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Cache from '../../../src/cacheAssets';
+import * as Cache from '../../../src/cache';
 import { Asset } from 'expo-asset';
 import FastImage from 'react-native-fast-image'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
@@ -30,7 +30,8 @@ interface Props { navigation: NavigationScreenProp<NavigationState, NavigationPa
 interface State { 
   items: Item[];
   gold: number;
-  network: {connected: boolean; reachable: boolean | null | undefined;};
+  // network: {connected: boolean; reachable: boolean | null | undefined;}; @remind
+  network: boolean;
   loading: boolean;
 }
 
@@ -50,22 +51,28 @@ let activeItem: Active = {
 class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   user = firebase.auth().currentUser;
   db = firebase.database();
+  dbRefs = {
+    usr: this.db.ref('users/' + this.user?.uid),
+    inventory: this.db.ref('users/' + this.user?.uid + '/inventory'),
+  };
   navigation = this.props.navigation;
   mounted = true;
+  safeSetState: any = safeSetState(this);
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
   item!: Item;
   inventoryListTemp!: string[];
   goldTemp!: number;
   prefetches: any = {};
-  network: boolean | null | undefined = true;
+  // network: boolean | null | undefined = true; @remind
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
       items: Cache.inventory.data,
       gold: Cache.user.data?.gold as number,
-      network: {connected: true, reachable: true},
+      // network: {connected: true, reachable: true}, @remind
+      network: true,
       loading: false,
     };
   }
@@ -74,27 +81,27 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     this.netInfo = NetInfo.addEventListener(state => {
-      this.network = state.isConnected && state.isInternetReachable;
-      this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } });
+        this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) })
+      // this.network = state.isConnected && state.isInternetReachable; @remind
+      // this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } }); @remind
     });
   }
 
   componentWillUnmount() {
     console.log("== inventory: UN-MOUNT")
+    this.mounted = false;
+    this.safeSetState = () => null;
     this.backHandler.remove();
     this.netInfo();
-    this.mounted = false;
-    this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @note trust me this is working
+
+    // this.db.ref('users/' + this.user?.uid).off(); @remind
+    // this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @note trust me this is working
+    Object.keys(this.dbRefs).forEach((key: any) => (this.dbRefs as any)[key].off())
+
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== inventory: aborted prefetches id", id);
     });
-  }
-
-  private safeSetState(update: any) {
-    if (this.mounted) {
-      this.setState(update);
-    }
   }
 
   private backAction = () => {
@@ -103,6 +110,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private selectItem = (item: Item) => {
+    console.log("== inventory: equip item");
     if (item.id === activeItem.id) resetBallSprite() // disselect item
     else if (!item.spriteUrl)  
       Alert.alert("", "Something went wrong", [
@@ -111,18 +119,21 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }
       ]);
     else {
-      this.setState({ loading: true });
+      console.log("== inventory: trying to fetch item sprite...");
+      this.safeSetState({ loading: true });
       // @ts-ignore: Unreachable code error
       Image.prefetch(item.spriteUrl, (id: number) => this.prefetches.sprite = id) 
         .then(_ => {
-          console.log("== inventory: succeed prefetch promise (then)");
+          console.log("== inventory: Succeed prefetch promise (then)");
           activeItem.ballySprite = item.spriteUrl;
           activeItem.id = item.id;
         })
         .catch(_ => {
+          console.log("== inventory: Failed prefetch");
           this.alert("Processing Failed", "Something went wrong");
         })
         .finally(() => {
+          console.log("== inventory: finally prefetch, whatever");
           delete this.prefetches.sprite;
           this.safeSetState({ loading: false });
         });
@@ -131,44 +142,53 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private updateCache = () => {
-    const inventoryTmp = this.state.items;
-    this.state.items.some(item => {
-      if (item.id === this.item.id) {
-        inventoryTmp.splice(inventoryTmp.indexOf(item), 1);
-        return true; // @note has purpose
-      }
-      else return false; // @note has purpose
-    });
-    Cache.inventory.update(inventoryTmp);
+    console.log("== inventory: Updating cache, removing sold item, current count", this.state.items.length);    
+    // const inventoryTmp = this.state.items; @remind
+    // this.state.items.some(item => {
+    //   if (item.id === this.item.id) {
+    //     inventoryTmp.splice(inventoryTmp.indexOf(item), 1);
+    //     return true; // @note has purpose
+    //   }
+    //   else return false; // @note has purpose
+    // });
+
+    const invntTmp = this.state.items;
+    invntTmp.splice(invntTmp.indexOf(this.item), 1);
+    console.log("== inventory: Success removing item, count", invntTmp.length);
+
+    Cache.inventory.update(invntTmp); // @note changes number of items in screen
 
     Cache.user.update({
       gold: this.goldTemp,
       inventory: this.inventoryListTemp,
     });
 
-    this.safeSetState({ items: inventoryTmp, gold: this.goldTemp, loading: false });
-    console.log("== inventory: done update cache after selling");
+    this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
+    console.log("== inventory: Success cache update after selling");
   }
 
   private sellItem = () => {
-    this.setState({ loading: true });
+    this.safeSetState({ loading: true });
     new Promise((_, reject) => {
-      console.log("== inventory: trying to fetch firebase in selling...");
-      this.db.ref('users/' + this.user?.uid + '/inventory').once('value') // @note prefered to get fresh data
+      console.log("== inventory: Trying to fetch firebase in selling...");
+      // @remind this.db.ref('users/' + this.user?.uid + '/inventory').once('value') // @note prefered to get fresh data
+      this.dbRefs.inventory.once('value') // @note prefered to get fresh data
         .then(async snapshot => {
-          console.log("== inventory: succeed to fetch firebase in selling");
+          console.log("== inventory: Succeed to fetch firebase in selling");
           this.inventoryListTemp = snapshot.val();
           this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
           this.goldTemp = this.state.gold + (this.item.info.buy / 2);
-          if (this.network) this.db.ref('users/' + this.user?.uid)
+          // if (this.state.network) this.db.ref('users/' + this.user?.uid) @remind
+          if (this.state.network) this.dbRefs.usr
             .update({ 
               inventory: this.inventoryListTemp,
               gold: this.goldTemp,
             })
             .then(_ => {
+              console.log("== inventory: Success updating database")
               this.updateCache()
               if (this.item.id === activeItem.id) {
-                console.log("== inventory: sprite was sold, deactivating")
+                console.log("== inventory: Deactivating sprite since it was sold")
                 resetBallSprite();
                 this.forceUpdate();
               }
@@ -182,7 +202,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private trySell = async (item: Item) => {
-    if (this.state.network.connected && this.state.network.reachable) {
+    // if (this.state.network.connected && this.state.network.reachable) { @remind
+    if (this.state.network) {
       this.item = item;
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {

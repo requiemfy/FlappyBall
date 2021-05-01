@@ -141,7 +141,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
       left = this.state.left,
       top = this.state.top,
       { width, height } = autoImageDim(2700, 3000);
-    console.log("== player: active sprite is", getBallSprite());
 
     return (
       <Circle.default {...this.props}>

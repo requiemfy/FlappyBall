@@ -11,7 +11,7 @@ import {
 import { NavigationParams, } from 'react-navigation';
 import { FlatList } from 'react-native-gesture-handler';
 import { firebase, UserData } from '../../../src/firebase'
-import { backOnlyOnce } from '../../../src/helpers';
+import { backOnlyOnce, safeSetState } from '../../../src/helpers';
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
 type Players = { [key: string]: UserData }
@@ -19,13 +19,16 @@ type Props = { navigation: NavigationParams; route: { params: { button: HOFButto
 type State = { loading: boolean; players: string[] }
 
 export default class HallOfFameScreen extends React.PureComponent<Props, State> {
+  dbUser = firebase.database().ref('/users');
   navigation = this.props.navigation;
   records!: Players;
   backHandler!: NativeEventSubscription;
+  mounted = true;
+  safeSetState: any = safeSetState(this);
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true, players: [] };
+    this.state = { loading: true, players: [], };
   }
 
   componentDidMount() {
@@ -36,29 +39,31 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
 
   componentWillUnmount() {
     console.log("HallOfFame SCREEN WILL UUUUUUUUUUUN-MOUNT");
+    this.mounted = false;
+    this.safeSetState = () => null;
     this.backHandler.remove();
+    this.dbUser.off();
   }
 
-  backAction = () => {
+  private backAction = () => {
     backOnlyOnce(this);
     return true;
   }
 
-  getRecords = () => {
-    firebase
-      .database()
-      .ref('/users')
-      .once('value')
+  private getRecords = () => {
+    console.log("== hall of fame: Trying to fetch all player records");
+    this.dbUser.once('value')
       .then(snapshot => {
+        console.log("== hall of fame: Finished fetching all player records");
         this.records = snapshot.val();
         // sort records object desc
         const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
-        this.setState({ players: arr, loading: false });
+        this.safeSetState({ players: arr, loading: false });
       })
-      .catch(err => console.log(err))
+      .catch(err => console.log("== hall of fame: Error", err))
   }
 
-  back = () => {
+  private back = () => {
     this.props.navigation.goBack()
   }
 
@@ -131,7 +136,6 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
       </View>
     )
   }
-
 }
 
 const styles = StyleSheet.create({

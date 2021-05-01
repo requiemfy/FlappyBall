@@ -1,5 +1,4 @@
-import firebase from "firebase";
-import { Dimensions } from "react-native";
+import { Alert, Dimensions } from "react-native";
 
 function backOnlyOnce(obj: any) {
   obj.props.navigation?.goBack();
@@ -14,4 +13,18 @@ function autoImageDim(actualW: number, actualH: number) {
   return { width, height }
 }
 
-export { backOnlyOnce, autoImageDim }
+function safeSetState(obj: any) {
+  return (update: any) => {
+    if (obj.mounted) obj.setState(update);
+  }
+}
+
+function alert (one: string, two: string) {
+  Alert.alert(one, two, [
+    { 
+      text: "OK", onPress: () => null
+    }
+  ]);
+}
+
+export { backOnlyOnce, autoImageDim, safeSetState, alert }

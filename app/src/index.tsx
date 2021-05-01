@@ -6,7 +6,7 @@ import * as React from 'react';
 import { firebase } from '../src/firebase';
 import AppLoading from 'expo-app-loading';
 import MainStackScreen from '../Navigation/src';
-import { loadAssetsAsync } from './cacheAssets';
+import { loadAssetsAsync } from './cache';
 import { LogBox } from 'react-native';
 
 LogBox.ignoreLogs(['Setting a timer']);

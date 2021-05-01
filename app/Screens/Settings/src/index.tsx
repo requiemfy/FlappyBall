@@ -1,6 +1,17 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
-import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { 
+  Alert, 
+  Button, 
+  StyleSheet, 
+  View, 
+  Text, 
+  NativeEventSubscription, 
+  BackHandler 
+} from 'react-native';
+import { 
+  ScrollView, 
+  TextInput, 
+} from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -10,10 +21,11 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce } from '../../../src/helpers';
+import { alert, backOnlyOnce, safeSetState } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { resetBallSprite } from '../../Inventory/src';
-import * as Cache from '../../../src/cacheAssets'
+import * as Cache from '../../../src/cache'
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -27,6 +39,10 @@ interface State {
 class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   navigation = this.props.navigation;
   backHandler!: NativeEventSubscription;
+  netInfo!: NetInfoSubscription ;
+  mounted = true;
+  network = true;
+  safeSetState: any = safeSetState(this);
 
   constructor(props: Props | any) {
     super(props);
@@ -42,10 +58,15 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   componentDidMount() {
     console.log("settings MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
+    this.netInfo = NetInfo.addEventListener(state => {
+      this.network = Boolean(state.isConnected && state.isInternetReachable);
+    });
   }
-
   componentWillUnmount() {
     console.log("settings UN-MOUNT")
+    this.mounted = false;
+    this.safeSetState = () => null;
+    this.netInfo();
     this.backHandler.remove();
   }
 
@@ -56,15 +77,16 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
 
   showError = (err: any) => {
     const error = String(err).replace('Error: ', '');
-    this.setState({ invalidCreds: true, error: error });
+    this.safeSetState({ invalidCreds: true, error: error });
   }
 
   changePass = () => {
+    if (!this.network) return alert("NO INTERNET", "Please connect to a network");
     if (this.state.newPass !== this.state.confirmPass) {
-      this.setState({ invalidCreds: true, error: "Password doesn't match." });
+      this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
       return null;
     } else  if (this.state.newPass === this.state.currentPass || this.state.newPass === "") {
-      this.setState({ invalidCreds: true, error: "Please enter new password." });
+      this.safeSetState({ invalidCreds: true, error: "Please enter new password." });
       return null;
     }
     const 
@@ -78,11 +100,11 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
               { 
                 text: "OK", 
                 onPress: () => {
-                  this.setState({ currentPass: "", newPass: "", confirmPass: "" })
+                  this.safeSetState({ currentPass: "", newPass: "", confirmPass: "" })
                 } 
               }
             ]);
-            this.setState({ invalidCreds: false })
+            this.safeSetState({ invalidCreds: false })
           })
           .catch(err => {
             this.showError(err)
@@ -115,7 +137,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   logout = () => {
     this.alertLogout(() => {
       this.alertLogout(() => {
-        this.setState({ invalidCreds: false });
+        this.safeSetState({ invalidCreds: false });
         firebase
           .auth()
           .signOut()
@@ -166,21 +188,21 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
           }
           <Text style={styles.changePassLabel}>Change Password</Text>
           <TextInput
-            onChangeText={(text => this.setState({ currentPass: text }))}
+            onChangeText={(text => this.safeSetState({ currentPass: text }))}
             value={this.state.currentPass}
             placeholder="Current Password"
             placeholderTextColor="white"
             secureTextEntry={true}
             style={styles.textInput} />
           <TextInput
-            onChangeText={(text => this.setState({ newPass: text }))}
+            onChangeText={(text => this.safeSetState({ newPass: text }))}
             value={this.state.newPass}
             placeholder="Password"
             placeholderTextColor="white"
             secureTextEntry={true}
             style={styles.textInput} />
           <TextInput
-            onChangeText={(text => this.setState({ confirmPass: text }))}
+            onChangeText={(text => this.safeSetState({ confirmPass: text }))}
             value={this.state.confirmPass}
             placeholder="Confirm Password"
             placeholderTextColor="white"

@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
-import * as Cache from '../../../src/cacheAssets'
+import * as Cache from '../../../src/cache'
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
+import { safeSetState } from '../../../src/helpers';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -21,10 +23,15 @@ type HomeState = {
     codeName: string; 
     record: number;
   }; 
+  network: boolean;
+  showConnectionState: boolean;
+  connectState: string;
 }
 
 export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
+  netInfo!: NetInfoSubscription;
   mounted = true;
+  safeSetState: any = safeSetState(this);
 
   constructor(props: HomeProps) {
     super(props);
@@ -35,21 +42,41 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         error: true,
         codeName: "",
         record: 0,
-      } 
+      },
+      network: true,
+      showConnectionState: false,
+      connectState: "Checking connection...",
     }
     this.getUserData();
   }
 
   componentDidMount() {
     console.log("Home MOUNT");
+    this.netInfo = NetInfo.addEventListener(state => {
+      if (state.isConnected && state.isInternetReachable) {
+        if (!this.state.network) {
+          this.safeSetState({ 
+            network: true,
+            showConnectionState: true,
+            connectState: "You are now connected to " + state.type
+          });
+          setTimeout(() => this.safeSetState({ showConnectionState: false }), 2000);
+        }
+      } else {
+        this.safeSetState({ 
+          network: false,
+          showConnectionState: true,
+          connectState: "No internet connection"
+        });
+      }
+    });
   }
 
   componentWillUnmount() {
     console.log("== home: UN-MOUNT");
-  }
-
-  private safeSetState = (update: any) => {
-    if (this.mounted) this.setState(update);
+    this.mounted = false;
+    this.safeSetState = () => null;
+    this.netInfo();
   }
 
   private getUserData = () => {
@@ -59,6 +86,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     })
     .then(resolve => {
         console.log("== home: USER DATA RESOLVE", resolve);
+        if (!resolve) return;
         const user = resolve as {codeName: string, record: string};
         this.safeSetState({ user: {
           loading: false,
@@ -109,11 +137,17 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   render() {
     return (
       <View style={styles.flexCenter}>
+        {
+          this.state.showConnectionState &&
+          <View style={[styles.network1, {backgroundColor: this.state.network ? "green" : "red",}]}>
+            <Text style={styles.network2}>{this.state.connectState}</Text>
+          </View>
+        }
         <View style={styles.container1}>
           <ImageBackground 
             source={require('../assets/bg.png')}
             style={styles.bg}
-            onLoadEnd={() => this.setState({ loadingBG: false })}>
+            onLoadEnd={() => this.safeSetState({ loadingBG: false })}>
           </ImageBackground>
           <View style={{ ...styles.flexCenter, }}>
             <View style={{ flex: 1, justifyContent: "center", }}>
@@ -214,5 +248,17 @@ const styles = StyleSheet.create({
     fontSize: 40, 
     fontWeight: "bold", 
     color: "white" 
-  }
+  },
+  network1: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    height: "5%",
+    justifyContent: "center",
+    zIndex: 9999
+  },
+  network2: { 
+    color: "black", 
+    textAlign: "center" 
+  },
 });

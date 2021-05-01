@@ -1,3 +1,12 @@
+CODE REVIEW
+
+check listeners, if they are unsubscribed
+mounted false in unmount
+safeSetState
+
+========================================================================================
+========================================================================================
+
 try to use Symbol() key to skip non physical entity props in for
 
 edited matter js Body.js to add gravity scaling
@@ -91,7 +100,11 @@ edited security rules of firebase, beware if it cause error
 -----------------------------------
 user data cache - especially gold (DONE)
 offline sprite vs online (DONE)
+test firebase offline vs online (DONE) - not useful
+check network on settings change pass (DONE)
+check if gold is enough when buying LOL (DONE)
 
 cache hall of fame
 sell/buy all selected
-cach offline score and gold
+cache offline score and gold then update online
+use alert in helpers

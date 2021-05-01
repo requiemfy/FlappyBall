@@ -10,7 +10,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce } from '../../../src/helpers';
+import { backOnlyOnce, safeSetState } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -25,6 +25,8 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   confirmPass = "";
   navigation = this.props.navigation;
   backHandler!: NativeEventSubscription;
+  mounted = true;
+  safeSetState = safeSetState(this);
 
   constructor(props: Props | any) {
     super(props);
@@ -42,6 +44,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   componentWillUnmount() {
     console.log("sign up UN-MOUNT")
     this.backHandler.remove();
+    this.mounted = false;
   }
 
   backAction = () => {
@@ -51,7 +54,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
 
   trySignUp = () => {
     if (this.password !== this.confirmPass) {
-      this.setState({ invalidCreds: true, error: "Password doesn't match." });
+      this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
       return null;
     } 
     firebase
@@ -68,7 +71,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
             .createUserWithEmailAndPassword(this.email, this.password)
             .then((arg) => {
               // add user initial data to database
-              this.setState({ invalidCreds: false });
+              this.safeSetState({ invalidCreds: false });
               const user = {
                 codeName: this.codeName,
                 record: 0,
@@ -87,10 +90,10 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
             })
             .catch((err: object) => {
               const error = String(err).replace('Error: ', '');
-              this.setState({ invalidCreds: true, error: error });
+              this.safeSetState({ invalidCreds: true, error: error });
             });
         } else {
-          this.setState({ invalidCreds: true, error: "Code Name is already used or has space." });
+          this.safeSetState({ invalidCreds: true, error: "Code Name is already used or has space." });
         }
       })
       .catch(err => console.log(err));

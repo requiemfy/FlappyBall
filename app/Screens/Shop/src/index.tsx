@@ -9,18 +9,20 @@ import {
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 import { Alert, ActivityIndicator, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import * as Cache from '../../../src/cacheAssets'
+import * as Cache from '../../../src/cache'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import Preview from '../components/Preview';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
+import { alert, safeSetState } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
   items: Item[];
   gold: number;
   inventoryList: string[];
-  network: { connected: boolean, reachable: boolean | null | undefined };
+  // network: { connected: boolean, reachable: boolean | null | undefined }; @remind
+  // network: boolean; @remind
   preview: {show: boolean, loading: boolean, error: boolean};
   loading: boolean;
 }
@@ -35,6 +37,7 @@ type Item = {
 class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   user = firebase.auth().currentUser;
   db = firebase.database();
+  dbUser = this.db.ref('users/' + this.user?.uid);
   previewSprite!: string;
   netInfo!: NetInfoSubscription;
   item!: Item;
@@ -42,6 +45,8 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   inventoryListTemp!: string[]; 
   goldTemp!: number; 
   mounted = true;
+  network = true;
+  safeSetState: any = safeSetState(this);
   prefetches: any = {};
 
   constructor (props: Props | any) {
@@ -50,7 +55,8 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       items: Cache.shop.data as Item[],
       gold: Cache.user.data?.gold as number,
       inventoryList: Cache.user.data?.inventory || [],
-      network: { connected: true, reachable: true },
+      // network: { connected: true, reachable: true },@remind
+      // network: true, @remind
       preview: {show: false, loading: true, error: false},
       loading: false,
     };
@@ -59,29 +65,31 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   componentDidMount() {
     this.netInfo = NetInfo.addEventListener(state => {
-      this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } })
+      // this.safeSetState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } }) @remind
+      // this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) }) // @remind
+      this.network = Boolean(state.isConnected && state.isInternetReachable);
     });
   }
 
   componentWillUnmount() {
     this.mounted = false;
+    this.safeSetState = () => null;
     this.netInfo();
-    this.db.ref('users/' + this.user?.uid).off() // @note trust me, this will abort listeners - I have tested it
+    // this.db.ref('users/' + this.user?.uid).off() // @note trust me, this will abort listeners - I have tested it
+    this.dbUser.off();
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== shop: abort prefetch id", id);
     });
   }
 
-  private safeSetState(update: any) {
-    if (this.mounted) this.setState(update);
-  }
-
   private togglePreview = (url?: string) => {
     if (this.state.preview.show) {
-      this.setState({ preview: {show: false, loading: true, error: false} });
+      this.safeSetState({ preview: {show: false, loading: true, error: false} });
     } else if (url) {
-      this.setState({ preview: {...this.state.preview, loading: true} })
+      // this.safeSetState({ preview: {...this.state.preview, loading: true} }) // @remind
+      this.previewSprite = url!;
+      this.safeSetState({ preview: {...this.state.preview, show: true } });
       // @ts-ignore: Unreachable code error
       Image.prefetch(url, (id: number) => this.prefetches.preview = id)
         .then(() => {
@@ -90,10 +98,10 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         })
         .catch(_ => this.safeSetState({ preview: {...this.state.preview, error: true} }))
         .finally(() => delete this.prefetches.preview);
-      this.previewSprite = url!;
-      this.setState({ preview: {...this.state.preview, show: true} });
+      // this.previewSprite = url!; @remind
+      // this.safeSetState({ preview: {...this.state.preview, show: true} });
     } else {
-      this.setState({ preview: {...this.state.preview, show: true, error: true} })
+      this.safeSetState({ preview: {show: true, loading: true, error: true} })
     }
   }
 
@@ -115,21 +123,23 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   private buy = () => {
     if (this.item.spriteUrl) {
+      if (Cache.user.data?.gold! < this.item.info.buy) return alert("NO GOLD", "Not enough gold");
       this.safeSetState({ loading: true });
       new Promise((_, reject) => {
         // @ts-ignore: Unreachable code error
         Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.buy = id)
           .then(_ => {
             console.log("== shop: succeed prefetch promise BUY (then)");
-            this.db.ref('users/' + this.user?.uid) // @note possibly, inventory is undefined
-              .once('value')
+            // this.db.ref('users/' + this.user?.uid) // @note possibly, inventory is undefined @remind
+            this.dbUser.once('value') // @note possibly, inventory is undefined
               .then(async snapshot => {
                 console.log("== shop: succeed firebase (user/uid).once BUY (then)");
                 const user = snapshot.val();
+                this.goldTemp = user.gold - this.item.info.buy;
                 this.inventoryListTemp = user.inventory as string[] || [];
                 this.inventoryListTemp.push(this.item.id);
-                this.goldTemp = user.gold - this.item.info.buy;
-                this.db.ref('users/' + this.user?.uid)
+                // this.db.ref('users/' + this.user?.uid) @remind
+                this.dbUser
                   .update({
                     inventory: this.inventoryListTemp,
                     gold: this.goldTemp
@@ -148,7 +158,9 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   private tryBuy = (item: Item) => {
-    if (this.state.network.connected && this.state.network.reachable) {
+    // if (this.state.network.connected && this.state.network.reachable) {
+    // if (this.state.network) { @remind
+    if (this.network) {
       this.item = item;
       Alert.alert("Hold on!", "Are you sure you want to buy?", [
         {

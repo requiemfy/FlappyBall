@@ -57,37 +57,10 @@ function getFileUrl(path: string) {
 
 const inventory = (() => {
   let inventoryCache: Shop.Item[] = [];
-  // cancelRequest: () => any = () => null; // @remind clear
   const cacheStorage = new CacheStorage();
 
-  // const request = async (resolve: any, reject: any) => { // @remind clear
   const fetchInventory = () => {
     console.log("== cache: Fetching inventory...");
-    // const user = firebase.auth().currentUser; // @remind clear
-    // let loggedIn = true;
-
-    // firebase
-    //   .database()
-    //   .ref('users/' + user?.uid + '/inventory')
-    //   .once('value')
-    //   .then(snapshot => {
-        // if (loggedIn) {
-        //   const inventory = snapshot.val() as string[], allItemUri: {uri: string}[] = [];
-        //   inventoryCache = [];
-        //   shop.cache?.forEach(item => {
-        //     if (inventory?.includes(item.id)) {
-        //       inventoryCache.push(item);
-        //       allItemUri.push({ uri: item.url });
-        //     }
-        //   });
-        //   allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-        //   cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 60 * 60 * 24);
-        //   resolve("success retrieve invent")
-        // }
-        // else reject("User not logged-in")
-    //   })
-    //   .catch(err => reject(err));
-
       const inventory = user.data?.inventory, allItemUri: {uri: string}[] = [];
       inventoryCache = [];
       shop.data?.forEach(item => {
@@ -101,13 +74,6 @@ const inventory = (() => {
       console.log("== cache: CACHE INVENTORY DONE <3");
   }
   
-  // const fetchInventory = () => { // @remind clear
-  //   console.log("== cache: going to fetch inventory")
-  //   new Promise((resolve, reject) => request(resolve, reject))
-  //     .then(resolve => console.log("== cache: CACHE INVENTORY RESOLVED:", resolve))
-  //       .catch(err => console.log("== cache: CACHE INVENTORY ERROR:", err));
-  // }
-
   return {
     fetch: fetchInventory,
     update: (items: Shop.Item[]) => {
@@ -271,9 +237,12 @@ const shop = (() => {
 
 // CACHE SHOP
 // =======================================================================
+// =======================================================================
+// USER DATA
 
 const user = (() => {
   const cacheStorage = new CacheStorage();
+  const unsavedStorage = new CacheStorage();
   let userCache: {codeName: string, record: number, inventory?: string[], gold: number} | null;
 
   const request = (resolve: any, reject: any) => {
@@ -317,26 +286,23 @@ const user = (() => {
 
   return {
     fetch: fetchUser,
-    
-    get data() {return userCache;},
-
     update: (val: {record?: number, gold?: number, inventory?: string[]}) => {
-      // val.gold ? userCache!.gold = val.gold : null; @remind
-      // val.record ? userCache!.record = val.record : null;
-      // val.inventory ? userCache!.inventory = val.inventory : null;
       userCache = { ...userCache!, ...val };
       cacheStorage.setItem('current-user', JSON.stringify(userCache), 0);
     },
-    
     storage: cacheStorage,
-    
+    pending: unsavedStorage,
     clear: () => {
       cacheStorage.setItem('current-user', '', 1);
       cacheStorage.clear();
       userCache = null;
-    }
+    },
+    get data() {return userCache;},
   }
 })()
+
+// USER DATA
+// =======================================================================
 
 export { 
   loadAssetsAsync, 

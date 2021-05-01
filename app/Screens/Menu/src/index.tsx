@@ -6,12 +6,13 @@ import {
   BackHandler, 
   Alert, 
   StyleSheet, 
-  NativeEventSubscription 
+  NativeEventSubscription, 
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { firebase } from '../../../src/firebase';
-import { backOnlyOnce } from '../../../src/helpers';
-import * as Cache from '../../../src/cacheAssets';
+import { backOnlyOnce, safeSetState } from '../../../src/helpers';
+import * as Cache from '../../../src/cache';
+import NetInfo from '@react-native-community/netinfo';
 
 type MenuButton = keyof { resume: string, restart: string };
 type Props = { 
@@ -24,50 +25,64 @@ type Props = {
     }
   }
 }
-type State = { newHighScore: boolean, earnedGold: string | number}
+type State = { 
+  newHighScore: boolean; 
+  earnedGold: string | number;
+  // network: boolean; @remind
+}
 
 export default class MenuScreen extends React.PureComponent<Props, State> {
   database = firebase.database();
   user = firebase.auth().currentUser;
-  score = this.props.route.params?.score;
+  dbUser = this.database.ref('users/' + this.user?.uid);
+  // score = this.props.route.params?.score;
+  score = 1;
   stateButton = this.props.route.params.button;
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
-  dbUser = this.database.ref('users/' + this.user?.uid);
+  // netInfo!: NetInfoSubscription; @remind
+  network = true;
+  cacheData = Cache.user.data!;
   mounted = true;
+  safeSetState: any = safeSetState(this);
 
   constructor(props: Props) {
     super(props);
     this.state = {
       newHighScore: false,
       earnedGold: "Calculating",
+      // network: true, @remind
     }
   }
 
   componentDidMount() {
-    console.log("MENU SCREEN WILL MOUNT");
-    this.isGameOver();
+    console.log("MENU SCREEN DID MOUNT");
+    NetInfo.fetch().then(status => {
+      this.network = Boolean(status.isConnected && status.isInternetReachable);
+      this.isOnline();
+    })
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
+    // this.netInfo = NetInfo.addEventListener(state => { @remind
+    //   this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable), networkChecked: true });
+    // });
   }
 
   componentWillUnmount() {
-    console.log("MENU SCREEN WILL UUUUUUUUUUUN-MOUNT");
-    this.backHandler.remove();
+    console.log("== menu: UN-MOUNT");
     this.mounted = false;
+    this.safeSetState = () => null;
+    this.backHandler.remove();
+    // this.netInfo(); @remind
     this.dbUser.off();
   }
 
-  private safeSetState = (update: any) => {
-    if (this.mounted) this.setState(update);
-  }
-
-  private isGameOver = () => {
+  private isOnline = () => {
     if (this.user && (this.stateButton === "restart")) {
-      console.log("== menu: GAME OVER user has score", this.score);
+      console.log("== menu: Online GAME OVER, score", this.score);
       if(this.score) this.checkScore()
-      else if (this.score === 0) this.setState({ earnedGold: 0 })
+      else if (this.score === 0) this.safeSetState({ earnedGold: 0 })
     } else {
-      console.log("== menu: just opening menu")
+      console.log("== menu: Just opening menu OR offline game over")
     }
   }
 
@@ -129,18 +144,54 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     }) 
   }
 
-  updateUserData = (val: {newScore?: number, gold: number}) => {
-    console.log("== menu: trying to update user data in firebase")
+  private updateUserData = (val: {newScore?: number, gold: number}) => {
     const update = (() => {
       if (val.newScore) return { record: val.newScore, gold: val.gold }
       else return { gold: val.gold }
     })();
+
+    console.log("== menu: checking network to record data", this.network);
+    // if (!this.state.network) { @remind
+    if (!this.network) {
+      console.log("== menu: No internet, can't record data");
+      this.unsavedData(update);
+      this.alert("NO INTERNET", "Connect to internet to save your data");
+      return;
+    };
+
+    console.log("== menu: Connected to internet, recording data...")
     this.dbUser.update(update)
       .then(_ => {
         Cache.user.update(update);
         console.log("== menu: finished updating user data in firebase")
       })
-      .catch(err => console.log("High Score Error 2:", err));
+      .catch(err => {
+        console.log("== menu: Error saving data", err)
+        this.unsavedData(update);
+        this.alert("Processing Error", "Something went wrong");
+      });
+  }
+
+  private unsavedData = (update: any) => {
+    console.log("== menu: trying to cache unsaved data...");
+    Cache.user.storage.getItem('unsaved').then(resolve => {
+      let unsaved: any = {};
+      console.log("== menu: current unsaved data resolve", resolve);
+      if(resolve) {
+        unsaved = JSON.parse(resolve);
+        let 
+          userTmp: { record?: number, gold: number } = unsaved[this.user?.uid!],
+          earnGold = userTmp?.gold ? userTmp.gold + (this.state.earnedGold as number) : update.gold;
+        unsaved[this.user?.uid!] = update?.record ? { record: update.record, gold: earnGold } : { gold: earnGold };
+        console.log("== menu: current user unsaved data if any", userTmp);
+      } else {
+        unsaved[this.user?.uid!] = update;
+        console.log("== menu: no current unsaved data");
+      }
+      console.log("== menu: Caching user unsaved data", unsaved)
+      Cache.user.pending.setItem('unsaved', JSON.stringify(unsaved))
+          .then(_ => console.log("== menu: Success caching unsaved data"))
+    }).catch(err => console.log("== menu: Error caching unsaved data"))
   }
 
   goldByNewRecord = (currentGold:number, currentRecord: number) => {
@@ -154,27 +205,39 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   checkScore = () => {
-    console.log("== menu: fetching firebase high score");
-    this.dbUser
-      .once('value')
-      .then(snapshot => {
-        console.log("== menu: succeed fetching firebase high score, check if beaten...");
-        const 
-          userData = snapshot.val(),
-          record = userData.record as number,
-          currentGold = userData.gold as number;
-        if ((record !== null) && (this.score! > record)) {
-          console.log("== menu: HAS new high score", this.score);
-          this.safeSetState({ newHighScore: true });
-          this.goldByNewRecord(currentGold, record)
-        } else {
-          console.log("== menu: NO new high score", this.score);
-          const earnedGold = this.score! * 2;
-          this.safeSetState({ earnedGold: earnedGold });
-          this.updateUserData({ gold: currentGold + earnedGold })
-        }
-      })
-      .catch(err => console.log("High Score Error 1:", err));
+    // console.log("== menu: fetching firebase high score");
+    // this.dbUser
+    //   .once('value')
+    //   .then(snapshot => {
+    //     console.log("== menu: succeed fetching firebase high score, check if beaten...");
+    //     const 
+    //       userData = snapshot.val(),
+    //       record = userData.record as number,
+    //       currentGold = userData.gold as number;
+    //     if ((record !== null) && (this.score! > record)) {
+    //       console.log("== menu: HAS new high score", this.score);
+    //       this.safeSetState({ newHighScore: true });
+    //       this.goldByNewRecord(currentGold, record)
+        // } else {
+        //   console.log("== menu: NO new high score", this.score);
+        //   const earnedGold = this.score! * 2;
+        //   this.safeSetState({ earnedGold: earnedGold });
+        //   this.updateUserData({ gold: currentGold + earnedGold })
+        // }
+    //   })
+    //   .catch(err => console.log("High Score Error 1:", err));
+
+    console.log("== menu: comparing score vs record");
+    if(this.score! > this.cacheData.record) {
+      console.log("== menu: HAS new high score", this.score);
+      this.safeSetState({ newHighScore: true });
+      this.goldByNewRecord(this.cacheData.gold, this.cacheData.record);
+    } else {
+      console.log("== menu: NO new high score", this.score);
+      const earnedGold = this.score! * 2;
+      this.safeSetState({ earnedGold: earnedGold });
+      this.updateUserData({ gold: this.cacheData.gold + earnedGold })
+    }
   }
 
   private showUserAchievement = () => {
@@ -196,7 +259,16 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     };
   }
 
+  private alert = (one: string, two: string) => {
+    Alert.alert(one, two, [
+      { 
+        text: "OK", onPress: () => null
+      }
+    ]);
+  }
+
   render() {
+
     return (
       <View style={{ ...styles.flexCenter, }}>
         <View style={{
