@@ -14,7 +14,7 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import Preview from '../components/Preview';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
-import { alert, safeSetState } from '../../../src/helpers';
+import { alert, safeSetState, shopRef } from '../../../src/helpers';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -57,6 +57,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       loading: false,
     };
     this.inventoryCache = Cache.inventory.data as Item[];
+    shopRef(this);
   }
 
   componentDidMount() {
@@ -68,6 +69,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   componentWillUnmount() {
     this.mounted = false;
     this.safeSetState = () => null;
+    shopRef(null);
     this.netInfo();
     this.dbUser.off();
     Object.keys(this.prefetches).forEach(id => {
@@ -317,4 +319,4 @@ const styles = StyleSheet.create({
 });
 
 export default withNavigation(ShopScreen);
-export { Item }
+export { Item };

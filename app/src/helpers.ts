@@ -45,4 +45,34 @@ function alertQuit (cb: any, lastWords: string) {
   ]);
 }
 
-export { backOnlyOnce, autoImageDim, safeSetState, alert, alertQuit }
+
+let inventoryObj: any, shopObj: any, homeObj: any;
+
+function inventoryRef(obj?: any) {
+  if (obj || (obj === null)) inventoryObj = obj;
+  console.log("== helpers: inventoryRef value", shopObj ? shopObj.constructor.name : shopObj)
+  return inventoryObj;
+}
+
+function shopRef(obj?: any) {
+  if (obj || (obj === null)) shopObj = obj;
+  console.log("== helpers: shopRef value", shopObj ? shopObj.constructor.name : shopObj)
+  return shopObj;
+}
+
+function homeRef(obj?: any) {
+  if (obj || (obj === null)) homeObj = obj;
+  console.log("== helpers: homeRef value", homeObj ? homeObj.constructor.name : homeObj)
+  return homeObj;
+}
+
+export { 
+  backOnlyOnce, 
+  autoImageDim, 
+  safeSetState, 
+  alert, 
+  alertQuit,
+  homeRef,
+  inventoryRef,
+  shopRef
+}

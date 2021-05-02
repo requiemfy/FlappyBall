@@ -9,6 +9,7 @@ import MainStackScreen from '../Navigation/src';
 import * as Cache from './cache';
 import { LogBox } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { alert, homeRef, inventoryRef, shopRef } from './helpers';
 
 LogBox.ignoreLogs(['Setting a timer']);
 
@@ -18,18 +19,20 @@ export default function Game() {
   const [loadingUser, setloadingUser] = React.useState(true);
   const unsavedData = Cache.user.pending;
   let network = {current: true, trigger: true};
+  let hasUser = false;
 
   React.useEffect(() => {
     console.log("App index: MOUNT");
     const authListenerUnsub = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
       console.log("== app index: trying to check if there's current user");
       if (user) {
+        hasUser = true;
         setRoute("Home");
         console.log("== app index: current user id", user.email);
       } else {
+        hasUser = false
         console.log("== app index: NO user", user);
       }
-      authListenerUnsub();
       setloadingUser(false);
     });
     const netInfoUnsub = NetInfo.addEventListener(state => {
@@ -52,9 +55,11 @@ export default function Game() {
             console.log("== app index: All data path for update", update)
             firebase.database().ref('/users').update(update)
               .then(_ => {
-                console.log("== app index: Success saving unsaved data");
+                console.log("== app index: Success saving unsaved data, outdated cache cleared");
                 unsavedData.storage.setItem('unsaved', '', 1);
                 unsavedData.storage.clear();
+                if (!hasUser) return console.log("== app index: NO user, no need to update state")
+                updateUserState();
               })
               .catch(_ => console.log("== app index: Failed unsaved data"));
           } else {
@@ -88,4 +93,25 @@ export default function Game() {
 
   console.log("== app index: initial route", route)
   return <MainStackScreen initRoute={route}/>
+}
+
+function updateUserState() {
+  console.log("== app index: Trying to fetch updated user state data");
+  Cache.user.clear();
+  new Promise((resolve, reject) => Cache.user.fetch(resolve, reject))
+    .then(res => {
+      if (!res) return console.log("== app index: Resolve is not valid");
+      else console.log("== app index: Updated data resolve", res)
+      const user = res as any;
+      homeRef()?.safeSetState({ user: {
+        ...homeRef()?.state.user,
+        codeName: user.codeName,
+        record: user.record,
+      }});
+      inventoryRef()?.safeSetState({gold: user.gold});
+      shopRef()?.safeSetState({gold: user.gold});
+      alert("DATA UPDATED", "Offline data was saved");
+      console.log("== app index: Success to fetch updated user data");
+    })
+    .catch(err => console.log("== app index: Error fetching updated user data", err));
 }

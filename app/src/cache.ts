@@ -6,6 +6,7 @@ import { firebase } from './firebase';
 import CacheStorage from 'react-native-cache-storage';
 import FastImage from 'react-native-fast-image';
 import * as Shop from '../Screens/Shop/src';
+import { inventoryRef, shopRef } from './helpers';
 
 function cacheStaticImg(images: any[]) {
   return images.map(image => Asset.fromModule(image).downloadAsync());
@@ -21,6 +22,7 @@ let cacheAssetRetrieved = false; // this is useful to detect when the app is clo
 async function loadUserAsync(resolve: any, reject: any) {
   await user.fetch(resolve, reject);
   shop.storage.getItem('fetch-again').then(async resolve => {
+    retrieveAssetCache();
     if (!(resolve === "false")) {
       console.log("cache: fetch urls again", resolve, typeof resolve)
       new Promise((resolve, reject) => shop.fetch(resolve, reject))
@@ -29,15 +31,15 @@ async function loadUserAsync(resolve: any, reject: any) {
     }
     else {
       console.log("cache: DONT fetch urls again, resolve status:", resolve)
-      retrieveAssetCache();
+      // retrieveAssetCache(); @remind
     }
   })
 }
 
 function retrieveAssetCache() {
   if(!cacheAssetRetrieved){
-    shop.storage.getItem('shop').then(resolve => shop.data = JSON.parse(resolve!));
-    inventory.storage.getItem('inventory').then(resolve => inventory.data = JSON.parse(resolve!));
+    shop.storage.getItem('shop').then(resolve => resolve ? shop.data = JSON.parse(resolve!) : null);
+    inventory.storage.getItem('inventory').then(resolve => resolve ? inventory.data = JSON.parse(resolve!) : null);
     cacheAssetRetrieved = true;
   }
   console.log("== cache: cacheAssetRetrieved", cacheAssetRetrieved)
@@ -60,16 +62,17 @@ const inventory = (() => {
 
   const fetchInventory = () => {
     console.log("== cache: Fetching inventory...");
-      const inventory = user.data?.inventory, allItemUri: {uri: string}[] = [];
+      const invent = user.data?.inventory, allItemUri: {uri: string}[] = [];
       inventoryCache = [];
       shop.data?.forEach(item => {
-        if (inventory?.includes(item.id)) {
+        if (invent?.includes(item.id)) {
           inventoryCache.push(item);
           allItemUri.push({ uri: item.url });
         }
       });
       allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
       cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 0);
+      inventoryRef()?.safeSetState({ items: inventory.data });
       console.log("== cache: CACHE INVENTORY DONE <3");
   }
   
@@ -190,7 +193,7 @@ const shop = (() => {
                 .catch(err => reject(err))
             } else {
               console.log("== cache: don't fetch urls again, just get from cache");
-              retrieveAssetCache();
+              // retrieveAssetCache(); @remind
             }
             // resolve or reject of this won't take effect, because of top promise FIRST
             new Promise((resolve, reject) => {
@@ -201,6 +204,7 @@ const shop = (() => {
               }, resolve, reject);
             }).then(res => {
                 console.log("== cache: getting url resolve:", res);
+                shopRef()?.safeSetState({ items: shop.data });
                 resolve(res);
               })
               .catch(err => {

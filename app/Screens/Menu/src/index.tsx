@@ -34,7 +34,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   user = firebase.auth().currentUser;
   dbUser = this.database.ref('users/' + this.user?.uid);
   // score = this.props.route.params?.score;
-  score = 1;
+  score = 8;
   stateButton = this.props.route.params.button;
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;

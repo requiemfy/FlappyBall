@@ -11,7 +11,7 @@ import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import * as Cache from '../../../src/cache'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
-import { safeSetState } from '../../../src/helpers';
+import { homeRef, safeSetState } from '../../../src/helpers';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -48,6 +48,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
       connectState: "Checking connection...",
     }
     this.getUserData();
+    homeRef(this);
   }
 
   componentDidMount() {
@@ -76,6 +77,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     console.log("== home: UN-MOUNT");
     this.mounted = false;
     this.safeSetState = () => null;
+    homeRef(null)
     this.netInfo();
   }
 

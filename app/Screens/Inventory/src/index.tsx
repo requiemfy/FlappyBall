@@ -19,7 +19,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { alert, backOnlyOnce, safeSetState } from '../../../src/helpers';
+import { alert, backOnlyOnce, safeSetState, inventoryRef } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cache';
 import { Asset } from 'expo-asset';
@@ -72,6 +72,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       network: true,
       loading: false,
     };
+    inventoryRef(this);
+    console.log("== inventory: items", this.state.items)
   }
 
   componentDidMount() {
@@ -86,6 +88,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("== inventory: UN-MOUNT")
     this.mounted = false;
     this.safeSetState = () => null;
+    inventoryRef(null);
     this.backHandler.remove();
     this.netInfo();
     Object.keys(this.dbRefs).forEach((key: any) => (this.dbRefs as any)[key].off())

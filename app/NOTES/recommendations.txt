@@ -103,9 +103,10 @@ offline sprite vs online (DONE)
 test firebase offline vs online (DONE) - not useful
 check network on settings change pass (DONE)
 check if gold is enough when buying LOL (DONE)
+cache offline score and gold then update online (DONE)
+try to update invent or shop state when URLs are ready (DONE)
 
 cache hall of fame
 sell/buy all selected
-cache offline score and gold then update online
-try to update invent or shop state when URLs are ready
+
 use alert in helpers
