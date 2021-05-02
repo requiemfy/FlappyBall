@@ -21,7 +21,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { alert, backOnlyOnce, safeSetState } from '../../../src/helpers';
+import { alert, alertQuit, backOnlyOnce, safeSetState } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { resetBallSprite } from '../../Inventory/src';
 import * as Cache from '../../../src/cache'
@@ -62,6 +62,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
       this.network = Boolean(state.isConnected && state.isInternetReachable);
     });
   }
+
   componentWillUnmount() {
     console.log("settings UN-MOUNT")
     this.mounted = false;
@@ -115,19 +116,6 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
       });
   }
 
-  alertLogout = (cb: any, lastWords: string) => {
-    Alert.alert("Hold on!", lastWords, [
-      {
-        text: "Cancel",
-        onPress: () => null,
-        style: "cancel"
-      },
-      { text: "YES", onPress: () => {
-        cb();
-      }}
-    ]);
-  }
-
   clearCache = () => {
     Cache.inventory.clear();
     Cache.shop.clear();
@@ -135,9 +123,8 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   logout = () => {
-    this.alertLogout(() => {
-      this.alertLogout(() => {
-        this.safeSetState({ invalidCreds: false });
+    alertQuit(() => {
+      alertQuit(() => {
         firebase
           .auth()
           .signOut()

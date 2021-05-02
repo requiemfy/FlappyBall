@@ -194,17 +194,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         </View>
         {
           this.state.loadingBG || this.state.user.loading
-            ? <View style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                backgroundColor: "black",
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}>
+            ? <View style={styles.loading}>
                 <PulseIndicator color='white'/>
               </View>
             : null
@@ -260,5 +250,16 @@ const styles = StyleSheet.create({
   network2: { 
     color: "black", 
     textAlign: "center" 
+  },
+  loading: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: "black",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

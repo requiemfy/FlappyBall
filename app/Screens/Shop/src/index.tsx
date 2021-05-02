@@ -21,8 +21,6 @@ interface State {
   items: Item[];
   gold: number;
   inventoryList: string[];
-  // network: { connected: boolean, reachable: boolean | null | undefined }; @remind
-  // network: boolean; @remind
   preview: {show: boolean, loading: boolean, error: boolean};
   loading: boolean;
 }
@@ -55,8 +53,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       items: Cache.shop.data as Item[],
       gold: Cache.user.data?.gold as number,
       inventoryList: Cache.user.data?.inventory || [],
-      // network: { connected: true, reachable: true },@remind
-      // network: true, @remind
       preview: {show: false, loading: true, error: false},
       loading: false,
     };
@@ -65,8 +61,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   componentDidMount() {
     this.netInfo = NetInfo.addEventListener(state => {
-      // this.safeSetState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } }) @remind
-      // this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) }) // @remind
       this.network = Boolean(state.isConnected && state.isInternetReachable);
     });
   }
@@ -75,7 +69,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     this.mounted = false;
     this.safeSetState = () => null;
     this.netInfo();
-    // this.db.ref('users/' + this.user?.uid).off() // @note trust me, this will abort listeners - I have tested it
     this.dbUser.off();
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
@@ -87,7 +80,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     if (this.state.preview.show) {
       this.safeSetState({ preview: {show: false, loading: true, error: false} });
     } else if (url) {
-      // this.safeSetState({ preview: {...this.state.preview, loading: true} }) // @remind
       this.previewSprite = url!;
       this.safeSetState({ preview: {...this.state.preview, show: true } });
       // @ts-ignore: Unreachable code error
@@ -98,8 +90,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         })
         .catch(_ => this.safeSetState({ preview: {...this.state.preview, error: true} }))
         .finally(() => delete this.prefetches.preview);
-      // this.previewSprite = url!; @remind
-      // this.safeSetState({ preview: {...this.state.preview, show: true} });
     } else {
       this.safeSetState({ preview: {show: true, loading: true, error: true} })
     }
@@ -130,7 +120,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         Image.prefetch(this.item.spriteUrl, (id: number) => this.prefetches.buy = id)
           .then(_ => {
             console.log("== shop: succeed prefetch promise BUY (then)");
-            // this.db.ref('users/' + this.user?.uid) // @note possibly, inventory is undefined @remind
             this.dbUser.once('value') // @note possibly, inventory is undefined
               .then(async snapshot => {
                 console.log("== shop: succeed firebase (user/uid).once BUY (then)");
@@ -138,7 +127,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                 this.goldTemp = user.gold - this.item.info.buy;
                 this.inventoryListTemp = user.inventory as string[] || [];
                 this.inventoryListTemp.push(this.item.id);
-                // this.db.ref('users/' + this.user?.uid) @remind
                 this.dbUser
                   .update({
                     inventory: this.inventoryListTemp,
@@ -158,8 +146,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   private tryBuy = (item: Item) => {
-    // if (this.state.network.connected && this.state.network.reachable) {
-    // if (this.state.network) { @remind
     if (this.network) {
       this.item = item;
       Alert.alert("Hold on!", "Are you sure you want to buy?", [
@@ -270,7 +256,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {

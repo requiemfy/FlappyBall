@@ -4,13 +4,12 @@ import {
   Text, 
   Button, 
   BackHandler, 
-  Alert, 
   StyleSheet, 
   NativeEventSubscription, 
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { firebase } from '../../../src/firebase';
-import { backOnlyOnce, safeSetState } from '../../../src/helpers';
+import { alert, alertQuit, backOnlyOnce, safeSetState } from '../../../src/helpers';
 import * as Cache from '../../../src/cache';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -28,7 +27,6 @@ type Props = {
 type State = { 
   newHighScore: boolean; 
   earnedGold: string | number;
-  // network: boolean; @remind
 }
 
 export default class MenuScreen extends React.PureComponent<Props, State> {
@@ -40,7 +38,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   stateButton = this.props.route.params.button;
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
-  // netInfo!: NetInfoSubscription; @remind
   network = true;
   cacheData = Cache.user.data!;
   mounted = true;
@@ -51,7 +48,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     this.state = {
       newHighScore: false,
       earnedGold: "Calculating",
-      // network: true, @remind
     }
   }
 
@@ -60,11 +56,8 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     NetInfo.fetch().then(status => {
       this.network = Boolean(status.isConnected && status.isInternetReachable);
       this.isOnline();
-    })
+    });
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
-    // this.netInfo = NetInfo.addEventListener(state => { @remind
-    //   this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable), networkChecked: true });
-    // });
   }
 
   componentWillUnmount() {
@@ -72,7 +65,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     this.mounted = false;
     this.safeSetState = () => null;
     this.backHandler.remove();
-    // this.netInfo(); @remind
     this.dbUser.off();
   }
 
@@ -93,22 +85,9 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     return true;
   }
 
-  alertQuit = (cb: any, lastWords: string) => {
-    Alert.alert("Hold on!", lastWords, [
-      {
-        text: "Cancel",
-        onPress: () => null,
-        style: "cancel"
-      },
-      { text: "YES", onPress: () => {
-        cb();
-      }}
-    ]);
-  }
-
   quit = () => {
-    this.alertQuit(() => {
-      this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
+    alertQuit(() => {
+      alertQuit(() => BackHandler.exitApp(), "Seriously?")
     }, "Are you sure you want to quit?");
   }
 
@@ -151,11 +130,10 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     })();
 
     console.log("== menu: checking network to record data", this.network);
-    // if (!this.state.network) { @remind
     if (!this.network) {
       console.log("== menu: No internet, can't record data");
       this.unsavedData(update);
-      this.alert("NO INTERNET", "Connect to internet to save your data");
+      alert("NO INTERNET", "Connect to internet to save your data");
       return;
     };
 
@@ -168,7 +146,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       .catch(err => {
         console.log("== menu: Error saving data", err)
         this.unsavedData(update);
-        this.alert("Processing Error", "Something went wrong");
+        alert("Processing Error", "Something went wrong");
       });
   }
 
@@ -205,28 +183,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   checkScore = () => {
-    // console.log("== menu: fetching firebase high score");
-    // this.dbUser
-    //   .once('value')
-    //   .then(snapshot => {
-    //     console.log("== menu: succeed fetching firebase high score, check if beaten...");
-    //     const 
-    //       userData = snapshot.val(),
-    //       record = userData.record as number,
-    //       currentGold = userData.gold as number;
-    //     if ((record !== null) && (this.score! > record)) {
-    //       console.log("== menu: HAS new high score", this.score);
-    //       this.safeSetState({ newHighScore: true });
-    //       this.goldByNewRecord(currentGold, record)
-        // } else {
-        //   console.log("== menu: NO new high score", this.score);
-        //   const earnedGold = this.score! * 2;
-        //   this.safeSetState({ earnedGold: earnedGold });
-        //   this.updateUserData({ gold: currentGold + earnedGold })
-        // }
-    //   })
-    //   .catch(err => console.log("High Score Error 1:", err));
-
     console.log("== menu: comparing score vs record");
     if(this.score! > this.cacheData.record) {
       console.log("== menu: HAS new high score", this.score);
@@ -242,7 +198,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
 
   private showUserAchievement = () => {
     if (this.user) {
-      console.log("== menu: ONLINE PLAY, show high score & gold")
+      console.log("== menu: ONLINE PLAY, score & gold")
       return (
         <>
           {
@@ -259,31 +215,17 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     };
   }
 
-  private alert = (one: string, two: string) => {
-    Alert.alert(one, two, [
-      { 
-        text: "OK", onPress: () => null
-      }
-    ]);
-  }
-
   render() {
-
     return (
-      <View style={{ ...styles.flexCenter, }}>
-        <View style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          width: "90%",
-          height: "90%",
-          borderRadius: 10,
-        }}>
-          <View style={{ ...styles.flexCenter, }}>
+      <View style={[styles.flexCenter]}>
+        <View style={styles.container1}>
+          <View style={[styles.flexCenter]}>
             <View>
               {
                 this.stateButton === "restart"
                   ? <View style={{ alignItems: "center" }}>
                       <Text style={styles.menuLabel}>That's Life</Text>
-                      <Text style={{ ...styles.menuLabel, fontSize: 50 }}>{this.score}</Text>
+                      <Text style={[{fontSize: 50}, styles.menuLabel]}>{this.score}</Text>
                       { this.showUserAchievement() }
                     </View>
                   : this.stateButton === "resume"
@@ -333,7 +275,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       </View>
     )
   }
-
 }
 
 const styles = StyleSheet.create({
@@ -348,6 +289,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  container1: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: "90%",
+    height: "90%",
+    borderRadius: 10,
   },
 })
 

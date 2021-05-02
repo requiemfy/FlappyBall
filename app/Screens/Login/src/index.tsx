@@ -34,7 +34,6 @@ interface State {
 class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
   email = "";
   password = "";
-  // connection = true; @remind
   navigation = this.props.navigation;
   authSubscriber!: firebase.Unsubscribe;
   netInfo!: NetInfoSubscription ;
@@ -58,7 +57,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.netInfo = NetInfo.addEventListener(state => {
       if (state.isConnected && state.isInternetReachable) {
         if (!this.state.network) {
-          // this.state.network = true; @remind
           this.safeSetState({ 
             network: true,
             showConnectionState: true,
@@ -67,7 +65,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
           setTimeout(() => this.safeSetState({ showConnectionState: false }), 2000);
         }
       } else {
-        // this.state.network = false; @remind
         this.safeSetState({ 
           network: false,
           showConnectionState: true,
@@ -123,7 +120,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.navigation.navigate('SignUp');
   }
 
-  // @remind
   playOffline = () => {
     this.navigation.reset({ 
       index: 0,
@@ -139,18 +135,11 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
       <View style={styles.rootContainer}>
         {
           this.state.showConnectionState &&
-          <View style={{
-            position: "absolute",
-            backgroundColor: this.state.network ? "green" : "red",
-            top: 0,
-            width: "100%",
-            height: "5%",
-            justifyContent: "center"
-          }}>
-            <Text style={{ 
-              color: "black", 
-              textAlign: "center" 
-            }}>{this.state.connectState}</Text>
+          <View style={[
+            styles.connectionState1, 
+            {backgroundColor: this.state.network ? "green" : "red",}
+          ]}>
+            <Text style={styles.connectionState2}>{this.state.connectState}</Text>
           </View>
         }
         {
@@ -248,6 +237,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold", 
     color: "white" ,
     marginBottom: 20,
-  }
+  },
+  connectionState1: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    height: "5%",
+    justifyContent: "center"
+  },
+  connectionState2: { 
+    color: "black", 
+    textAlign: "center" 
+  },
 })
 export default withNavigation(LoginScreen);

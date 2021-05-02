@@ -70,57 +70,27 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   render() {
     const button = this.props.route.params?.button;
     return (
-      <View style={{
-        flex: 1,
-        ...styles.flexCenter,
-      }}>
-        <View style={{
-          backgroundColor: 'rgba(0,0,0,0.9)',
-          width: "90%",
-          height: "90%",
-          borderRadius: 10,
-        }}>
-          <View style={{
-            flex: 1,
-            ...styles.flexCenter,
-          }}>
-            <View style={{ flex: 1, justifyContent: "center", }}>
-              <Text style={styles.HallOfFameLabel}>HALL OF FAME</Text>
+      <View style={[{flex: 1}, styles.flexCenter]}>
+        <View style={styles.container1}>
+          <View style={[{flex: 1}, styles.flexCenter]}>
+            <View style={styles.HOFtxtCont}>
+              <Text style={styles.HOFtxt}>HALL OF FAME</Text>
             </View>
-            <View style={{
-              flex: 4,
-              ...styles.flexCenter,
-            }}>
+            <View style={[{flex: 4}, styles.flexCenter]}>
             {
               this.state.loading 
                 ? <ActivityIndicator size="large" color="white" />
-                : (<FlatList
+                : <FlatList
                     data={this.state.players}
                     renderItem={({ item }) => {
                       return (
-                        <View style={{
-                          alignItems: "center",
-                          borderTopWidth: 1,
-                          borderColor: "#e0e0e0",
-                          backgroundColor: "black", 
-                          paddingTop: 10,
-                          paddingBottom: 10,
-                          width: 200
-                        }}>
-                          <Text style={{ 
-                            fontSize: 18, 
-                            color: "white", 
-                          }}>{this.records[item].codeName}</Text>
-                          <Text style={{ 
-                            fontSize: 20, 
-                            color: "white", 
-                            fontStyle: "italic",
-                            fontWeight: "bold",
-                          }}>{this.records[item].record}</Text>
+                        <View style={styles.itemCont1}>
+                          <Text style={styles.codeName}>{this.records[item].codeName}</Text>
+                          <Text style={styles.record}>{this.records[item].record}</Text>
                         </View>
                       );
                     }}
-                    keyExtractor={(item, index) => index.toString()} />)
+                    keyExtractor={(item, index) => index.toString()} />
             }
             </View>  
             <View style={{ flex: 1, justifyContent: "center", }}>
@@ -139,7 +109,9 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
 }
 
 const styles = StyleSheet.create({
-  HallOfFameLabel: { fontSize: 20, fontWeight: "bold", color: "white" },
+  HOFtxtCont: { flex: 1, justifyContent: "center", },
+  HOFtxt: { fontSize: 20, fontWeight: "bold", color: "white" },
+  buttonCont: {},
   HOFButton: {
     borderWidth: 1,
     borderColor: "white",
@@ -148,6 +120,31 @@ const styles = StyleSheet.create({
   flexCenter: {
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  container1: {
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    width: "90%",
+    height: "90%",
+    borderRadius: 10,
+  },
+  itemCont1: {
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderColor: "#e0e0e0",
+    backgroundColor: "black", 
+    paddingTop: 10,
+    paddingBottom: 10,
+    width: 200
+  },
+  codeName: { 
+    fontSize: 18, 
+    color: "white", 
+  },
+  record: { 
+    fontSize: 20, 
+    color: "white", 
+    fontStyle: "italic",
+    fontWeight: "bold",
+  },
 })
 

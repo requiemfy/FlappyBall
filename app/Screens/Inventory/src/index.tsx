@@ -19,7 +19,7 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce, safeSetState } from '../../../src/helpers';
+import { alert, backOnlyOnce, safeSetState } from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cache';
 import { Asset } from 'expo-asset';
@@ -30,7 +30,6 @@ interface Props { navigation: NavigationScreenProp<NavigationState, NavigationPa
 interface State { 
   items: Item[];
   gold: number;
-  // network: {connected: boolean; reachable: boolean | null | undefined;}; @remind
   network: boolean;
   loading: boolean;
 }
@@ -64,14 +63,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   inventoryListTemp!: string[];
   goldTemp!: number;
   prefetches: any = {};
-  // network: boolean | null | undefined = true; @remind
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
       items: Cache.inventory.data,
       gold: Cache.user.data?.gold as number,
-      // network: {connected: true, reachable: true}, @remind
       network: true,
       loading: false,
     };
@@ -81,9 +78,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     this.netInfo = NetInfo.addEventListener(state => {
-        this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) })
-      // this.network = state.isConnected && state.isInternetReachable; @remind
-      // this.setState({ network: { connected: state.isConnected, reachable: state.isInternetReachable } }); @remind
+        this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) });
     });
   }
 
@@ -93,11 +88,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.safeSetState = () => null;
     this.backHandler.remove();
     this.netInfo();
-
-    // this.db.ref('users/' + this.user?.uid).off(); @remind
-    // this.db.ref('users/' + this.user?.uid + '/inventory').off(); // @note trust me this is working
     Object.keys(this.dbRefs).forEach((key: any) => (this.dbRefs as any)[key].off())
-
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== inventory: aborted prefetches id", id);
@@ -130,7 +121,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         })
         .catch(_ => {
           console.log("== inventory: Failed prefetch");
-          this.alert("Processing Failed", "Something went wrong");
+          alert("Processing Failed", "Something went wrong");
         })
         .finally(() => {
           console.log("== inventory: finally prefetch, whatever");
@@ -143,26 +134,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private updateCache = () => {
     console.log("== inventory: Updating cache, removing sold item, current count", this.state.items.length);    
-    // const inventoryTmp = this.state.items; @remind
-    // this.state.items.some(item => {
-    //   if (item.id === this.item.id) {
-    //     inventoryTmp.splice(inventoryTmp.indexOf(item), 1);
-    //     return true; // @note has purpose
-    //   }
-    //   else return false; // @note has purpose
-    // });
-
     const invntTmp = this.state.items;
     invntTmp.splice(invntTmp.indexOf(this.item), 1);
     console.log("== inventory: Success removing item, count", invntTmp.length);
-
     Cache.inventory.update(invntTmp); // @note changes number of items in screen
-
     Cache.user.update({
       gold: this.goldTemp,
       inventory: this.inventoryListTemp,
     });
-
     this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
     console.log("== inventory: Success cache update after selling");
   }
@@ -171,14 +150,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.safeSetState({ loading: true });
     new Promise((_, reject) => {
       console.log("== inventory: Trying to fetch firebase in selling...");
-      // @remind this.db.ref('users/' + this.user?.uid + '/inventory').once('value') // @note prefered to get fresh data
       this.dbRefs.inventory.once('value') // @note prefered to get fresh data
         .then(async snapshot => {
           console.log("== inventory: Succeed to fetch firebase in selling");
           this.inventoryListTemp = snapshot.val();
           this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
           this.goldTemp = this.state.gold + (this.item.info.buy / 2);
-          // if (this.state.network) this.db.ref('users/' + this.user?.uid) @remind
           if (this.state.network) this.dbRefs.usr
             .update({ 
               inventory: this.inventoryListTemp,
@@ -197,12 +174,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }).catch(err => reject(err));
     }).catch(_ => {
       this.safeSetState({ loading: false }); // @note reject loading false
-      this.alert("Processing Error", "Something went wrong")
+      alert("Processing Error", "Something went wrong")
     });
   }
 
   private trySell = async (item: Item) => {
-    // if (this.state.network.connected && this.state.network.reachable) { @remind
     if (this.state.network) {
       this.item = item;
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
@@ -216,15 +192,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }
       ]);
     }
-    else this.alert("NO INTERNET", "Please make sure you have working connection");
-  }
-
-  private alert = (one: string, two: string) => {
-    Alert.alert(one, two, [
-      { 
-        text: "OK", onPress: () => null
-      }
-    ]);
+    else alert("NO INTERNET", "Please make sure you have working connection");
   }
 
   render() {
@@ -251,10 +219,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               contentContainerStyle={styles.flatlist}
               data={this.state.items}
               renderItem={({ item }) => { return (
-                <View style={{
-                  ...styles.item,
-                  backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"
-                }}>
+                <View style={[
+                  styles.item,
+                  {backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"}
+                ]}>
                   <TouchableOpacity 
                     style={styles.touchable} 
                     onPress={() => this.selectItem(item)}>

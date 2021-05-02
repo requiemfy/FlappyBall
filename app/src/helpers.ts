@@ -15,7 +15,12 @@ function autoImageDim(actualW: number, actualH: number) {
 
 function safeSetState(obj: any) {
   return (update: any) => {
-    if (obj.mounted) obj.setState(update);
+    if (obj.mounted) {
+      console.log("== helpers: Component set STATE");
+      obj.setState(update);
+    } else {
+      console.log("== helpers: Component DONT set state ");
+    }
   }
 }
 
@@ -27,4 +32,17 @@ function alert (one: string, two: string) {
   ]);
 }
 
-export { backOnlyOnce, autoImageDim, safeSetState, alert }
+function alertQuit (cb: any, lastWords: string) {
+  Alert.alert("Hold on!", lastWords, [
+    {
+      text: "Cancel",
+      onPress: () => null,
+      style: "cancel"
+    },
+    { text: "YES", onPress: () => {
+      cb();
+    }}
+  ]);
+}
+
+export { backOnlyOnce, autoImageDim, safeSetState, alert, alertQuit }

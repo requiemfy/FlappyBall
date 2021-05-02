@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { Alert, Button, Image, StyleSheet, View, ActivityIndicator, Platform, Dimensions, Text, NativeEventSubscription, BackHandler } from 'react-native';
-import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { 
+  Button, 
+  StyleSheet, 
+  View, 
+  Text, 
+  NativeEventSubscription, 
+  BackHandler 
+} from 'react-native';
+import { 
+  TextInput, 
+} from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -10,7 +19,8 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { backOnlyOnce, safeSetState } from '../../../src/helpers';
+import { alert, backOnlyOnce, safeSetState } from '../../../src/helpers';
+import NetInfo from '@react-native-community/netinfo';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -19,6 +29,8 @@ interface State {
 }
 
 class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
+  db = firebase.database();
+  dbUsers = this.db.ref('users');
   email = "";
   codeName = "";
   password = "";
@@ -26,7 +38,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   navigation = this.props.navigation;
   backHandler!: NativeEventSubscription;
   mounted = true;
-  safeSetState = safeSetState(this);
+  safeSetState:any = safeSetState(this);
 
   constructor(props: Props | any) {
     super(props);
@@ -37,14 +49,16 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   }
 
   componentDidMount() {
-    console.log("sign up MOUNT");
+    console.log("Signup: MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
   }
 
   componentWillUnmount() {
-    console.log("sign up UN-MOUNT")
-    this.backHandler.remove();
+    console.log("== signup: UN-MOUNT")
     this.mounted = false;
+    this.safeSetState = () => null;
+    this.dbUsers.off();
+    this.backHandler.remove();
   }
 
   backAction = () => {
@@ -53,50 +67,47 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   }
 
   trySignUp = () => {
-    if (this.password !== this.confirmPass) {
-      this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
-      return null;
-    } 
-    firebase
-      .database()
-      .ref('users')
-      .orderByChild("codeName")
-      .equalTo(this.codeName)
-      .once("value")
-      .then(snapshot => {
-        if (!snapshot.exists() && this.codeName !== "" && !this.codeName.includes(" ")) {// if null then unique
-          // these verfy email and password length
-          firebase
-            .auth()
-            .createUserWithEmailAndPassword(this.email, this.password)
-            .then((arg) => {
-              // add user initial data to database
-              this.safeSetState({ invalidCreds: false });
-              const user = {
-                codeName: this.codeName,
-                record: 0,
-                gold: 1000,
-              };
-              firebase
-                .database()
-                .ref('users/' + arg.user?.uid)
+    NetInfo.fetch().then(status => {
+      const network = Boolean(status.isConnected && status.isInternetReachable);
+      if (!network) return alert("NO INTERNET", "Please connect to internet");
+      if (this.password !== this.confirmPass) {
+        this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
+        return null;
+      } 
+      this.dbUsers.orderByChild("codeName").equalTo(this.codeName).once("value")
+        .then(snapshot => {
+          if (!snapshot.exists() && this.codeName !== "" && !this.codeName.includes(" ")) {// if null then unique
+            // these verfy email and password length
+            firebase
+              .auth()
+              .createUserWithEmailAndPassword(this.email, this.password)
+              .then((arg) => {
+                // add user initial data to database
+                this.safeSetState({ invalidCreds: false });
+                const user = {
+                  codeName: this.codeName,
+                  record: 0,
+                  gold: 1000,
+                };
+              this.db.ref('users/' + arg.user?.uid)
                 .update(user)
                 .then(snapshot => {
-                  console.log("SIGN UP SUCCESS", snapshot);
+                  console.log("== signup: Success", snapshot);
                 })
                 .catch(err => {
-                  console.log("SIGN UP FAILED", err);
+                  console.log("== signup: Failed", err);
                 })
             })
             .catch((err: object) => {
               const error = String(err).replace('Error: ', '');
               this.safeSetState({ invalidCreds: true, error: error });
             });
-        } else {
-          this.safeSetState({ invalidCreds: true, error: "Code Name is already used or has space." });
-        }
-      })
-      .catch(err => console.log(err));
+          } else {
+            this.safeSetState({ invalidCreds: true, error: "Code Name is already used or has space." });
+          }
+        })
+        .catch(err => console.log(err));
+    });
   }
 
   render() {
