@@ -20,7 +20,6 @@ let cacheAssetRetrieved = false; // this is useful to detect when the app is clo
 
 async function loadUserAsync(resolve: any, reject: any) {
   await user.fetch(resolve, reject);
-
   shop.storage.getItem('fetch-again').then(async resolve => {
     if (!(resolve === "false")) {
       console.log("cache: fetch urls again", resolve, typeof resolve)
@@ -70,7 +69,7 @@ const inventory = (() => {
         }
       });
       allItemUri[0]?.uri !== void 0 ? FastImage.preload(allItemUri) : null;
-      cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 60 * 60 * 24);
+      cacheStorage.setItem('inventory', JSON.stringify(inventoryCache), 0);
       console.log("== cache: CACHE INVENTORY DONE <3");
   }
   
@@ -78,7 +77,7 @@ const inventory = (() => {
     fetch: fetchInventory,
     update: (items: Shop.Item[]) => {
       inventoryCache = items;
-      cacheStorage.setItem('inventory', JSON.stringify(items), 60 * 60 * 24)
+      cacheStorage.setItem('inventory', JSON.stringify(items), 0)
     },
     get data() {return inventoryCache;},
     set data(items: Shop.Item[]) {
@@ -291,13 +290,16 @@ const user = (() => {
       cacheStorage.setItem('current-user', JSON.stringify(userCache), 0);
     },
     storage: cacheStorage,
-    pending: unsavedStorage,
     clear: () => {
       cacheStorage.setItem('current-user', '', 1);
       cacheStorage.clear();
       userCache = null;
     },
     get data() {return userCache;},
+    pending: {
+      update: (update: any) => unsavedStorage.setItem('unsaved', JSON.stringify(update), 0),
+      storage: unsavedStorage,
+    },
   }
 })()
 

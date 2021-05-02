@@ -167,8 +167,8 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
         console.log("== menu: no current unsaved data");
       }
       console.log("== menu: Caching user unsaved data", unsaved)
-      Cache.user.pending.setItem('unsaved', JSON.stringify(unsaved))
-          .then(_ => console.log("== menu: Success caching unsaved data"))
+      Cache.user.pending.update(unsaved)
+        .then(_ => console.log("== menu: Success caching unsaved data"))
     }).catch(err => console.log("== menu: Error caching unsaved data"))
   }
 
