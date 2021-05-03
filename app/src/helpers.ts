@@ -45,6 +45,15 @@ function alertQuit (cb: any, lastWords: string) {
   ]);
 }
 
+function getOrientation (window: any) {
+  if (window.height > window.width) {
+    console.log("TEST orient portrait");
+    return "portrait";
+  } else {
+    console.log("TEST orient landscape");
+    return "landscape";
+  }
+}
 
 let inventoryObj: any, shopObj: any, homeObj: any;
 
@@ -74,5 +83,6 @@ export {
   alertQuit,
   homeRef,
   inventoryRef,
-  shopRef
+  shopRef,
+  getOrientation
 }

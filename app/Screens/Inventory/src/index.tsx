@@ -7,9 +7,13 @@ import {
   ActivityIndicator, 
   Text, 
   NativeEventSubscription, 
-  BackHandler 
+  BackHandler, 
+  Dimensions,
 } from 'react-native';
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import { 
+  FlatList, 
+  TouchableOpacity, 
+} from 'react-native-gesture-handler';
 import {
   NavigationScreenProp,
   NavigationState,
@@ -19,12 +23,19 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { alert, backOnlyOnce, safeSetState, inventoryRef } from '../../../src/helpers';
+import { 
+  alert, 
+  backOnlyOnce, 
+  safeSetState, 
+  inventoryRef, 
+  getOrientation
+} from '../../../src/helpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Cache from '../../../src/cache';
 import { Asset } from 'expo-asset';
 import FastImage from 'react-native-fast-image'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -32,6 +43,8 @@ interface State {
   gold: number;
   network: boolean;
   loading: boolean;
+  checkBox: boolean;
+  columns: number;
 }
 
 type Item = { 
@@ -71,6 +84,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       gold: Cache.user.data?.gold as number,
       network: true,
       loading: false,
+      checkBox: false,
+      columns: getOrientation(Dimensions.get('window')) === 'portrait' ? 2 : 3,
     };
     inventoryRef(this);
     console.log("== inventory: items", this.state.items)
@@ -82,6 +97,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.netInfo = NetInfo.addEventListener(state => {
         this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) });
     });
+    Dimensions.addEventListener('change', this.orientationChange)
   }
 
   componentWillUnmount() {
@@ -91,11 +107,20 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     inventoryRef(null);
     this.backHandler.remove();
     this.netInfo();
+    Dimensions.removeEventListener('change', this.orientationChange);
     Object.keys(this.dbRefs).forEach((key: any) => (this.dbRefs as any)[key].off())
     Object.keys(this.prefetches).forEach(id => {
       Image.abortPrefetch!(this.prefetches[id]);
       console.log("== inventory: aborted prefetches id", id);
     });
+  }
+
+  private orientationChange = ({ window }: any) => {
+    if (getOrientation(window) === 'portrait') {
+      this.safeSetState({ columns: 2 });
+    } else {
+      this.safeSetState({ columns: 3 });
+    }
   }
 
   private backAction = () => {
@@ -198,6 +223,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     else alert("NO INTERNET", "Please make sure you have working connection");
   }
 
+  private showCheckBox = () => {
+    this.safeSetState({ checkBox: !this.state.checkBox });
+  }
+
   render() {
     
     return(
@@ -211,49 +240,83 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             </View>
           : null
         }
-        <View style={styles.gold1}>
-          <Text style={styles.gold2}>
-            Gold: {this.state.gold}
-          </Text>
-        </View>
+        {/* <View style={styles.gold1}> @remind */}
+        <View style={{flex: 1}}>
+          {/* <View style={styles.gold1}>  @remind */}
+            <Text style={styles.gold}>
+              Gold: {this.state.gold}
+            </Text>
+          {/* </View> @remind */}
+          {
+            this.state.checkBox &&
+            <View style={styles.sell1}>
+              <TouchableOpacity style={styles.sell2}>
+                <Text style={styles.sell3}>SELL</Text>
+              </TouchableOpacity>
+              <BouncyCheckbox
+                text="Select All"
+                onPress={(isChecked?: boolean) => console.log("TEST checkbox", isChecked)} 
+                fillColor="black"
+                unfillColor="#393939"
+                bounceFriction={0}
+                textStyle={{ fontSize: 15, textDecorationLine: 'none',}}
+                iconStyle={{ borderColor: "white",  borderRadius: 10 }}
+                style={{ padding: 5 }}
+              />
+            </View>
+          }
         {
           this.state.items.length
           ? <FlatList 
-              contentContainerStyle={styles.flatlist}
+              // contentContainerStyle={styles.flatlist} // @remind
+              key={this.state.columns} // @note believe me this is required
               data={this.state.items}
               renderItem={({ item }) => { return (
                 <View style={[
                   styles.item,
                   {backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"}
                 ]}>
-                  <TouchableOpacity 
-                    style={styles.touchable} 
-                    onPress={() => this.selectItem(item)}>
-                      
-                      <FastImage
-                        style={{width: 100, height: 100}}
-                        source={{
-                            uri: item.url,
-                            headers: { Authorization: 'someAuthToken' },
-                            priority: FastImage.priority.high,
-                        }}
-                        resizeMode={FastImage.resizeMode.contain}
-                      />
-
-                    <Text>{item.info.description}</Text>
-                  </TouchableOpacity>
+                  <View style={{ flex: 0 }}>
+                    {
+                      this.state.checkBox &&
+                        <BouncyCheckbox 
+                          disableText={true}
+                          onPress={(isChecked?: boolean) => console.log("TEST checkbox", isChecked)} 
+                          fillColor="black"
+                          unfillColor="#393939"
+                          iconStyle={{ borderColor: "white" }}
+                          style={styles.checkBox}
+                        />
+                    }
+                    <TouchableOpacity 
+                      style={styles.touchable} 
+                      onPress={() => this.selectItem(item)}
+                      onLongPress={() => this.showCheckBox()}>
+                        <FastImage
+                          style={{width: 100, height: 100}}
+                          source={{
+                              uri: item.url,
+                              headers: { Authorization: 'someAuthToken' },
+                              priority: FastImage.priority.high,
+                          }}
+                          resizeMode={FastImage.resizeMode.contain}
+                        />
+                      <Text>{item.info.description}</Text>
+                    </TouchableOpacity>
+                  </View>
                   <TouchableOpacity onPress={() => this.trySell(item)}>
                     <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>SELL FOR {item.info.buy/2}</Text>
                   </TouchableOpacity>
                 </View>
               )}}
               keyExtractor={(item: any) => item.id}
-              numColumns={2}
+              numColumns={this.state.columns}
             />
           : <View style={[styles.item, {flex: 0}]}>
               <Text style={{ color: "whitesmoke"}}>NO ITEMS</Text>
             </View>
         }
+        </View>
       </SafeAreaView>
     );
   }
@@ -279,7 +342,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#000",
   },
-  flatlist: {flex: 1, justifyContent: "center",},
+  // flatlist: { // @remind
+  //   flexGrow: 1,
+  //   justifyContent: "center",
+  // },
   item: {
     flex: 1,
     height: 180,  
@@ -314,8 +380,40 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderRadius: 50,
   },
-  gold1: { height: 100, justifyContent: "flex-end", alignItems: "center" },
-  gold2: { color: "yellow", fontSize: 20, fontWeight: "bold" }
+  // gold1: { 
+  //   padding: 20,
+  //   // justifyContent: "center",  // @remind
+  //   alignItems: "center",
+  // },
+  gold: { 
+    color: "yellow", 
+    fontSize: 20, 
+    padding: 20,
+    fontWeight: "bold" ,
+    textAlign: "center",
+  },
+  checkBox: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 99999,
+  },
+  sell1: {
+    flexDirection: "row",
+    margin: 5,
+  },
+  sell2: {
+    backgroundColor: "gray",
+    marginRight: 10,
+    borderRadius: 20,
+  },
+  sell3: {
+    padding: 10,
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: "yellow",
+  },
+  sell4: {}
 });
 
 export default withNavigation(InventoryScreen);

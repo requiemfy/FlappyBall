@@ -105,8 +105,8 @@ check network on settings change pass (DONE)
 check if gold is enough when buying LOL (DONE)
 cache offline score and gold then update online (DONE)
 try to update invent or shop state when URLs are ready (DONE)
+use alert in helpers (DONE)
 
 cache hall of fame
 sell/buy all selected
-
-use alert in helpers
+fix orientation issues
