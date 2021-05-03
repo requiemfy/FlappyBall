@@ -240,13 +240,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             </View>
           : null
         }
-        {/* <View style={styles.gold1}> @remind */}
         <View style={{flex: 1}}>
-          {/* <View style={styles.gold1}>  @remind */}
-            <Text style={styles.gold}>
-              Gold: {this.state.gold}
-            </Text>
-          {/* </View> @remind */}
+          <Text style={styles.gold}>
+            Gold: {this.state.gold}
+          </Text>
           {
             this.state.checkBox &&
             <View style={styles.sell1}>
@@ -268,7 +265,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         {
           this.state.items.length
           ? <FlatList 
-              // contentContainerStyle={styles.flatlist} // @remind
               key={this.state.columns} // @note believe me this is required
               data={this.state.items}
               renderItem={({ item }) => { return (
@@ -342,10 +338,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#000",
   },
-  // flatlist: { // @remind
-  //   flexGrow: 1,
-  //   justifyContent: "center",
-  // },
   item: {
     flex: 1,
     height: 180,  
@@ -380,11 +372,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderRadius: 50,
   },
-  // gold1: { 
-  //   padding: 20,
-  //   // justifyContent: "center",  // @remind
-  //   alignItems: "center",
-  // },
   gold: { 
     color: "yellow", 
     fontSize: 20, 
