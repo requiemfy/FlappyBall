@@ -164,15 +164,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     else alert("NO INTERNET", "Please make sure you have working connection")
   }
 
-  // @remind
-  // private alert = (one: string, two: string) => {
-  //   Alert.alert(one, two, [
-  //     { 
-  //       text: "OK", onPress: () => null
-  //     }
-  //   ]);
-  // }
-
   render() {
     return(
       <SafeAreaView style={styles.safeArea}>

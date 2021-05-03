@@ -100,25 +100,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     .catch(err => console.log("== home: USER DATA REJECT", err))
   }
 
-  // @remind
-  // private alertQuit = (cb: any, lastWords: string) => {
-  //   Alert.alert("Hold on!", lastWords, [
-  //     {
-  //       text: "Cancel",
-  //       onPress: () => null,
-  //       style: "cancel"
-  //     },
-  //     { text: "YES", onPress: () => {
-  //       cb();
-  //     }}
-  //   ]);
-  // }
-
   private quit = () => {
-    // @remind
-    // this.alertQuit(() => {
-    //   this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
-    // }, "Are you sure you want to quit?");
     alertQuit(() => {
       alertQuit(() => BackHandler.exitApp(), "Seriously?")
     }, "Are you sure you want to quit?");
