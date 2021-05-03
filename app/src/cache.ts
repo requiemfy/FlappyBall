@@ -30,8 +30,7 @@ async function loadUserAsync(resolve: any, reject: any) {
         .catch(reject => console.log("== cache: CACHE SHOP ERROR -", reject));
     }
     else {
-      console.log("cache: DONT fetch urls again, resolve status:", resolve)
-      // retrieveAssetCache(); @remind
+      console.log("cache: DONT fetch urls again, just use cache, resolve:", resolve)
     }
   })
 }
@@ -193,7 +192,6 @@ const shop = (() => {
                 .catch(err => reject(err))
             } else {
               console.log("== cache: don't fetch urls again, just get from cache");
-              // retrieveAssetCache(); @remind
             }
             // resolve or reject of this won't take effect, because of top promise FIRST
             new Promise((resolve, reject) => {

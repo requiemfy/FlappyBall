@@ -109,7 +109,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       gold: this.goldTemp,
       loading: false 
     });
-    this.alert("Purchase Successful", "You can now equip the item");
+    alert("Purchase Successful", "You can now equip the item");
     console.log("== shop: done update cache after buying");
   }
 
@@ -141,10 +141,10 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
             .finally(() => delete this.prefetches.buy);
       }).catch(_ => {
         this.safeSetState({ loading: false }); // @note loading false for reject
-        this.alert("Processing Error", "Something went wrong");
+        alert("Processing Error", "Something went wrong");
       });
     } 
-    else this.alert("Processing Error", "Something went wrong");
+    else alert("Processing Error", "Something went wrong");
   }
 
   private tryBuy = (item: Item) => {
@@ -161,16 +161,17 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         }
       ]);
     }
-    else this.alert("NO INTERNET", "Please make sure you have working connection")
+    else alert("NO INTERNET", "Please make sure you have working connection")
   }
 
-  private alert = (one: string, two: string) => {
-    Alert.alert(one, two, [
-      { 
-        text: "OK", onPress: () => null
-      }
-    ]);
-  }
+  // @remind
+  // private alert = (one: string, two: string) => {
+  //   Alert.alert(one, two, [
+  //     { 
+  //       text: "OK", onPress: () => null
+  //     }
+  //   ]);
+  // }
 
   render() {
     return(

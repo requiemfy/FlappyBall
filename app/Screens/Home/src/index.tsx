@@ -11,7 +11,7 @@ import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import * as Cache from '../../../src/cache'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
-import { homeRef, safeSetState } from '../../../src/helpers';
+import { alertQuit, homeRef, safeSetState } from '../../../src/helpers';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -100,22 +100,27 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
     .catch(err => console.log("== home: USER DATA REJECT", err))
   }
 
-  private alertQuit = (cb: any, lastWords: string) => {
-    Alert.alert("Hold on!", lastWords, [
-      {
-        text: "Cancel",
-        onPress: () => null,
-        style: "cancel"
-      },
-      { text: "YES", onPress: () => {
-        cb();
-      }}
-    ]);
-  }
+  // @remind
+  // private alertQuit = (cb: any, lastWords: string) => {
+  //   Alert.alert("Hold on!", lastWords, [
+  //     {
+  //       text: "Cancel",
+  //       onPress: () => null,
+  //       style: "cancel"
+  //     },
+  //     { text: "YES", onPress: () => {
+  //       cb();
+  //     }}
+  //   ]);
+  // }
 
   private quit = () => {
-    this.alertQuit(() => {
-      this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
+    // @remind
+    // this.alertQuit(() => {
+    //   this.alertQuit(() => BackHandler.exitApp(), "Seriously?")
+    // }, "Are you sure you want to quit?");
+    alertQuit(() => {
+      alertQuit(() => BackHandler.exitApp(), "Seriously?")
     }, "Are you sure you want to quit?");
   }
 
