@@ -16,7 +16,7 @@ function autoImageDim(actualW: number, actualH: number) {
 function safeSetState(obj: any) {
   return (update: any) => {
     if (obj.mounted) {
-      console.log("== helpers: Component set STATE", obj.constructor.name);
+      console.log("== helpers: Component set STATE", obj.constructor.name, update);
       obj.setState(update);
     } else {
       console.log("== helpers: Component DONT set state",  obj.constructor.name);

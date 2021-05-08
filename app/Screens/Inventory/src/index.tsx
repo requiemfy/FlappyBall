@@ -72,7 +72,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   safeSetState: any = safeSetState(this);
   backHandler!: NativeEventSubscription;
   netInfo!: NetInfoSubscription;
-  item!: Item;
+  itemsToSell: Item[] = [];
   inventoryListTemp!: string[];
   goldTemp!: number;
   prefetches: any = {};
@@ -95,7 +95,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     console.log("Inventorys MOUNT");
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     this.netInfo = NetInfo.addEventListener(state => {
-        this.safeSetState({ network: Boolean(state.isConnected && state.isInternetReachable) });
+      const update = Boolean(state.isConnected && state.isInternetReachable);
+      if (update !== this.state.network) this.safeSetState({ network: update });
     });
     Dimensions.addEventListener('change', this.orientationChange)
   }
@@ -162,8 +163,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private updateCache = () => {
     console.log("== inventory: Updating cache, removing sold item, current count", this.state.items.length);    
-    const invntTmp = this.state.items;
-    invntTmp.splice(invntTmp.indexOf(this.item), 1);
+    let invntTmp = this.state.items;
+
+    // invntTmp.splice(invntTmp.indexOf(this.item), 1); // @remind
+    invntTmp = invntTmp.filter((item: Item) => !this.itemsToSell.includes(item));
+
     console.log("== inventory: Success removing item, count", invntTmp.length);
     Cache.inventory.update(invntTmp); // @note changes number of items in screen
     Cache.user.update({
@@ -171,19 +175,38 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       inventory: this.inventoryListTemp,
     });
     this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
+    if (this.state.checkBox) this.toggleCheckBox();
     console.log("== inventory: Success cache update after selling");
   }
 
-  private sellItem = () => {
+  private sellItems = () => {
     this.safeSetState({ loading: true });
     new Promise((_, reject) => {
       console.log("== inventory: Trying to fetch firebase in selling...");
       this.dbRefs.inventory.once('value') // @note prefered to get fresh data
         .then(async snapshot => {
           console.log("== inventory: Succeed to fetch firebase in selling");
-          this.inventoryListTemp = snapshot.val();
-          this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
-          this.goldTemp = this.state.gold + (this.item.info.buy / 2);
+          
+          // this.inventoryListTemp = snapshot.val(); // @remind
+          // this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
+          // this.goldTemp = this.state.gold + (this.item.info.buy / 2);
+
+          const itemIDlist = snapshot.val();
+          const itemIDsToSell = this.itemsToSell.map((item: Item) => item.id);
+          this.inventoryListTemp = itemIDlist.filter((itemID: string) => !itemIDsToSell.includes(itemID));
+
+          this.goldTemp = this.state.gold;
+          this.itemsToSell.forEach(item => {
+            this.goldTemp += (item.info.buy/2)
+          })
+
+          console.log("TEST itemIDlist", itemIDlist);
+          console.log("TEST items to sell", itemIDsToSell);
+          console.log("TEST updated inventory", this.inventoryListTemp);
+          console.log("TEST gold", this.goldTemp);
+
+          // this.itemsToSell = []; // @remind
+
           if (this.state.network) this.dbRefs.usr
             .update({ 
               inventory: this.inventoryListTemp,
@@ -191,14 +214,30 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             })
             .then(_ => {
               console.log("== inventory: Success updating database")
-              this.updateCache()
-              if (this.item.id === activeItem.id) {
-                console.log("== inventory: Deactivating sprite since it was sold")
+              this.updateCache();
+
+              // if (this.item.id === activeItem.id) { // @remind
+              //   console.log("== inventory: Deactivating sprite since it was sold")
+              //   resetBallSprite();
+              //   this.forceUpdate();
+              // }
+
+              // this.itemsToSell.some(item => { // @remind
+              //   if (item.id === activeItem.id) return true;
+              //   else return false;
+              // });
+
+              if (itemIDsToSell.includes(activeItem.id!)) {
                 resetBallSprite();
                 this.forceUpdate();
               }
+
+              this.itemsToSell = [];
+
             }) // @note resolve loading false
             .catch(err => reject(err));
+
+
         }).catch(err => reject(err));
     }).catch(_ => {
       this.safeSetState({ loading: false }); // @note reject loading false
@@ -206,9 +245,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     });
   }
 
-  private trySell = async (item: Item) => {
+  private trySell = async (item: Item | 'marked') => {
     if (this.state.network) {
-      this.item = item;
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
           text: "Cancel",
@@ -216,19 +254,34 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           style: "cancel"
         },
         { 
-          text: "YES", onPress: this.sellItem
+          text: "YES", onPress: () => {
+            if (item !== "marked") this.itemsToSell.push(item);
+            this.sellItems();
+          }
         }
       ]);
     }
     else alert("NO INTERNET", "Please make sure you have working connection");
   }
 
-  private showCheckBox = () => {
+  private toggleCheckBox = (item?: Item) => {
+    if (!this.state.checkBox && item) this.toggleMark(item, true);
+    else if (this.state.checkBox) this.itemsToSell = [];
     this.safeSetState({ checkBox: !this.state.checkBox });
   }
 
+  private toggleMark = (item: Item, isChecked: boolean | undefined) => {
+    if (isChecked) this.itemsToSell.push(item)
+    else this.itemsToSell.splice(this.itemsToSell.indexOf(item), 1);
+    console.log("TEST toggle mark", this.itemsToSell);
+  }
+
+  // private sellAllMarked = () => { // @remind
+  //   console.log("TEST marked items", this.itemsToSell);
+  //   this.sellItems();
+  // }
+
   render() {
-    
     return(
       <SafeAreaView style={styles.safeArea}>
         {
@@ -247,7 +300,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           {
             this.state.checkBox &&
             <View style={styles.sell1}>
-              <TouchableOpacity style={styles.sell2}>
+              <TouchableOpacity 
+                style={styles.sell2}
+                onPress={() => this.trySell('marked')}
+              >
                 <Text style={styles.sell3}>SELL</Text>
               </TouchableOpacity>
               <BouncyCheckbox
@@ -267,46 +323,54 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           ? <FlatList 
               key={this.state.columns} // @note believe me this is required
               data={this.state.items}
-              renderItem={({ item }) => { return (
-                <View style={[
-                  styles.item,
-                  {backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"}
-                ]}>
-                  <View style={{ flex: 0 }}>
-                    {
-                      this.state.checkBox &&
-                        <BouncyCheckbox 
-                          disableText={true}
-                          onPress={(isChecked?: boolean) => console.log("TEST checkbox", isChecked)} 
-                          fillColor="black"
-                          unfillColor="#393939"
-                          iconStyle={{ borderColor: "white" }}
-                          style={styles.checkBox}
-                        />
-                    }
-                    <TouchableOpacity 
-                      style={styles.touchable} 
-                      onPress={() => this.selectItem(item)}
-                      onLongPress={() => this.showCheckBox()}>
-                        <FastImage
-                          style={{width: 100, height: 100}}
-                          source={{
-                              uri: item.url,
-                              headers: { Authorization: 'someAuthToken' },
-                              priority: FastImage.priority.high,
-                          }}
-                          resizeMode={FastImage.resizeMode.contain}
-                        />
-                      <Text>{item.info.description}</Text>
+              renderItem={({ item }) => { 
+                let bouncyCheckboxRef: BouncyCheckbox | null = null;
+                return (
+                  <View style={[
+                    styles.item,
+                    {backgroundColor: activeItem.id === item.id ? "green" : "#dfdddd59"}
+                  ]}>
+                    <View style={{ flex: 0 }}>
+                      {
+                        this.state.checkBox &&
+                          <BouncyCheckbox 
+                            ref={(ref: any) => bouncyCheckboxRef = ref}
+                            isChecked={this.itemsToSell.includes(item)}
+                            onPress={(isChecked?: boolean) => this.toggleMark(item, isChecked)} 
+                            disableText={true}
+                            fillColor="black"
+                            unfillColor="#393939"
+                            iconStyle={{ borderColor: "white" }}
+                            style={styles.checkBox}
+                          />
+                      }
+                      <TouchableOpacity 
+                        style={styles.touchable} 
+
+                        // onPress={() => this.selectItem(item)} // @remind
+                        onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.selectItem(item)}
+
+                        onLongPress={() => this.toggleCheckBox(item)}>
+                          <FastImage
+                            style={{width: 100, height: 100}}
+                            source={{
+                                uri: item.url,
+                                headers: { Authorization: 'someAuthToken' },
+                                priority: FastImage.priority.high,
+                            }}
+                            resizeMode={FastImage.resizeMode.contain}
+                          />
+                        <Text>{item.info.description}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={() => this.trySell(item)}>
+                      <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>SELL FOR {item.info.buy/2}</Text>
                     </TouchableOpacity>
                   </View>
-                  <TouchableOpacity onPress={() => this.trySell(item)}>
-                    <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>SELL FOR {item.info.buy/2}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}}
+                )}}
               keyExtractor={(item: any) => item.id}
               numColumns={this.state.columns}
+              contentContainerStyle={styles.flatlist}
             />
           : <View style={[styles.item, {flex: 0}]}>
               <Text style={{ color: "whitesmoke"}}>NO ITEMS</Text>
@@ -338,6 +402,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#000",
   },
+  flatlist: {
+    flexGrow: 1, 
+    justifyContent: "center",
+  },
   item: {
     flex: 1,
     height: 180,  
@@ -350,7 +418,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "gray", 
-
     elevation: 50,
     shadowColor: 'black',
   },
@@ -400,7 +467,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: "yellow",
   },
-  sell4: {}
 });
 
 export default withNavigation(InventoryScreen);

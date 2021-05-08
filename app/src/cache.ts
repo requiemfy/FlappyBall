@@ -165,6 +165,7 @@ const shop = (() => {
   }
 
   const fetchShop = async (resolve: any, reject: any) => {
+    console.log("== cache: fetchShop()");
     let loggedIn = true;
     firebase
       .database()
