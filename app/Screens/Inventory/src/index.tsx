@@ -295,10 +295,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               data={this.state.items}
               renderItem={({ item }) => { 
                 let bouncyCheckboxRef: BouncyCheckbox | null = null;
-
-                // if (this.itemsToSell.includes(item)) isChecked = true // @remind
                 const isChecked = this.itemsToSell.includes(item);
-
                 return (
                   <View style={[
                     styles.item,
@@ -309,13 +306,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                         this.state.checkBox &&
                           <BouncyCheckbox 
                             ref={(ref: any) => bouncyCheckboxRef = ref}
-
-                            // isChecked={this.itemsToSell.includes(item)} // @remind
-                            // onPress={(isChecked?: boolean) => this.toggleMark(item, isChecked)} 
-
                             isChecked={isChecked}
                             onPress={() => this.toggleMark(item, !isChecked)} 
-
                             disableText={true}
                             fillColor="black"
                             unfillColor="#393939"
