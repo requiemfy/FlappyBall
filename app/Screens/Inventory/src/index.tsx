@@ -164,10 +164,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   private updateCache = () => {
     console.log("== inventory: Updating cache, removing sold item, current count", this.state.items.length);    
     let invntTmp = this.state.items;
-
-    // invntTmp.splice(invntTmp.indexOf(this.item), 1); // @remind
     invntTmp = invntTmp.filter((item: Item) => !this.itemsToSell.includes(item));
-
     console.log("== inventory: Success removing item, count", invntTmp.length);
     Cache.inventory.update(invntTmp); // @note changes number of items in screen
     Cache.user.update({
@@ -186,27 +183,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       this.dbRefs.inventory.once('value') // @note prefered to get fresh data
         .then(async snapshot => {
           console.log("== inventory: Succeed to fetch firebase in selling");
-          
-          // this.inventoryListTemp = snapshot.val(); // @remind
-          // this.inventoryListTemp.splice(this.inventoryListTemp.indexOf(this.item.id), 1);
-          // this.goldTemp = this.state.gold + (this.item.info.buy / 2);
-
           const itemIDlist = snapshot.val();
           const itemIDsToSell = this.itemsToSell.map((item: Item) => item.id);
           this.inventoryListTemp = itemIDlist.filter((itemID: string) => !itemIDsToSell.includes(itemID));
-
           this.goldTemp = this.state.gold;
-          this.itemsToSell.forEach(item => {
-            this.goldTemp += (item.info.buy/2)
-          })
-
-          console.log("TEST itemIDlist", itemIDlist);
-          console.log("TEST items to sell", itemIDsToSell);
-          console.log("TEST updated inventory", this.inventoryListTemp);
-          console.log("TEST gold", this.goldTemp);
-
-          // this.itemsToSell = []; // @remind
-
+          this.itemsToSell.forEach(item => this.goldTemp += (item.info.buy/2));
           if (this.state.network) this.dbRefs.usr
             .update({ 
               inventory: this.inventoryListTemp,
@@ -215,29 +196,13 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             .then(_ => {
               console.log("== inventory: Success updating database")
               this.updateCache();
-
-              // if (this.item.id === activeItem.id) { // @remind
-              //   console.log("== inventory: Deactivating sprite since it was sold")
-              //   resetBallSprite();
-              //   this.forceUpdate();
-              // }
-
-              // this.itemsToSell.some(item => { // @remind
-              //   if (item.id === activeItem.id) return true;
-              //   else return false;
-              // });
-
               if (itemIDsToSell.includes(activeItem.id!)) {
                 resetBallSprite();
                 this.forceUpdate();
               }
-
               this.itemsToSell = [];
-
             }) // @note resolve loading false
             .catch(err => reject(err));
-
-
         }).catch(err => reject(err));
     }).catch(_ => {
       this.safeSetState({ loading: false }); // @note reject loading false
@@ -275,11 +240,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     else this.itemsToSell.splice(this.itemsToSell.indexOf(item), 1);
     console.log("TEST toggle mark", this.itemsToSell);
   }
-
-  // private sellAllMarked = () => { // @remind
-  //   console.log("TEST marked items", this.itemsToSell);
-  //   this.sellItems();
-  // }
 
   render() {
     return(
@@ -346,10 +306,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                       }
                       <TouchableOpacity 
                         style={styles.touchable} 
-
-                        // onPress={() => this.selectItem(item)} // @remind
                         onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.selectItem(item)}
-
                         onLongPress={() => this.toggleCheckBox(item)}>
                           <FastImage
                             style={{width: 100, height: 100}}
