@@ -212,6 +212,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private trySell = async (item: Item | 'marked') => {
     if (this.state.network) {
+      if (item !== "marked") this.itemsToSell.push(item);
+      else if (!((item === 'marked') && this.itemsToSell.length)) return alert("SELECT ITEM", "No items to sell");
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
           text: "Cancel",
@@ -219,10 +221,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
           style: "cancel"
         },
         { 
-          text: "YES", onPress: () => {
-            if (item !== "marked") this.itemsToSell.push(item);
-            this.sellItems();
-          }
+          text: "YES", onPress: this.sellItems
         }
       ]);
     }
@@ -233,12 +232,22 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     if (!this.state.checkBox && item) this.toggleMark(item, true);
     else if (this.state.checkBox) this.itemsToSell = [];
     this.safeSetState({ checkBox: !this.state.checkBox });
+    console.log("== inventory: (toggleCheckBox) items to sell length", this.itemsToSell.length);
   }
 
   private toggleMark = (item: Item, isChecked: boolean | undefined) => {
     if (isChecked) this.itemsToSell.push(item)
     else this.itemsToSell.splice(this.itemsToSell.indexOf(item), 1);
-    console.log("TEST toggle mark", this.itemsToSell);
+    this.forceUpdate();
+    console.log("== inventory: (toggleMark) items to sell length", this.itemsToSell.length, "is checked", isChecked);
+  }
+
+  private selectAll = (isChecked?: boolean) => {
+    if (isChecked) this.itemsToSell = [...this.state.items]; // @note shallow copy, objects are passed by reference, this is useful for comparison such as array.includes
+    // if (isChecked) this.itemsToSell = JSON.parse(JSON.stringify(this.state.items)); // @note deep copy, objects are passed by balue, not working for comparing objects
+    else this.itemsToSell = [];
+    this.forceUpdate();
+    console.log("== inventory: (selectAll) items to sell length", this.itemsToSell.length, "is checked", isChecked);
   }
 
   render() {
@@ -268,13 +277,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               </TouchableOpacity>
               <BouncyCheckbox
                 text="Select All"
-                onPress={(isChecked?: boolean) => console.log("TEST checkbox", isChecked)} 
+                onPress={this.selectAll} 
                 fillColor="black"
                 unfillColor="#393939"
                 bounceFriction={0}
                 textStyle={{ fontSize: 15, textDecorationLine: 'none',}}
                 iconStyle={{ borderColor: "white",  borderRadius: 10 }}
                 style={{ padding: 5 }}
+                useNativeDriver={true}
               />
             </View>
           }
@@ -285,6 +295,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               data={this.state.items}
               renderItem={({ item }) => { 
                 let bouncyCheckboxRef: BouncyCheckbox | null = null;
+
+                // if (this.itemsToSell.includes(item)) isChecked = true // @remind
+                const isChecked = this.itemsToSell.includes(item);
+
                 return (
                   <View style={[
                     styles.item,
@@ -295,13 +309,19 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                         this.state.checkBox &&
                           <BouncyCheckbox 
                             ref={(ref: any) => bouncyCheckboxRef = ref}
-                            isChecked={this.itemsToSell.includes(item)}
-                            onPress={(isChecked?: boolean) => this.toggleMark(item, isChecked)} 
+
+                            // isChecked={this.itemsToSell.includes(item)} // @remind
+                            // onPress={(isChecked?: boolean) => this.toggleMark(item, isChecked)} 
+
+                            isChecked={isChecked}
+                            onPress={() => this.toggleMark(item, !isChecked)} 
+
                             disableText={true}
                             fillColor="black"
                             unfillColor="#393939"
                             iconStyle={{ borderColor: "white" }}
                             style={styles.checkBox}
+                            disableBuiltInState
                           />
                       }
                       <TouchableOpacity 
@@ -309,11 +329,11 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                         onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.selectItem(item)}
                         onLongPress={() => this.toggleCheckBox(item)}>
                           <FastImage
-                            style={{width: 100, height: 100}}
+                            style={{ width: 100, height: 100 }}
                             source={{
-                                uri: item.url,
-                                headers: { Authorization: 'someAuthToken' },
-                                priority: FastImage.priority.high,
+                              uri: item.url,
+                              headers: {Authorization: 'someAuthToken'},
+                              priority: FastImage.priority.high,
                             }}
                             resizeMode={FastImage.resizeMode.contain}
                           />
@@ -329,7 +349,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               numColumns={this.state.columns}
               contentContainerStyle={styles.flatlist}
             />
-          : <View style={[styles.item, {flex: 0}]}>
+          : <View style={[styles.item, {flex: 1}]}>
               <Text style={{ color: "whitesmoke"}}>NO ITEMS</Text>
             </View>
         }
