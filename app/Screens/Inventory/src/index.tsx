@@ -120,7 +120,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   componentDidUpdate() {
-    setTimeout(() => this.safeSetState({ rendering: false }), 0);
+    if (this.state.rendering) setTimeout(() => this.safeSetState({ rendering: false }), 0);
+  }
+
+  private clearSelections = () => {
+    if (this.state.checkBox) this.toggleCheckBox();
+    else this.itemsToSell = []; // @note this is for the case of 1 item buy 
   }
 
   private orientationChange = ({ window }: any) => {
@@ -180,8 +185,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       inventory: this.inventoryListTemp,
     });
     this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
-    if (this.state.checkBox) this.toggleCheckBox();
-    else this.itemsToSell = []; 
+    this.clearSelections(); 
     console.log("== inventory: Success cache update after selling");
   }
 
@@ -204,12 +208,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             })
             .then(_ => {
               console.log("== inventory: Success updating database");
-              this.updateCache();
+              this.updateCache(); // @note resolve loading false
               if (itemIDsToSell.includes(activeItem.id!)) {
                 resetBallSprite();
                 this.mounted && this.forceUpdate();
               }
-            }) // @note resolve loading false
+            })
             .catch(err => reject(err));
         }).catch(err => reject(err));
     }).catch(_ => {

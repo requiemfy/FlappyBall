@@ -102,7 +102,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   componentDidUpdate() {
-    setTimeout(() => this.safeSetState({ rendering: false }), 0);
+    if (this.state.rendering) setTimeout(() => this.safeSetState({ rendering: false }), 0);
   }
 
   private orientationChange = ({ window }: any) => {
@@ -133,6 +133,11 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     }
   }
 
+  private clearSelections = () => {
+    if (this.state.checkBox) this.toggleCheckBox();
+    else this.itemsToBuy = []; // @note this is for the case of 1 item buy 
+  }
+
   private updateCache = () => {
     this.inventoryCache = [...this.inventoryCache, ...this.itemsToBuy];
     Cache.inventory.update(this.inventoryCache);
@@ -145,8 +150,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       gold: this.goldTemp,
       loading: false 
     });
-    if (this.state.checkBox) this.toggleCheckBox();
-    else this.itemsToBuy = [];
+    this.clearSelections();
     alert("Purchase Successful", "You can now equip the item");
     console.log("== shop: done update cache after buying");
   }
@@ -196,7 +200,10 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         this.safeSetState({ loading: false }); // @note loading false for reject
         alert("Processing Error", "Something went wrong");
       });
-    } else alert("Processing Error", "Something went wrong");
+    } else {
+      this.forceUpdate(); // @note to update state of checkbox in case of 1 item buy while others are checked
+      alert("Processing Error", "Something went wrong");
+    }
   }
 
   private tryBuy = (item: Item | 'marked') => {

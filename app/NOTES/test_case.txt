@@ -1,0 +1,4 @@
+shop / inventory
+
+1.) check items,
+    sell 1 item
