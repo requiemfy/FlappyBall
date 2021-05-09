@@ -76,6 +76,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   inventoryListTemp!: string[];
   goldTemp!: number;
   prefetches: any = {};
+  isAllChecked = false;
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
@@ -98,7 +99,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       const update = Boolean(state.isConnected && state.isInternetReachable);
       if (update !== this.state.network) this.safeSetState({ network: update });
     });
-    Dimensions.addEventListener('change', this.orientationChange)
+    Dimensions.addEventListener('change', this.orientationChange);
   }
 
   componentWillUnmount() {
@@ -173,6 +174,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     });
     this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
     if (this.state.checkBox) this.toggleCheckBox();
+    else this.itemsToSell = []; 
     console.log("== inventory: Success cache update after selling");
   }
 
@@ -200,7 +202,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 resetBallSprite();
                 this.forceUpdate();
               }
-              this.itemsToSell = [];
             }) // @note resolve loading false
             .catch(err => reject(err));
         }).catch(err => reject(err));
@@ -212,7 +213,10 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private trySell = async (item: Item | 'marked') => {
     if (this.state.network) {
-      if (item !== "marked") this.itemsToSell.push(item);
+      if (item !== "marked") {
+        this.itemsToSell = [];
+        this.itemsToSell.push(item);
+      }
       else if (!((item === 'marked') && this.itemsToSell.length)) return alert("SELECT ITEM", "No items to sell");
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
@@ -237,17 +241,21 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
 
   private toggleMark = (item: Item, isChecked: boolean | undefined) => {
     if (isChecked) this.itemsToSell.push(item)
-    else this.itemsToSell.splice(this.itemsToSell.indexOf(item), 1);
+    else {
+      this.itemsToSell.splice(this.itemsToSell.indexOf(item), 1);
+      this.isAllChecked = false;
+    };
     this.forceUpdate();
     console.log("== inventory: (toggleMark) items to sell length", this.itemsToSell.length, "is checked", isChecked);
   }
 
-  private selectAll = (isChecked?: boolean) => {
-    if (isChecked) this.itemsToSell = [...this.state.items]; // @note shallow copy, objects are passed by reference, this is useful for comparison such as array.includes
+  private selectAll = () => {
+    this.isAllChecked = !this.isAllChecked;
+    if (this.isAllChecked) this.itemsToSell = [...this.state.items]; // @note shallow copy, objects are passed by reference, this is useful for comparison such as array.includes
     // if (isChecked) this.itemsToSell = JSON.parse(JSON.stringify(this.state.items)); // @note deep copy, objects are passed by balue, not working for comparing objects
     else this.itemsToSell = [];
     this.forceUpdate();
-    console.log("== inventory: (selectAll) items to sell length", this.itemsToSell.length, "is checked", isChecked);
+    console.log("== inventory: (selectAll) items to sell length", this.itemsToSell.length, "is checked", this.isAllChecked);
   }
 
   render() {
@@ -276,6 +284,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 <Text style={styles.sell3}>SELL</Text>
               </TouchableOpacity>
               <BouncyCheckbox
+                isChecked={this.isAllChecked}
                 text="Select All"
                 onPress={this.selectAll} 
                 fillColor="black"
@@ -285,6 +294,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                 iconStyle={{ borderColor: "white",  borderRadius: 10 }}
                 style={{ padding: 5 }}
                 useNativeDriver={true}
+                disableBuiltInState
               />
             </View>
           }
