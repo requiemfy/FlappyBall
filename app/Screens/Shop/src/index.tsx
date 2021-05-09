@@ -8,7 +8,16 @@ import {
 } from 'react-navigation';
 import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
-import { Alert, ActivityIndicator, Image, SafeAreaView, StyleSheet, Text, View, Dimensions } from 'react-native';
+import { 
+  Alert, 
+  ActivityIndicator, 
+  Image, 
+  SafeAreaView, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Dimensions 
+} from 'react-native';
 import * as Cache from '../../../src/cache'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
@@ -118,9 +127,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   private updateCache = () => {
-    // this.inventoryCache.push(this.itemsToBuy); // @remind
     this.inventoryCache = [...this.inventoryCache, ...this.itemsToBuy];
-
     Cache.inventory.update(this.inventoryCache);
     Cache.user.update({
       gold: this.goldTemp,
@@ -139,49 +146,12 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
 
   private buy = () => {
     if (this.itemsToBuy.length && this.itemsToBuy[0].spriteUrl) {
-
-      // if (Cache.user.data?.gold! < this.itemsToBuy.info.buy) return alert("NO GOLD", "Not enough gold"); // @remind
       let totalPrice = 0;
       this.itemsToBuy.forEach(item => totalPrice += item.info.buy)
       if (Cache.user.data?.gold! < totalPrice) return alert("NO GOLD", "Not enough gold");
-
       this.safeSetState({ loading: true });
       new Promise((_, reject) => {
-        // @ts-ignore: Unreachable code error
-        // Image.prefetch(this.itemsToBuy.spriteUrl, (id: number) => this.prefetches.buy = id)
-        //   .then(_ => {
-        //     console.log("== shop: succeed prefetch promise BUY (then)");
-        //     this.dbUser.once('value') // @note possibly, inventory is undefined
-        //       .then(async snapshot => {
-        //         console.log("== shop: succeed firebase (user/uid).once BUY (then)");
-              
-        //         // const user = snapshot.val();
-        //         // this.goldTemp = user.gold - this.itemsToBuy.info.buy;
-        //         // this.inventoryListTemp = user.inventory as string[] || [];
-        //         // this.inventoryListTemp.push(this.itemsToBuy.id);
-        //         const user = snapshot.val();
-        //         this.goldTemp = user.gold - totalPrice;
-        //         this.inventoryListTemp = user.inventory as string[] || [];
-        //         // this.inventoryListTemp.push(this.itemsToBuy.id);
-
-        //         console.log("TEST user.inventory", user.inventory);
-        //         console.log("TEST inventoryList", this.inventoryListTemp);
-        //         console.log("TEST price", totalPrice)
-              
-        //         // this.dbUser
-        //         //   .update({
-        //         //     inventory: this.inventoryListTemp,
-        //         //     gold: this.goldTemp
-        //         //   })
-        //         //   .then(_ => this.updateCache()) // @note loading false for resolve
-        //         //   .catch(err => reject(err));
-
-
-        //       }).catch(err => reject(err));
-        //   }).catch(err => reject(err))
-        //     .finally(() => delete this.prefetches.buy);
-
-        let allSpritePromise: Promise[] = []
+        let allSpritePromise: any[] = []
         this.itemsToBuy.forEach(item => {
           console.log("TEST item", item.spriteUrl);
           const promise = new Promise((resolve, reject) => {
@@ -196,28 +166,16 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
           });
           allSpritePromise.push(promise);
         });
-
         Promise.all(allSpritePromise)
           .then(resolveIDs => {
             console.log("== shop: succeed prefetch promise BUY (then)", resolveIDs);
-
             this.dbUser.once('value') // @note possibly, inventory is undefined
               .then(async snapshot => {
                 console.log("== shop: succeed firebase (user/uid).once BUY (then)");
-              
-                // const user = snapshot.val(); // @remind
-                // this.goldTemp = user.gold - this.itemsToBuy.info.buy;
-                // this.inventoryListTemp = user.inventory as string[] || [];
-                // this.inventoryListTemp.push(this.itemsToBuy.id);
                 const user = snapshot.val();
                 this.goldTemp = user.gold - totalPrice;
                 this.inventoryListTemp = user.inventory as string[] || [];
                 this.inventoryListTemp = [...this.inventoryListTemp, ...resolveIDs];
-
-                console.log("TEST user.inventory", user.inventory);
-                console.log("TEST inventoryList", this.inventoryListTemp);
-                console.log("TEST price", totalPrice)
-              
                 this.dbUser
                   .update({
                     inventory: this.inventoryListTemp,
@@ -225,30 +183,22 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                   })
                   .then(_ => this.updateCache()) // @note loading false for resolve
                   .catch(err => reject(err));
-
               }).catch(err => reject(err));
-
-          })
-          .catch(err => reject(err));
-
+          }).catch(err => reject(err));
       }).catch(_ => {
         this.safeSetState({ loading: false }); // @note loading false for reject
         alert("Processing Error", "Something went wrong");
       });
-    } 
-    else alert("Processing Error", "Something went wrong");
+    } else alert("Processing Error", "Something went wrong");
   }
 
   private tryBuy = (item: Item | 'marked') => {
     if (this.network) {
-      
-      // this.itemsToBuy = item; // @remind
       if (item !== "marked") {
         this.itemsToBuy = [];
         this.itemsToBuy.push(item);
       }
       else if (!((item === 'marked') && this.itemsToBuy.length)) return alert("SELECT ITEM", "No items to sell");
-      
       Alert.alert("Hold on!", "Are you sure you want to buy?", [
         {
           text: "Cancel",
@@ -291,121 +241,101 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         }
         {
           this.state.preview.show
-            ? <View style={styles.preview1}>
-                <TouchableOpacity 
-                  style={styles.preview2}
-                  onPress={() => this.togglePreview()}
-                >
-                  {
-                    this.state.preview.loading
-                      ? this.state.preview.error
-                        ? <Text style={{color: "white"}}>Error Loading Preview</Text>
-                        : <ActivityIndicator size={100} color="gray" />
-                      : <Preview url={this.previewSprite}></Preview>
-                  }
-                </TouchableOpacity>
-              </View>
-            : null
-        }
-
-        {/* // @remind */}
-        {/* <View style={{ height: 100, justifyContent: "flex-end", alignItems: "center" }}> 
-          <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
-            Gold: {this.state.gold}
-          </Text>
-        </View> */}
-        <View style={{ flex: 1 }}>
-          <Text style={styles.gold}>
-            Gold: {this.state.gold}
-          </Text>
-
-        {
-          this.state.checkBox &&
-          <View style={styles.sell1}>
-            <TouchableOpacity 
-              style={styles.sell2}
-              onPress={() => this.tryBuy('marked')}>
-              <Text style={styles.sell3}>BUY</Text>
-            </TouchableOpacity>
-          </View>
-        }
-        {
-          this.state.items?.length
-          ? <FlatList 
-              key={this.state.columns} // @note believe me this is required
-              data={this.state.items}
-              renderItem={({ item }) => { 
-                let bouncyCheckboxRef: BouncyCheckbox | null = null;
-                const 
-                  isChecked = this.itemsToBuy.includes(item), 
-                  sold = this.state.inventoryList.includes(item.id);
-                return (
-                  <View style={styles.item}>
-
-                    <View style={{ flex: 0 }}>
-                      {
-                        (this.state.checkBox && !sold) &&
-                          <BouncyCheckbox 
-                            ref={(ref: any) => bouncyCheckboxRef = ref}
-                            isChecked={isChecked}
-                            onPress={() => this.toggleMark(item, !isChecked)} 
-                            disableText={true}
-                            fillColor="black"
-                            unfillColor="#393939"
-                            iconStyle={{ borderColor: "white" }}
-                            style={styles.checkBox}
-                            disableBuiltInState
-                          />
-                        }
-                      <TouchableOpacity 
-                        style={styles.touchable} 
-
-                        // onPress={() => this.togglePreview(item.spriteUrl)} // @remind
-                        onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.togglePreview(item.spriteUrl)}
-                        onLongPress={() => !sold ? this.toggleCheckBox(item) : null}>
-
-                        <FastImage
-                          style={{width: 100, height: 100}}
-                          source={{
-                              uri: item.url,
-                              headers: { Authorization: 'Nani?' },
-                              priority: FastImage.priority.high,
-                          }}
-                          resizeMode={FastImage.resizeMode.contain}
-                          />
-
-                        <Text>{item.info.description}</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {
-                      // !this.state.inventoryList.includes(item.id) // @remind
-                      !sold
-                      ? <TouchableOpacity onPress={() => this.tryBuy(item)}>
-                          <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>
-                            BUY FOR {item.info.buy}
-                          </Text>
-                        </TouchableOpacity>
-                      : <Text style={{ color:"gray", fontSize: 12, fontWeight: "bold" }}>
-                          PURCHASED FOR {item.info.buy}
-                        </Text>
-                    }
-                    
-                  </View>
-              )}}
-              keyExtractor={(item: any) => item.id}
-              numColumns={this.state.columns}
-              contentContainerStyle={styles.flatlist}
-            />
-          : <View style={[styles.item, {flex: 0}]}>
-              <Text style={{ color: "whitesmoke"}}>Loading</Text>
+          ? <View style={styles.preview1}>
+              <TouchableOpacity 
+                style={styles.preview2}
+                onPress={() => this.togglePreview()}>
+                {
+                  this.state.preview.loading
+                  ? this.state.preview.error
+                    ? <Text style={{color: "white"}}>Error Loading Preview</Text>
+                    : <ActivityIndicator size={100} color="gray" />
+                  : <Preview url={this.previewSprite}></Preview>
+                }
+              </TouchableOpacity>
             </View>
+          : null
         }
+        <View style={{ flex: 1 }}>
+          <Text style={styles.gold}>Gold: {this.state.gold}</Text>
+          {
+            this.state.checkBox &&
+            <View style={styles.sell1}>
+              <TouchableOpacity 
+                style={styles.sell2}
+                onPress={() => this.tryBuy('marked')}>
+                <Text style={styles.sell3}>BUY</Text>
+              </TouchableOpacity>
+            </View>
+          }
+          {
+            this.state.items?.length
+            ? <FlatList 
+                key={this.state.columns} // @note believe me this is required
+                data={this.state.items}
+                renderItem={({ item }) => { 
+                  let bouncyCheckboxRef: BouncyCheckbox | null = null;
+                  const 
+                    isChecked = this.itemsToBuy.includes(item), 
+                    sold = this.state.inventoryList.includes(item.id);
+                  return (
+                    <View style={styles.item}>
+                      <View style={{ flex: 0 }}>
+                        {
+                          (this.state.checkBox && !sold) &&
+                            <BouncyCheckbox 
+                              ref={(ref: any) => bouncyCheckboxRef = ref}
+                              isChecked={isChecked}
+                              onPress={() => this.toggleMark(item, !isChecked)} 
+                              disableText={true}
+                              fillColor="black"
+                              unfillColor="#393939"
+                              iconStyle={{ borderColor: "white" }}
+                              style={styles.checkBox}
+                              disableBuiltInState
+                            />
+                        }
+                        <TouchableOpacity 
+                          style={styles.touchable} 
+                          onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.togglePreview(item.spriteUrl)}
+                          onLongPress={() => !sold ? this.toggleCheckBox(item) : null}>
+                          <FastImage
+                            style={{width: 100, height: 100}}
+                            source={{
+                                uri: item.url,
+                                headers: { Authorization: 'Nani?' },
+                                priority: FastImage.priority.high,
+                            }}
+                            resizeMode={FastImage.resizeMode.contain}
+                          />
+                          <Text>{item.info.description}</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {
+                        !sold
+                        ? <TouchableOpacity onPress={() => this.tryBuy(item)}>
+                            <Text style={{ color:"yellow", fontSize: 12, fontWeight: "bold" }}>
+                              BUY FOR {item.info.buy}
+                            </Text>
+                          </TouchableOpacity>
+                        : <Text style={{ color:"gray", fontSize: 12, fontWeight: "bold" }}>
+                            PURCHASED FOR {item.info.buy}
+                          </Text>
+                      }
+                    </View>
+                )}}
+                keyExtractor={(item: any) => item.id}
+                numColumns={this.state.columns}
+                contentContainerStyle={styles.flatlist}
+              />
+            : <View style={[styles.item, {flex: 0}]}>
+                <Text style={{ color: "whitesmoke"}}>Loading</Text>
+              </View>
+          }
         </View>
       </SafeAreaView>
     )
   }
-
 }
 
 const styles = StyleSheet.create({

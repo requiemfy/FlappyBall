@@ -196,7 +196,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               gold: this.goldTemp,
             })
             .then(_ => {
-              console.log("== inventory: Success updating database")
+              console.log("== inventory: Success updating database");
               this.updateCache();
               if (itemIDsToSell.includes(activeItem.id!)) {
                 resetBallSprite();
@@ -207,7 +207,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }).catch(err => reject(err));
     }).catch(_ => {
       this.safeSetState({ loading: false }); // @note reject loading false
-      alert("Processing Error", "Something went wrong")
+      alert("Processing Error", "Something went wrong");
     });
   }
 
@@ -279,8 +279,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             <View style={styles.sell1}>
               <TouchableOpacity 
                 style={styles.sell2}
-                onPress={() => this.trySell('marked')}
-              >
+                onPress={() => this.trySell('marked')}>
                 <Text style={styles.sell3}>SELL</Text>
               </TouchableOpacity>
               <BouncyCheckbox
@@ -330,15 +329,15 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
                         style={styles.touchable} 
                         onPress={() => this.state.checkBox ? bouncyCheckboxRef?.onPress() : this.selectItem(item)}
                         onLongPress={() => this.toggleCheckBox(item)}>
-                          <FastImage
-                            style={{ width: 100, height: 100 }}
-                            source={{
-                              uri: item.url,
-                              headers: {Authorization: 'someAuthToken'},
-                              priority: FastImage.priority.high,
-                            }}
-                            resizeMode={FastImage.resizeMode.contain}
-                          />
+                        <FastImage
+                          style={{ width: 100, height: 100 }}
+                          source={{
+                            uri: item.url,
+                            headers: {Authorization: 'someAuthToken'},
+                            priority: FastImage.priority.high,
+                          }}
+                          resizeMode={FastImage.resizeMode.contain}
+                        />
                         <Text>{item.info.description}</Text>
                       </TouchableOpacity>
                     </View>
