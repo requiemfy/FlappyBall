@@ -33,6 +33,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
+  rendering: boolean,
   items: Item[];
   gold: number;
   inventoryList: string[];
@@ -67,6 +68,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   constructor (props: Props | any) {
     super(props);
     this.state = { 
+      rendering: false,
       items: Cache.shop.data as Item[],
       gold: Cache.user.data?.gold as number,
       inventoryList: Cache.user.data?.inventory || [],
@@ -99,7 +101,12 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     });
   }
 
+  componentDidUpdate() {
+    setTimeout(() => this.safeSetState({ rendering: false }), 0);
+  }
+
   private orientationChange = ({ window }: any) => {
+    this.safeSetState({ rendering: true });
     if (getOrientation(window) === 'portrait') {
       this.safeSetState({ columns: 2 });
     } else {
@@ -269,7 +276,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
             </View>
           }
           {
-            this.state.items?.length
+            this.state.items?.length && !this.state.rendering
             ? <FlatList 
                 key={this.state.columns} // @note believe me this is required
                 data={this.state.items}
@@ -328,7 +335,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
                 numColumns={this.state.columns}
                 contentContainerStyle={styles.flatlist}
               />
-            : <View style={[styles.item, {flex: 0}]}>
+            : <View style={[styles.item, {flex: 1}]}>
                 <Text style={{ color: "whitesmoke"}}>Loading</Text>
               </View>
           }

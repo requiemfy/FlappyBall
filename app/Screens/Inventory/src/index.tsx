@@ -39,6 +39,7 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
+  rendering: boolean,
   items: Item[];
   gold: number;
   network: boolean;
@@ -81,6 +82,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
     this.state = { 
+      rendering: false,
       items: Cache.inventory.data,
       gold: Cache.user.data?.gold as number,
       network: true,
@@ -117,7 +119,12 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     });
   }
 
+  componentDidUpdate() {
+    setTimeout(() => this.safeSetState({ rendering: false }), 0);
+  }
+
   private orientationChange = ({ window }: any) => {
+    this.safeSetState({ rendering: true });
     if (getOrientation(window) === 'portrait') {
       this.safeSetState({ columns: 2 });
     } else {
@@ -200,7 +207,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               this.updateCache();
               if (itemIDsToSell.includes(activeItem.id!)) {
                 resetBallSprite();
-                this.forceUpdate();
+                this.mounted && this.forceUpdate();
               }
             }) // @note resolve loading false
             .catch(err => reject(err));
@@ -298,7 +305,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
             </View>
           }
         {
-          this.state.items.length
+          this.state.items.length && !this.state.rendering
           ? <FlatList 
               key={this.state.columns} // @note believe me this is required
               data={this.state.items}
@@ -351,7 +358,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
               contentContainerStyle={styles.flatlist}
             />
           : <View style={[styles.item, {flex: 1}]}>
-              <Text style={{ color: "whitesmoke"}}>NO ITEMS</Text>
+              <Text style={{ color: "whitesmoke", fontSize: 100}}>…</Text>
             </View>
         }
         </View>
