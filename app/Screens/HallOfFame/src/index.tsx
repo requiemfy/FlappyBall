@@ -10,8 +10,10 @@ import {
 } from 'react-native';
 import { NavigationParams, } from 'react-navigation';
 import { FlatList } from 'react-native-gesture-handler';
-import { firebase, UserData } from '../../../src/firebase'
+import { UserData } from '../../../src/firebase';
 import { backOnlyOnce, safeSetState } from '../../../src/helpers';
+import * as Cache from '../../../src/cache';
+import NetInfo from '@react-native-community/netinfo';
 
 type HOFButton = keyof { play: string, resume: string, restart: string };
 type Players = { [key: string]: UserData }
@@ -19,7 +21,7 @@ type Props = { navigation: NavigationParams; route: { params: { button: HOFButto
 type State = { loading: boolean; players: string[] }
 
 export default class HallOfFameScreen extends React.PureComponent<Props, State> {
-  dbUser = firebase.database().ref('/users');
+  // dbUser = firebase.database().ref('/users'); @remind
   navigation = this.props.navigation;
   records!: Players;
   backHandler!: NativeEventSubscription;
@@ -42,7 +44,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
     this.mounted = false;
     this.safeSetState = () => null;
     this.backHandler.remove();
-    this.dbUser.off();
+    // this.dbUser.off(); @remind
   }
 
   private backAction = () => {
@@ -52,15 +54,30 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
 
   private getRecords = () => {
     console.log("== hall of fame: Trying to fetch all player records");
-    this.dbUser.once('value')
-      .then(snapshot => {
-        console.log("== hall of fame: Finished fetching all player records");
-        this.records = snapshot.val();
-        // sort records object desc
-        const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
-        this.safeSetState({ players: arr, loading: false });
-      })
-      .catch(err => console.log("== hall of fame: Error", err))
+    // this.dbUser.once('value') @remind
+    //   .then(snapshot => {
+    //     console.log("== hall of fame: Finished fetching all player records");
+    //     this.records = snapshot.val();
+    //     // sort records object desc
+    //     const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
+    //     this.safeSetState({ players: arr, loading: false });
+    //   })
+    //   .catch(err => console.log("== hall of fame: Error", err))
+
+    NetInfo.fetch().then(status => {
+      const network = Boolean(status.isConnected && status.isInternetReachable);
+      if (!network) Cache.hallOfFame.data && this.sortRecords(Cache.hallOfFame.data);
+      else new Promise((resolve, reject) => Cache.hallOfFame.fetch(resolve, reject))
+        .then((result: any) => this.sortRecords(result))
+        .catch(err => console.log("== hall of fame: Error 2", err));
+    });
+  }
+
+  private sortRecords = (records: any) => {
+    this.records = records;
+    //  sort records object desc
+    const arr = Object.keys(this.records).sort((a,b) => this.records[b].record - this.records[a].record);
+    this.safeSetState({ players: arr, loading: false });
   }
 
   private back = () => {

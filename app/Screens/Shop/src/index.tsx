@@ -164,7 +164,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       new Promise((_, reject) => {
         let allSpritePromise: any[] = []
         this.itemsToBuy.forEach(item => {
-          console.log("TEST item", item.spriteUrl);
           const promise = new Promise((resolve, reject) => {
             let prefetchID: string = "";
             // @ts-ignore: Unreachable code error

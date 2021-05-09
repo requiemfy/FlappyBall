@@ -237,7 +237,7 @@ const shop = (() => {
   }
 })();
 
-// CACHE SHOP
+// SHOP CACHING
 // =======================================================================
 // =======================================================================
 // USER DATA
@@ -308,6 +308,37 @@ const user = (() => {
 
 // USER DATA
 // =======================================================================
+// =======================================================================
+// HALL OF FAME CACHE
+
+const hallOfFame = (() => {
+  let hofCache: any = null;
+  const cacheStorage = new CacheStorage();
+  cacheStorage.getItem('hall-of-fame').then(result => result ? hofCache = JSON.parse(result) : null)
+
+  const fetchHoF = async (resolve: any, reject: any) => {
+    console.log("== cache: Fetching HOF...");
+    firebase.database().ref('/users').once('value')
+      .then(snapshot => {
+        console.log("== hall of fame: Finished fetching all player records");
+        hofCache = snapshot.val();
+        cacheStorage.setItem('hall-of-fame', JSON.stringify(hofCache), 0);
+        resolve(hofCache);
+      })
+      .catch(err => reject(err));
+  }
+  
+  return {
+    fetch: fetchHoF,
+    get data() {return hofCache;},
+    storage: cacheStorage,
+    clear: () => {
+      cacheStorage.setItem('hall-of-fame', '', 1);
+      cacheStorage.clear();
+      hofCache = [];
+    }
+  }
+})();
 
 export { 
   loadAssetsAsync, 
@@ -315,4 +346,5 @@ export {
   inventory,
   shop,
   user,
+  hallOfFame,
 }

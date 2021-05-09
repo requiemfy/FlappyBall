@@ -46,7 +46,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
       network: true,
       showConnectionState: false,
       connectState: "Checking connection...",
-    }
+    };
     this.getUserData();
     homeRef(this);
   }
