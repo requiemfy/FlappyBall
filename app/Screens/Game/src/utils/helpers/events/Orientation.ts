@@ -1,4 +1,3 @@
-
 import { Dimensions } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import FlappyBallGame from "../../..";
@@ -6,6 +5,7 @@ import { GAME_LANDSCAPE_WIDTH, GAME_PORTRAIT_WIDTH, NAVBAR_HEIGHT } from "../../
 import { Entities } from "../../world/Entities";
 import { DeviceMotion } from 'expo-sensors';
 import { GameDimension } from "../dimensions";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 export namespace Orientation {
   type WallProps = { x: number, y: number, heightPercent: number };
@@ -19,18 +19,29 @@ export namespace Orientation {
   type UpdateAxis = (axis: number, previousDimension: number, currentDimension: number) => number;
 
   let orientationCallback: ((event: object) => void) | null; // Event
+  let dontRotate = false;
+  let prevHeight = 0;
   export const addChangeListener: OrientGame = (game) => {
-    console.log("\torientation.tsx: addChangeListener!!!");
 
-    orientationCallback = () => {
-      ////////////////////////////////////////////////////////////
-      console.log("\n\norientation.tsx:\n````````````````````````````````````````````````````````````");
-      console.log("ORIENTATION CHANGED");
-      console.log("game.paused: " + game.paused);
-      ////////////////////////////////////////////////////////////
+    orientationCallback = (e: any) => {
+      if (dontRotate || (prevHeight === e.window.height)) return;
+
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
       game.forceUpdate(); // this is for update of GameDimensions
+
+      dontRotate = true;
+      prevHeight = e.window.height // @remind
+      e.window.width > e.window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2)
+
+      setTimeout(() => {
+        dontRotate = false;
+      // prevHeight = e.window.height // @remind
+        ScreenOrientation.lockAsync(0);
+        console.log("TEST ORIENTATE")
+      }, 1000)
+
+      console.log("TEST orient =================", e.window.height)
     };
     Dimensions.addEventListener('change', orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
 
@@ -40,7 +51,6 @@ export namespace Orientation {
         let prevOrient: number; // we are not sure what's first orientation
         DeviceMotion.addListener((current) => {
           if (prevOrient !== current.orientation) {
-            console.log("orientation " + current.orientation);
             if (current.orientation == 90) game.setState({ left: getStatusBarHeight(), })
             else game.setState({ left: 0, });
             prevOrient = current.orientation;
@@ -52,9 +62,12 @@ export namespace Orientation {
 
   export const removeChangeListener = () => {
     Dimensions.removeEventListener('change', orientationCallback!);
-    DeviceMotion.isAvailableAsync().then((supported) => {
-      supported ? DeviceMotion.removeAllListeners() : null;
-    });
+
+    // DeviceMotion.isAvailableAsync().then((supported) => { // @remind
+    //   supported ? DeviceMotion.removeAllListeners() : null;
+    // });
+    DeviceMotion.removeAllListeners()
+
     orientationCallback = null;
   }
 
@@ -85,7 +98,6 @@ export namespace Orientation {
         { lastEntX, lastEntY } = lastEntityCoords(wall);
       wallProps.push({ ...orientEntityCoords(lastEntX, lastEntY), ...maintainedProps});
       i++;
-      console.log("ORIENTATION WALL " + wallKey);
     }
     return wallProps; // [ {x: n, y: m, heightPercent: o}, ... ]
   }
@@ -98,14 +110,6 @@ export namespace Orientation {
       gameWidth = GameDimension.getWidth("now"),
       updatedX = getUpdatedAxis(lastEntX, prevGameWidth, gameWidth),
       updatedY = getUpdatedAxis(lastEntY, prevGameHeight, gameHeight);
-      ////////////////////////////////////////////////////////////
-      console.log("\t----diemensions of x,y: " + windowWidth + ", " + windowHeight );
-      console.log("\t----prev game dim: x,y" + prevGameWidth + ", " + prevGameHeight );
-      console.log("\t----current game dim: x,y" + gameWidth + ", " + gameHeight );
-      console.log("\t----Entity of x,y: " + lastEntX + ", " + lastEntY );
-      console.log("\t----Update Entity of x,y: " + updatedX + ", " + updatedY );
-      console.log("````````````````````````````````````````````````````````````");
-      ////////////////////////////////////////////////////////////
     return { x: updatedX, y: updatedY };
   }
 

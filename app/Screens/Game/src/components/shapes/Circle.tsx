@@ -1,8 +1,6 @@
-// quadrilateral matter template
-
 import { Body } from 'matter-js';
 import * as React from 'react'
-import { TouchableWithoutFeedback, View } from "react-native";
+import { View } from "react-native";
 
 export interface Props {
   size: number;
@@ -14,9 +12,6 @@ export interface State { }
 
 // PureComponent won't work
 export default class Circle extends React.Component<Props, State> {
-  componentWillUnmount() {
-    console.log("CIRCLE UNMOUNTING....");
-  }
 
   render() {
     const

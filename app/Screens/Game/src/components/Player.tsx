@@ -7,7 +7,6 @@ import { getBallSprite } from '../../../Inventory/src';
 import { autoImageDim } from '../../../../src/helpers';
 
 interface Props { setRef: ((ref: any) => void) | null; }
-
 interface State {
   left: number;
   top: number;
@@ -28,13 +27,11 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   componentDidMount() {
-    console.log("PLAYER DID MOUNT");
     Dimensions.addEventListener('change', this.orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
     this.props.setRef ? this.props.setRef(this) : null;
   }
 
   componentWillUnmount() {
-    console.log("PLAYER WILL UN-MOUNT")
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.stopCurrentAnim();
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
@@ -42,7 +39,6 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   private orientationCallback = () => {
-    console.log("PLAYER ORIENT");
     this.stopCurrentAnim();
     const { gameHeight } = GameDimension.window();
     this.setState({
@@ -69,32 +65,9 @@ export default class Player extends React.Component<Circle.Props & Props, State>
     this.spriteRef = spriteRef!;
     this.playSprite("idle", 12, true);
   }
-  // // optional animation, not really used for now
-  // fly = (spriteRef: SpriteSheet | null) => {
-  //   this.setSpriteRef(spriteRef);
-  //   this.playSprite(
-  //     "fly", 25, false,
-  //     ({ finished }) => finished ? this.playSprite("flyIdle", 12, true) : null
-  //   );
-  // }
-  // // optional animation
-  // fall = (spriteRef: SpriteSheet | null) => {
-  //   this.setSpriteRef(spriteRef);
-  //   this.playSprite(
-  //     "flyReverse", 60, false, 
-  //     ({ finished }) => 
-  //       finished 
-  //         ? this.playSprite(
-  //             "fall", 15, false, 
-  //             ({ finished }) => finished ? this.playSprite("fallIdle", 12, true) : null
-  //           )
-  //         : null
-  //   );
-  // }
 
   reverse = (spriteRef: SpriteSheet | null, type: string, fps: number, cb = ({ finished }: { finished: boolean }) => {}) => {
     this.spriteRef = spriteRef!;
-
     this.spriteRef?.reverse({
       type: type,
       fps: fps,

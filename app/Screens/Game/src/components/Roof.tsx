@@ -1,9 +1,6 @@
-import { ScaleFromCenterAndroid } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets';
-import { number } from 'prop-types';
-import React, { createRef, MutableRefObject } from 'react';
-import { Animated, Easing, Dimensions, Image, Platform, TouchableWithoutFeedback, ImageBackground } from 'react-native';
+import React from 'react';
+import { Animated, Easing, Dimensions, Image, Platform } from 'react-native';
 import { GameDimension } from '../utils/helpers/dimensions';
-import { SCREEN_HEIGHT } from '../utils/world/constants';
 import * as Box from './shapes/Box';
 
 interface Props { setRef: ((ref: any) => void) | null; }

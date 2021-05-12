@@ -3,7 +3,7 @@ import {
   View, 
   Text, 
   Button, 
-  BackHandler, Alert,
+  BackHandler,
   ImageBackground, 
   StyleSheet
 } from 'react-native';

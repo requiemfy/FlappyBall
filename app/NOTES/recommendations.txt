@@ -107,6 +107,42 @@ cache offline score and gold then update online (DONE)
 try to update invent or shop state when URLs are ready (DONE)
 use alert in helpers (DONE)
 sell/buy all selected (DONE)
+cache hall of fame (DONE)
+fix orientation issues (DONE)
 
-cache hall of fame
-fix orientation issues
+-----------------------------------
+
+PASSED TESTS
+  app background and orientation
+  rough orientation / rotation
+
+BUGS
+  game screen
+    put safeSetState
+  over clicking buttons cause error - put return false
+
+PENDING TEST
+
+REVIEWED
+  menu (checked)
+  home (checked)
+  hof (checked)
+  game 
+    index
+    world/
+      physics
+      matter
+      entities
+    helpers/
+      coordinates
+      events/
+        orientation
+        gamestate
+    components/
+      topbar
+      roof
+      player
+      grass
+      shapes/
+        circle
+        box

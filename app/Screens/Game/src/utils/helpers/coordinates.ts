@@ -1,4 +1,3 @@
-import FlappyBallGame from "../.."
 import { Entities } from "../world/Entities";
 
 export namespace Coordinates {

@@ -1,39 +1,21 @@
 import * as React from 'react'
-import { ActivityIndicator, Alert, Animated, AppState, BackHandler, BackHandlerStatic, Dimensions, ImageBackground, NativeEventSubscription, Platform, Text } from 'react-native'
+import { BackHandler, Dimensions, ImageBackground, NativeEventSubscription } from 'react-native'
 import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
 import { GameEngine } from './utils/helpers/react-native-game-engine';
-
 import { GameAppState } from './utils/helpers/events/GameState';
 import { Orientation } from './utils/helpers/events/Orientation';
-import {
-  BODY,
-  COMPOSITE,
-  // engine, 
-  EVENTS,
-  NAVBAR_HEIGHT,
-  ENGINE,
-  // world 
-} from './utils/world/constants';
+import { ENGINE } from './utils/world/constants';
 import { Entities } from './utils/world/Entities';
-import { Matter } from './utils/world/Matter';
 import { Physics } from './utils/world/Physics';
-
-import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { GameDimension } from './utils/helpers/dimensions';
-
-import * as ScreenOrientation from 'expo-screen-orientation';
-
-import * as Updates from 'expo-updates';
-import { GameAlert } from './utils/helpers/alerts';
 import TopBar from './components/TopBar';
 import { NavigationParams } from 'react-navigation';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { Engine, World } from 'matter-js';
 import Player from './components/Player';
-import SpriteSheet from './utils/helpers/sprite-sheet';
 import Grass from './components/Grass';
 import Roof from './components/Roof';
 import { PulseIndicator } from 'react-native-indicators';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 interface Props {
   navigation: NavigationParams;
@@ -44,7 +26,7 @@ interface Props {
   }
 }
 interface State {
-  left: number; // used in orientation, i needed this because component doesn't automatically render in orientation change
+  left: number;
   score: number;
   loadingBG: boolean;
 }
@@ -53,7 +35,7 @@ interface Game {
   entities: Entities.All;
   paused: boolean;
   over: boolean;
-  wallIds: number[]; // [[wall id, wall x], ...]
+  wallIds: number[]; 
   wallFreedIds: number[];
   entitiesInitialized: boolean;
   gravity: number;
@@ -67,7 +49,7 @@ interface Game {
 export default class FlappyBallGame extends React.PureComponent<Props, State> implements Game {
 
   engine!: GameEngine;
-  entities!: Entities.All; // all entities (player, floor)
+  entities!: Entities.All; 
   playerRef!: Player;
   grassRef!: Grass;
   roofRef!: Roof;
@@ -81,25 +63,19 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   state = { score: 0, left: 0, loadingBG: true };
   matterEngine = ENGINE.create({ enableSleeping: false });
   matterWorld = this.matterEngine.world;
-  connection = this.props.route.params.connection; // only useful for menu buttons
+  connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
 
   constructor(props: Props) {
     super(props);
-    // const TEST_UPDATE = 0;
     // Updates.checkForUpdateAsync().then((update) => update.isAvailable ? GameAlert.hasUpdate() : null);
-    Entities.getInitial(this); // entities is initialized here
+    Entities.getInitial(this);
   }
 
   componentDidMount() {
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
-    console.log("FLAPPY GAME DID MOUNT!!");
     Physics.addCollisionListener(this);
     Orientation.addChangeListener(this);
     GameAppState.addChangeListener(this);
-    console.log("--------------------------\n")
-    ////////////////////////////////////////////////////////////
     this.backHandler = BackHandler.addEventListener("hardwareBackPress", this.backAction);
     setTimeout(() => {
       this.engine.stop();
@@ -107,18 +83,17 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   componentWillUnmount() {
-    console.log("FLAPPY GAME WILL UNMOUNT!!")
     Physics.removeCollisionListener(this);
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
     this.backHandler.remove();
 
-    // this.grassRef = null;
-    // this.playerRef = null;
-    // this.roofRef = null;
-    // this.matterEngine = null;
-    // this.matterWorld = null;
-    // this.entities.game = null; // @note to avoid cycle reference
+    this.grassRef = null;
+    this.playerRef = null;
+    this.roofRef = null;
+    this.matterEngine = null;
+    this.matterWorld = null;
+    this.entities.game = null;
   }
 
   setEngineRef = (ref: GameEngine) => {
@@ -126,12 +101,9 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   menu = () => {
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
     if (!this.over) {
       if (!this.paused) {
-        console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======");
-        this.engine.stop(); // if stop() went missing, add it to GameEngine index.d.ts
+        this.engine.stop();
       }
       this.grassRef.stop();
       this.roofRef.stop();
@@ -139,17 +111,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
         button: "resume", 
         connection: this.connection,
       })
-    } else {
-      console.log("GAME OVER")
     }
-    const
-      lastPlayerX = this.entities.player.body.position.x,
-      lastPlayerY = this.entities.player.body.position.y;
-    console.log("this.over: " + this.over);
-    console.log("this.paused: " + this.paused);
-    console.log("lastPlayer x,y: " + lastPlayerX + ", " + lastPlayerY);
-    console.log("--------------------------");
-    ////////////////////////////////////////////////////////////
     return false;
   }
 
@@ -161,9 +123,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (e.type === "stopped") {
       this.paused = true;
       if (this.over && !this.willUnmount) {
-        this.willUnmount = true; // this is necessary because game engine event is stopping again (even already stopped) when unmounting
+        this.willUnmount = true; 
         Physics.removeCollisionListener(this);
-        console.log("MOUNTING MENU BECAUSE COLLISION DETECTED")
         this.props.navigation.push("Menu", { 
           button: "restart", 
           score: this.state.score,
@@ -173,13 +134,6 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     } else if (e.type === "started") {
       this.paused = false;
     }
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
-    console.log(e);
-    console.log("this.paused " + this.paused);
-    console.log("this.over " + this.over);
-    console.log("--------------------------");
-    ////////////////////////////////////////////////////////////
   }
 
   play = () => {
@@ -190,18 +144,12 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   playerFly = () => {
     if (!this.over) {
-      if (this.paused) this.play(); // if start() went missing, add it to GameEngine index.d.ts
-
+      if (this.paused) this.play();
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-      // if (orient === "landscape") Physics.playerRelativity.gravity(-0.0025);
       if (orient === "landscape") Physics.playerRelativity.gravity(-0.0045);
-      // else Physics.playerRelativity.gravity(-0.003);
       else Physics.playerRelativity.gravity(-0.005);
-
       this.playerRef.stopCurrentAnim();
-      // just choose either animation
-      // this.playerRef.setState({ startSprite: this.playerRef.fly });
       this.playerRef.setState({ startSprite: this.playerRef.reverseFallThenFly });
     }
   }
@@ -210,33 +158,20 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     if (!this.over) {
       let { width, height } = Dimensions.get("window"),
         orient = GameDimension.getOrientation(width, height);
-      // if (orient === "landscape") Physics.playerRelativity.gravity(0.001);
       if (orient === "landscape") Physics.playerRelativity.gravity(0.002);
-      // else Physics.playerRelativity.gravity(0.0015);
       else Physics.playerRelativity.gravity(0.0015);
-
       this.playerRef.stopCurrentAnim();
-      // just choose either animation
-      // this.playerRef.setState({ startSprite: this.playerRef.fall });
       this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
     }
   }
 
   render() {
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:")
-    console.log("--------------------------");
-    console.log("RENDER()...");
-    console.log("--------------------------\n");
-    ////////////////////////////////////////////////////////////
     return (
       <View style={{ flex: 1, }}>
         <TopBar score={this.state.score} pause={this.menu} running="Menu" />
         <TouchableWithoutFeedback
           onPressIn={this.playerFly}
           onPressOut={this.playerFall}>
-          {/* this view is necessary, because GameEngine return many components
-          and TouchableWithoutFeedback only works with 1 component */}
           <View style={{
             flex: 1,
             flexDirection: "row",
@@ -256,10 +191,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
               onEvent={this.onGameEngineEvent}
               systems={[Physics.system]}
               entities={this.entities}
-              // running={!this.paused} // @note running
               style={{
                 flex: 1,
-                // backgroundColor: "black",
                 left: this.state.left,
               }} />
             <StatusBar hidden />
