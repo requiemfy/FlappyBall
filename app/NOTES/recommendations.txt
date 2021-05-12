@@ -112,37 +112,48 @@ fix orientation issues (DONE)
 
 -----------------------------------
 
+DONE 
+  game screen put safeSetState
+
 PASSED TESTS
   app background and orientation
   rough orientation / rotation
 
 BUGS
-  game screen
-    put safeSetState
+  
   over clicking buttons cause error - put return false
+    menu buttons (DONE)
+      resume / restart
+      home
+      quit
+    hof (DONE)
+    home
+      play
+
+  orientate then home then play then orientate - broke game screen
 
 PENDING TEST
 
 REVIEWED
-  menu (checked)
-  home (checked)
-  hof (checked)
+  menu (DONE)
+  home (DONE)
+  hof #no need
   game 
-    index
+    index (DONE)
     world/
-      physics
-      matter
-      entities
+      physics (DONE)
+      matter #no need
+      entities #no need
     helpers/
-      coordinates
+      coordinates #no need
       events/
-        orientation
-        gamestate
+        orientation (DONE)
+        gamestate #no need
     components/
-      topbar
-      roof
-      player
-      grass
+      topbar #no need
+      roof (DONE)
+      player (DONE)
+      grass (DONE)
       shapes/
-        circle
-        box
+        circle #no need
+        box #no need

@@ -32,11 +32,11 @@ function alert (one: string, two: string) {
   ]);
 }
 
-function alertQuit (cb: any, lastWords: string) {
+function alertQuit (cb: any, lastWords: string, cancel: any = () => null) {
   Alert.alert("Hold on!", lastWords, [
     {
       text: "Cancel",
-      onPress: () => null,
+      onPress: cancel,
       style: "cancel"
     },
     { text: "YES", onPress: () => {

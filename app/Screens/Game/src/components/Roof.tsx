@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated, Easing, Dimensions, Image, Platform } from 'react-native';
+import { safeSetState } from '../../../../src/helpers';
 import { GameDimension } from '../utils/helpers/dimensions';
 import * as Box from './shapes/Box';
 
@@ -19,6 +20,8 @@ type RoofObject = {
 };
 
 export default class Roof extends React.PureComponent<Box.Props & Props, State> {
+  mounted = true;
+  safeSetState = safeSetState(this);
   private static readonly BASE_DURATION = 6000;
   private static readonly BASE_DISTANCE = 798;
   private roofWidth = GameDimension.getWidth("now");
@@ -53,6 +56,7 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.roofAleft.removeAllListeners();
@@ -62,18 +66,14 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
 
   private orientationCallback = () => {
     this.stop();
-
     this.roofWidth = GameDimension.getWidth("now");
-
     this.roofA.stoppedLeft = 0;
     this.roofA.toValue = -this.roofWidth;
     this.roofB.stoppedLeft = this.roofWidth;
     this.roofB.toValue = 0;
-
     this.state.roofAleft.setValue(0);
     this.state.roofBleft.setValue(this.roofWidth);
-
-    this.setState({});
+    this.safeSetState({});
   }
 
   private calcDuration(width: number, left: number) {
@@ -111,12 +111,12 @@ export default class Roof extends React.PureComponent<Box.Props & Props, State> 
   private swapRoof = () => {
     if (this.firstRoof === "roof-a") {
       this.firstRoof = "roof-b"
-      this.setState({ roofBvine: this.randomVine() })
+      this.safeSetState({ roofBvine: this.randomVine() })
       this.switching()
 
     } else {
       this.firstRoof = "roof-a"
-      this.setState({ roofAvine: this.randomVine() })
+      this.safeSetState({ roofAvine: this.randomVine() })
       this.switching([0, -this.roofWidth], [this.roofWidth, 0])
     }
   }

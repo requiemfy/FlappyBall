@@ -5,13 +5,15 @@ import {
   Button, 
   BackHandler, 
   StyleSheet, 
-  NativeEventSubscription, 
+  NativeEventSubscription,
+  Dimensions, 
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { firebase } from '../../../src/firebase';
 import { alert, alertQuit, backOnlyOnce, safeSetState } from '../../../src/helpers';
 import * as Cache from '../../../src/cache';
 import NetInfo from '@react-native-community/netinfo';
+import { Orientation } from '../../Game/src/utils/helpers/events/Orientation';
 
 type MenuButton = keyof { resume: string, restart: string };
 type Props = { 
@@ -40,6 +42,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   network = true;
   cacheData = Cache.user.data!;
   mounted = true;
+  noMoreButtons = false;
   safeSetState: any = safeSetState(this);
 
   constructor(props: Props) {
@@ -85,24 +88,42 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   quit = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     alertQuit(() => {
-      alertQuit(() => BackHandler.exitApp(), "Seriously?")
-    }, "Are you sure you want to quit?");
+      alertQuit(() => BackHandler.exitApp(), "Seriously?", () => this.noMoreButtons = false) // 3rd callback when cancelled
+    }, "Are you sure you want to quit?", () => this.noMoreButtons = false);
   }
 
   play = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     const button = this.props.route.params?.button;
-    (button === "resume")
-      ? this.props.navigation.goBack() // resume
-      : this.props.navigation.reset({ // restart
+
+    // Orientation.disableRotate(Dimensions.get('window')); // @remind
+    // (button === "resume")
+    //   ? this.props.navigation.goBack() // resume
+    //   : this.props.navigation.reset({ // restart
+    //     index: 0,
+    //     routes: [
+    //       { name: 'FlappyBall', params: { button: button, connection: this.connection } },
+    //     ],
+    //   });
+    if (button === "resume") this.props.navigation.goBack();
+    else {
+      Orientation.disableRotate(Dimensions.get('window'));
+      this.props.navigation.reset({ // restart
         index: 0,
         routes: [
           { name: 'FlappyBall', params: { button: button, connection: this.connection } },
         ],
       });
+    }
   }
 
   goHome = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     this.props.navigation.reset({
       index: 0,
       routes: [
@@ -116,6 +137,8 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   }
 
   logIn = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     this.props.navigation.reset({ 
       index: 0,
       routes: [{ name: 'Login' }],

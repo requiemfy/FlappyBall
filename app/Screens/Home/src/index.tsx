@@ -5,13 +5,15 @@ import {
   Button, 
   BackHandler,
   ImageBackground, 
-  StyleSheet
+  StyleSheet,
+  Dimensions
 } from 'react-native';
 import { NavigationParams } from 'react-navigation';
 import { PulseIndicator } from 'react-native-indicators';
 import * as Cache from '../../../src/cache'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 import { alertQuit, homeRef, safeSetState } from '../../../src/helpers';
+import { Orientation } from '../../Game/src/utils/helpers/events/Orientation';
 
 type HomeButton = keyof { play: string; resume: string; restart: string };
 type HomeProps = { navigation: NavigationParams; route: { params: { button: HomeButton; } } }
@@ -31,6 +33,7 @@ type HomeState = {
 export default class HomeScreen extends React.PureComponent<HomeProps, HomeState> {
   netInfo!: NetInfoSubscription;
   mounted = true;
+  noMoreButtons = false;
   safeSetState: any = safeSetState(this);
 
   constructor(props: HomeProps) {
@@ -101,12 +104,17 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
   }
 
   private quit = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     alertQuit(() => {
-      alertQuit(() => BackHandler.exitApp(), "Seriously?")
-    }, "Are you sure you want to quit?");
+      alertQuit(() => BackHandler.exitApp(), "Seriously?", () => this.noMoreButtons = false) // 3rd callback when cancelled
+    }, "Are you sure you want to quit?", () => this.noMoreButtons = false);
   }
 
   private play = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
+    Orientation.disableRotate(Dimensions.get('window'));
     this.props.navigation.reset({
       index: 0,
       routes: [

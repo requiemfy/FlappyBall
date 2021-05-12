@@ -4,7 +4,7 @@ import { GameDimension } from '../utils/helpers/dimensions';
 import SpriteSheet from '../utils/helpers/sprite-sheet';
 import * as Circle from './shapes/Circle';
 import { getBallSprite } from '../../../Inventory/src';
-import { autoImageDim } from '../../../../src/helpers';
+import { autoImageDim, safeSetState } from '../../../../src/helpers';
 
 interface Props { setRef: ((ref: any) => void) | null; }
 interface State {
@@ -15,6 +15,8 @@ interface State {
 
 export default class Player extends React.Component<Circle.Props & Props, State> {
   spriteRef: SpriteSheet | null = null;
+  mounted = true;
+  safeSetState = safeSetState(this);
 
   constructor(props: Circle.Props & Props) {
     super(props);
@@ -32,6 +34,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.stopCurrentAnim();
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
@@ -41,7 +44,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
   private orientationCallback = () => {
     this.stopCurrentAnim();
     const { gameHeight } = GameDimension.window();
-    this.setState({
+    this.safeSetState({
       left: gameHeight * 0.077,
       top: gameHeight * 0.0342,
     });

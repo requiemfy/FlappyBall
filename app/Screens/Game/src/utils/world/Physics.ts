@@ -73,7 +73,7 @@ export namespace Physics {
         if ((playerX - (playerSize/2)) > (currentWallX + (currentWallSize/2))) {
           const recentWallid = nextWall > 0 ? entities.game.wallIds[nextWall-1] : null;
           if (recentWallid === null || !entities[recentWallid]) {
-            entities.game.setState({ score: entities.game.state.score + 1 });
+            entities.game.safeSetState({ score: entities.game.state.score + 1 });
             const
               playerX = entities.player.body.position.x,
               wallX = entities[entities.game.wallIds[1]].body.position.x;
@@ -153,7 +153,7 @@ export namespace Physics {
                 game.grassRef.stop();
                 game.roofRef.stop();
                 game.playerRef.stopCurrentAnim();
-                game.playerRef.setState({ startSprite: game.playerRef.collided });
+                game.playerRef.safeSetState({ startSprite: game.playerRef.collided });
               })();
               clearTimeout(timeOut);
               timeOut = null; callBack = null;

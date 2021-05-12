@@ -21,27 +21,45 @@ export namespace Orientation {
   let orientationCallback: ((event: object) => void) | null; // Event
   let dontRotate = false;
   let prevHeight = 0;
+  let timeOutRotate: any;
+
+  export const disableRotate = (window: {width: number, height: number}) => {
+    dontRotate = true;
+    window.width > window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2);
+  }
+
+  export const enableRotate = (game: FlappyBallGame) => {
+    timeOutRotate = setTimeout(() => {
+      if (!game.mounted) return;
+      dontRotate = false;
+      ScreenOrientation.lockAsync(0); // unlock
+      console.log("== orientation: enable rotate");
+    }, 1000);
+  }
+
   export const addChangeListener: OrientGame = (game) => {
 
     orientationCallback = (e: any) => {
-      if (dontRotate || (prevHeight === e.window.height)) return;
-
+      if (dontRotate || (prevHeight === e.window.height) || !game.mounted) return;
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
       game.forceUpdate(); // this is for update of GameDimensions
 
-      dontRotate = true;
-      prevHeight = e.window.height // @remind
-      e.window.width > e.window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2)
+      prevHeight = e.window.height
+      // dontRotate = true; // @remind
+      disableRotate(e.window)
+      
+      // e.window.width > e.window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2) // @remind
 
-      setTimeout(() => {
-        dontRotate = false;
-      // prevHeight = e.window.height // @remind
-        ScreenOrientation.lockAsync(0);
-        console.log("TEST ORIENTATE")
-      }, 1000)
+      // setTimeout(() => { // @remind
+      //   dontRotate = false;
+      //   ScreenOrientation.lockAsync(0);
+      //   console.log("== orientation: Free to rotate")
+      // }, 1000);
 
-      console.log("TEST orient =================", e.window.height)
+      enableRotate(game);
+
+      console.log("== orientation: On orientation, height", e.window.height)
     };
     Dimensions.addEventListener('change', orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right
 
@@ -50,9 +68,10 @@ export namespace Orientation {
       if (supported) {
         let prevOrient: number; // we are not sure what's first orientation
         DeviceMotion.addListener((current) => {
+          if (dontRotate) return;
           if (prevOrient !== current.orientation) {
-            if (current.orientation == 90) game.setState({ left: getStatusBarHeight(), })
-            else game.setState({ left: 0, });
+            if (current.orientation == 90) game.safeSetState({ left: getStatusBarHeight(), })
+            else game.safeSetState({ left: 0, });
             prevOrient = current.orientation;
           }
         });
@@ -62,13 +81,11 @@ export namespace Orientation {
 
   export const removeChangeListener = () => {
     Dimensions.removeEventListener('change', orientationCallback!);
-
-    // DeviceMotion.isAvailableAsync().then((supported) => { // @remind
-    //   supported ? DeviceMotion.removeAllListeners() : null;
-    // });
+    clearTimeout(timeOutRotate);
     DeviceMotion.removeAllListeners()
-
     orientationCallback = null;
+    timeOutRotate = null;
+    prevHeight = 0;
   }
 
   const changeOrientation: OrientGame = (game: FlappyBallGame) => {

@@ -210,5 +210,4 @@ export namespace Entities {
       game.engine.swap(game.entities);
     } as typeof swap)
   })();
-  // ====================================================================================================
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated, Easing, Dimensions, Platform } from 'react-native';
+import { safeSetState } from '../../../../src/helpers';
 import { GameDimension } from '../utils/helpers/dimensions';
 import * as Box from './shapes/Box';
 
@@ -18,6 +19,8 @@ type GrassObject = {
 };
 
 export default class Grass extends React.PureComponent<Box.Props & Props, State> {
+  mounted = true;
+  safeSetState = safeSetState(this);
   private static readonly BASE_DURATION = 6000;
   private static readonly BASE_DISTANCE = 798;
   private grassWidth = GameDimension.getWidth("now");
@@ -53,6 +56,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.grassAleft.removeAllListeners();
@@ -92,11 +96,11 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
   private swapGrass = () => { // putting front grass to back
     if (this.firstGrass === "grass-a") {
       this.firstGrass = "grass-b"
-      this.setState({ grassBheight: this.randomHeight() });
+      this.safeSetState({ grassBheight: this.randomHeight() });
       this.switching()
     } else {
       this.firstGrass = "grass-a"
-      this.setState({ grassAheight: this.randomHeight() });
+      this.safeSetState({ grassAheight: this.randomHeight() });
       this.switching([0, -this.grassWidth], [this.grassWidth, 0])
     }
   }

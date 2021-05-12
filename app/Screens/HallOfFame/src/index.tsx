@@ -24,6 +24,7 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   navigation = this.props.navigation;
   records!: Players;
   backHandler!: NativeEventSubscription;
+  noMoreButtons = false;
   mounted = true;
   safeSetState: any = safeSetState(this);
 
@@ -69,6 +70,8 @@ export default class HallOfFameScreen extends React.PureComponent<Props, State> 
   }
 
   private back = () => {
+    if (this.noMoreButtons) return;
+    this.noMoreButtons = true;
     this.props.navigation.goBack()
   }
 

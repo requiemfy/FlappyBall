@@ -15,7 +15,7 @@ import Player from './components/Player';
 import Grass from './components/Grass';
 import Roof from './components/Roof';
 import { PulseIndicator } from 'react-native-indicators';
-import * as ScreenOrientation from 'expo-screen-orientation';
+import { safeSetState } from '../../../src/helpers';
 
 interface Props {
   navigation: NavigationParams;
@@ -65,6 +65,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   matterWorld = this.matterEngine.world;
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
+  mounted = true;
+  safeSetState = safeSetState(this);
 
   constructor(props: Props) {
     super(props);
@@ -80,9 +82,12 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
     setTimeout(() => {
       this.engine.stop();
     }, 0)
+    Orientation.enableRotate(this);
+    console.log("== game: Did mount, enable rotate");
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     Physics.removeCollisionListener(this);
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();
@@ -150,7 +155,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       if (orient === "landscape") Physics.playerRelativity.gravity(-0.0045);
       else Physics.playerRelativity.gravity(-0.005);
       this.playerRef.stopCurrentAnim();
-      this.playerRef.setState({ startSprite: this.playerRef.reverseFallThenFly });
+      this.playerRef.safeSetState({ startSprite: this.playerRef.reverseFallThenFly });
     }
   }
 
@@ -161,7 +166,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
       if (orient === "landscape") Physics.playerRelativity.gravity(0.002);
       else Physics.playerRelativity.gravity(0.0015);
       this.playerRef.stopCurrentAnim();
-      this.playerRef.setState({ startSprite: this.playerRef.reverseFlyThenFall });
+      this.playerRef.safeSetState({ startSprite: this.playerRef.reverseFlyThenFall });
     }
   }
 
@@ -183,7 +188,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
                 width: GameDimension.getWidth("now"),
                 height: GameDimension.window().gameHeight,
               }}
-              onLoadEnd={() => this.setState({ loadingBG: false })}
+              onLoadEnd={() => this.safeSetState({ loadingBG: false })}
             >
             </ImageBackground>
             <GameEngine
