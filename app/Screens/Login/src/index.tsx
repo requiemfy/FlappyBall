@@ -101,7 +101,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
     this.safeSetState({ loading: true });
     new Promise((resolve, reject) => {
       if (!this.state.network) {
-        // this.safeSetState({ loading: false }); // @remind
         resolve({ loading: false });
         alert("NO INTERNET", "Please connect to internet")
         return;
@@ -111,7 +110,6 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
         .signInWithEmailAndPassword(this.email, this.password)
         .catch((err: object) => {
           const error = String(err).replace('Error: ', '');
-          // this.safeSetState({ invalidCreds: true, error: error, loading: false }); // @remind
           reject({ invalidCreds: true, error: error, loading: false });
         });
     }).then(res => this.safeSetState(res))

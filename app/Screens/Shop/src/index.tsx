@@ -163,7 +163,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       let totalPrice = 0;
       this.itemsToBuy.forEach(item => totalPrice += item.info.buy)
       if (Cache.user.data?.gold! < totalPrice) return alert("NO GOLD", "Not enough gold");
-      // this.safeSetState({ loading: true }); // @remind
       new Promise((_, reject) => {
         let allSpritePromise: any[] = []
         this.itemsToBuy.forEach(item => {
@@ -203,7 +202,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         alert("Processing Error", "Something went wrong", this.unlockButtons);
       });
     } else {
-      // this.forceUpdate(); // @note to update state of checkbox in case of 1 item buy while others are checked
       this.safeSetState({ loading: false }); // @note hope to update state of checkbox in case of 1 item buy while others are checked
       alert("Processing Error", "Something went wrong", this.unlockButtons);
     }
@@ -245,7 +243,6 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   private toggleCheckBox = (item?: Item) => {
     this.itemsToBuy = [];
     if (!this.state.checkBox && item) this.toggleMark(item, true); // first marked item
-    // else if (this.state.checkBox) this.itemsToBuy = []; // @remind
     this.safeSetState({ checkBox: !this.state.checkBox });
     console.log("== shop: (toggleCheckBox) items to sell length", this.itemsToBuy.length);
   }

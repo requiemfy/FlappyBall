@@ -194,7 +194,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   }
 
   private sellItems = () => {
-    // this.safeSetState({ loading: true }); // @remind
     new Promise((_, reject) => {
       console.log("== inventory: Trying to fetch firebase in selling...");
       this.dbRefs.inventory.once('value') // @note prefered to get fresh data
@@ -257,7 +256,6 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
     this.itemsToSell = [];
     this.isAllChecked = false;
     if (!this.state.checkBox && item) this.toggleMark(item, true);
-    // else if (this.state.checkBox) this.itemsToSell = []; // @remind
     this.safeSetState({ checkBox: !this.state.checkBox });
     console.log("== inventory: (toggleCheckBox) items to sell length", this.itemsToSell.length);
   }

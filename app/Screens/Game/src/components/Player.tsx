@@ -160,7 +160,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
               61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
               71, 72, 73, 74, 75, 76, 77, 78, 79, 80
             ],
-            dead: [80]
+            dead: [81, 82]
           }} />
       </Circle.default>
     )
