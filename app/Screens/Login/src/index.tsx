@@ -6,7 +6,8 @@ import {
   Text,
   NativeEventSubscription, 
   BackHandler, 
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions
 } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import { 
@@ -20,6 +21,7 @@ import { CommonActions } from '@react-navigation/native';
 import { firebase } from '../../../src/firebase'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 import { alert, safeSetState } from '../../../src/helpers';
+import { Orientation } from '../../Game/src/utils/helpers/events/Orientation';
 
 interface Props { navigation: NavigationScreenProp<NavigationState, NavigationParams> & typeof CommonActions; }
 interface State { 
@@ -39,6 +41,7 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   netInfo!: NetInfoSubscription ;
   backHandler!: NativeEventSubscription;
   mounted = true;
+  lockButtons = false;
   safeSetState: any = safeSetState(this);
 
   constructor(props: Props | any) {
@@ -94,19 +97,26 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   }
 
   tryLogin = () => {
+    this.lockButtons = true;
     this.safeSetState({ loading: true });
-    if (!this.state.network) {
-      this.safeSetState({ loading: false });
-      alert("NO INTERNET", "Please connect to internet")
-      return;
-    }
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(this.email, this.password)
-      .catch((err: object) => {
-        const error = String(err).replace('Error: ', '');
-        this.safeSetState({ invalidCreds: true, error: error, loading: false });
-      });
+    new Promise((resolve, reject) => {
+      if (!this.state.network) {
+        // this.safeSetState({ loading: false }); // @remind
+        resolve({ loading: false });
+        alert("NO INTERNET", "Please connect to internet")
+        return;
+      }
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.email, this.password)
+        .catch((err: object) => {
+          const error = String(err).replace('Error: ', '');
+          // this.safeSetState({ invalidCreds: true, error: error, loading: false }); // @remind
+          reject({ invalidCreds: true, error: error, loading: false });
+        });
+    }).then(res => this.safeSetState(res))
+      .catch(err => this.safeSetState(err))
+      .finally(() => this.lockButtons = false);
   }
 
   goHome = () => {
@@ -121,6 +131,9 @@ class LoginScreen extends React.PureComponent<NavigationInjectedProps & Props, S
   }
 
   playOffline = () => {
+    if (this.lockButtons) return;
+    this.lockButtons = true;
+    Orientation.disableRotate(Dimensions.get('window'));
     this.navigation.reset({ 
       index: 0,
       routes: [{ 

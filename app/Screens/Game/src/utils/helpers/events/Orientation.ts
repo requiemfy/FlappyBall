@@ -44,21 +44,9 @@ export namespace Orientation {
       !game.paused ? game.engine.stop() : null;
       changeOrientation(game);
       game.forceUpdate(); // this is for update of GameDimensions
-
       prevHeight = e.window.height
-      // dontRotate = true; // @remind
       disableRotate(e.window)
-      
-      // e.window.width > e.window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2) // @remind
-
-      // setTimeout(() => { // @remind
-      //   dontRotate = false;
-      //   ScreenOrientation.lockAsync(0);
-      //   console.log("== orientation: Free to rotate")
-      // }, 1000);
-
       enableRotate(game);
-
       console.log("== orientation: On orientation, height", e.window.height)
     };
     Dimensions.addEventListener('change', orientationCallback); // luckily this will not invoke in eg. landscape left to landscape right

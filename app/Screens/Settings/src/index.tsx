@@ -6,7 +6,8 @@ import {
   View, 
   Text, 
   NativeEventSubscription, 
-  BackHandler 
+  BackHandler, 
+  ActivityIndicator
 } from 'react-native';
 import { 
   ScrollView, 
@@ -34,6 +35,7 @@ interface State {
   currentPass: string;
   newPass: string;
   confirmPass: string; 
+  loading: boolean;
 }
 
 class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
@@ -42,7 +44,8 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   netInfo!: NetInfoSubscription ;
   mounted = true;
   network = true;
-  safeSetState: any = safeSetState(this);
+  lockButtons = false;
+  safeSetState = safeSetState(this);
 
   constructor(props: Props | any) {
     super(props);
@@ -52,6 +55,7 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
       currentPass: "",
       newPass: "",
       confirmPass: "",
+      loading: false,
     };
   }
 
@@ -71,25 +75,35 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
     this.backHandler.remove();
   }
 
+  private unlockButtons = () => this.lockButtons = false
+
   backAction = () => {
     backOnlyOnce(this);
     return true;
   }
 
   showError = (err: any) => {
+    this.unlockButtons();    
     const error = String(err).replace('Error: ', '');
-    this.safeSetState({ invalidCreds: true, error: error });
+    this.safeSetState({ invalidCreds: true, loading: false, error: error });
   }
 
   changePass = () => {
-    if (!this.network) return alert("NO INTERNET", "Please connect to a network");
+    if (this.lockButtons) return; 
+    if (!this.network) {
+      this.lockButtons = true;
+      return alert("NO INTERNET", "Please connect to a network", this.unlockButtons);
+    }
     if (this.state.newPass !== this.state.confirmPass) {
       this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
-      return null;
+      return null; 
     } else  if (this.state.newPass === this.state.currentPass || this.state.newPass === "") {
       this.safeSetState({ invalidCreds: true, error: "Please enter new password." });
-      return null;
+      return null; 
     }
+    this.lockButtons = true;
+    this.safeSetState({ loading: true });
+    console.log("== settings: Try change pass")
     const 
       user = firebase.auth().currentUser,
       cred = firebase.auth.EmailAuthProvider.credential(user?.email!, this.state.currentPass);
@@ -97,23 +111,18 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
       .then(() => {
         firebase.auth().currentUser?.updatePassword(this.state.newPass)
           .then(() => {
+            this.safeSetState({ invalidCreds: false, loading: false  })
             Alert.alert("Password", "Successfully Changed", [
               { 
                 text: "OK", 
                 onPress: () => {
+                  this.unlockButtons();    
                   this.safeSetState({ currentPass: "", newPass: "", confirmPass: "" })
                 } 
               }
             ]);
-            this.safeSetState({ invalidCreds: false })
-          })
-          .catch(err => {
-            this.showError(err)
-          })
-      })
-      .catch(err => {
-        this.showError(err)
-      });
+          }).catch(err => this.showError(err))
+      }).catch(err => this.showError(err));
   }
 
   clearCache = () => {
@@ -123,6 +132,8 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   }
 
   logout = () => {
+    if (this.lockButtons) return;
+    this.lockButtons = true;
     alertQuit(() => {
       alertQuit(() => {
         firebase
@@ -137,8 +148,8 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
             });
           })
           .catch(err => console.log(err));
-      }, "Seriously?")
-    }, "Are you sure you want to logout?")
+      }, "Seriously?", this.unlockButtons)
+    }, "Are you sure you want to logout?", this.unlockButtons)
   }
 
   goInventory = () => {
@@ -152,6 +163,15 @@ class SettingScreen extends React.PureComponent<NavigationInjectedProps & Props,
   render() {
     return (
       <SafeAreaView style={styles.safeArea}>
+        {
+          this.state.loading
+          ? <View style={styles.loading1}>
+              <View style={styles.loading2}>
+                <ActivityIndicator size={100} color="gray" />
+              </View>
+            </View>
+          : null
+        }
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <View
             style={[styles.button, { height: 50 }]}>
@@ -244,7 +264,7 @@ const styles = StyleSheet.create({
   },
   invalidCreds: {
     width: "100%",
-    height: "5%",
+    flexGrow: 0,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "pink",
@@ -252,6 +272,24 @@ const styles = StyleSheet.create({
   button: {
     width: "80%",
     marginTop: 5,
-  }
+  },
+  loading1: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.2)',
+    alignItems: "center",
+    zIndex: 99999,
+  },
+  loading2: {
+    width: "90%",
+    height: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    elevation: 5,
+    borderRadius: 50,
+  },
 })
 export default withNavigation(SettingScreen);

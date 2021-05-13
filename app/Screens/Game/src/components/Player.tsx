@@ -35,6 +35,7 @@ export default class Player extends React.Component<Circle.Props & Props, State>
 
   componentWillUnmount() {
     this.mounted = false;
+    this.safeSetState = () => null;
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.stopCurrentAnim();
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null

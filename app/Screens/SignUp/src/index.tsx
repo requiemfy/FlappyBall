@@ -5,7 +5,8 @@ import {
   View, 
   Text, 
   NativeEventSubscription, 
-  BackHandler 
+  BackHandler, 
+  ActivityIndicator
 } from 'react-native';
 import { 
   TextInput, 
@@ -26,6 +27,7 @@ interface Props { navigation: NavigationScreenProp<NavigationState, NavigationPa
 interface State { 
   invalidCreds: boolean; 
   error: string;
+  loading: boolean;
 }
 
 class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, State> {
@@ -37,6 +39,7 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
   confirmPass = "";
   navigation = this.props.navigation;
   backHandler!: NativeEventSubscription;
+  lockButtons = false;
   mounted = true;
   safeSetState:any = safeSetState(this);
 
@@ -44,7 +47,8 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
     super(props);
     this.state = { 
       invalidCreds: false, 
-      error: "Invalid Credentials"
+      error: "Invalid Credentials",
+      loading: false,
     };
   }
 
@@ -61,19 +65,27 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
     this.backHandler.remove();
   }
 
+  private unlockButtons = () => this.lockButtons = false;
+
   backAction = () => {
     backOnlyOnce(this);
     return true;
   }
 
   trySignUp = () => {
+    if (this.lockButtons) return;
     NetInfo.fetch().then(status => {
       const network = Boolean(status.isConnected && status.isInternetReachable);
-      if (!network) return alert("NO INTERNET", "Please connect to internet");
+      if (!network) {
+        this.lockButtons = true;
+        return alert("NO INTERNET", "Please connect to internet", this.unlockButtons);
+      }
       if (this.password !== this.confirmPass) {
         this.safeSetState({ invalidCreds: true, error: "Password doesn't match." });
-        return null;
-      } 
+        return;
+      }
+      this.safeSetState({ loading: true });
+      console.log("== signup: Try sign up")
       this.dbUsers.orderByChild("codeName").equalTo(this.codeName).once("value")
         .then(snapshot => {
           if (!snapshot.exists() && this.codeName !== "" && !this.codeName.includes(" ")) {// if null then unique
@@ -89,24 +101,28 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
                   record: 0,
                   gold: 1000,
                 };
-              this.db.ref('users/' + arg.user?.uid)
-                .update(user)
-                .then(snapshot => {
-                  console.log("== signup: Success", snapshot);
-                })
-                .catch(err => {
-                  console.log("== signup: Failed", err);
-                })
-            })
-            .catch((err: object) => {
-              const error = String(err).replace('Error: ', '');
-              this.safeSetState({ invalidCreds: true, error: error });
+                this.db.ref('users/' + arg.user?.uid)
+                  .update(user)
+                  .then(snapshot => {
+                    console.log("== signup: Success", snapshot);
+                  })
+                  .catch(err => {
+                    console.log("== signup: Failed", err);
+                  })
+                  .finally(() => this.safeSetState({ loading: false }));
+              })
+              .catch((err: object) => {
+                const error = String(err).replace('Error: ', '');
+                this.safeSetState({ invalidCreds: true, error: error, loading: false });
             });
           } else {
-            this.safeSetState({ invalidCreds: true, error: "Code Name is already used or has space." });
+            this.safeSetState({ invalidCreds: true, error: "Code Name is already used or has space.", loading: false });
           }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          this.safeSetState({ loading: false });
+        });
     });
   }
 
@@ -141,13 +157,16 @@ class SignUpScreen extends React.PureComponent<NavigationInjectedProps & Props, 
           placeholderTextColor="white"
           secureTextEntry={true}
           style={styles.textInput} />
-        <View
-          style={[styles.signUpButton]}>
-          <Button
-            onPress={this.trySignUp}
-            title='Sign Up'
-            color='rgba(66, 66, 66, 0.6)' />
-        </View>
+          <View style={[styles.signUpButton]}>
+            { 
+              this.state.loading
+              ? <ActivityIndicator size="small" color="white" />
+              : <Button
+                    onPress={this.trySignUp}
+                    title='Sign Up'
+                    color='rgba(66, 66, 66, 0.6)' />
+            }
+          </View>
       </View>
     )
   }

@@ -88,6 +88,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
 
   componentWillUnmount() {
     this.mounted = false;
+    this.safeSetState = () => null
     Physics.removeCollisionListener(this);
     Orientation.removeChangeListener();
     GameAppState.removeChangeListener();

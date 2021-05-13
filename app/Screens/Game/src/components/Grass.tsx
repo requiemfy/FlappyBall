@@ -57,6 +57,7 @@ export default class Grass extends React.PureComponent<Box.Props & Props, State>
 
   componentWillUnmount() {
     this.mounted = false;
+    this.safeSetState = () => null;
     this.props.setRef ? this.props.setRef(null) : null; // setting game.playerRef to null
     Dimensions.removeEventListener('change', this.orientationCallback);
     this.state.grassAleft.removeAllListeners();

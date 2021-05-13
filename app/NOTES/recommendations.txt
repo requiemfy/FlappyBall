@@ -114,26 +114,37 @@ fix orientation issues (DONE)
 
 DONE 
   game screen put safeSetState
-
-PASSED TESTS
-  app background and orientation
-  rough orientation / rotation
-
-BUGS
-  
+  safeSetState = () => null
+  settings change pass loading
   over clicking buttons cause error - put return false
     menu buttons (DONE)
       resume / restart
       home
       quit
     hof (DONE)
-    home
+    home (DONE)
       play
+    shop / inventory (DONE)
+      specific buy / sell
+      all sell / buy
+    playoffline (DONE)
+    sign up (DONE)
 
-  orientate then home then play then orientate - broke game screen
+PASSED TESTS
+  app background and orientation
+  rough orientation / rotation
+  orientate then home then play then orientate
 
+~~~~~~~~~~~~~
+TODO
+  
+ 
+  
+
+~~~~~~~~~~~~~
 PENDING TEST
 
+~~~~~~~~~~~~~
 REVIEWED
   menu (DONE)
   home (DONE)

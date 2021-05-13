@@ -61,6 +61,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   inventoryListTemp!: string[]; 
   goldTemp!: number; 
   mounted = true;
+  lockButtons = false;
   network = true;
   safeSetState: any = safeSetState(this);
   prefetches: any = {};
@@ -104,6 +105,8 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   componentDidUpdate() {
     if (this.state.rendering) setTimeout(() => this.safeSetState({ rendering: false }), 0);
   }
+
+  private unlockButtons = () => this.lockButtons = false;
 
   private orientationChange = ({ window }: any) => {
     this.safeSetState({ rendering: true });
@@ -151,7 +154,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       loading: false 
     });
     this.clearSelections();
-    alert("Purchase Successful", "You can now equip the item");
+    alert("Purchase Successful", "You can now equip the item", this.unlockButtons);
     console.log("== shop: done update cache after buying");
   }
 
@@ -160,7 +163,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
       let totalPrice = 0;
       this.itemsToBuy.forEach(item => totalPrice += item.info.buy)
       if (Cache.user.data?.gold! < totalPrice) return alert("NO GOLD", "Not enough gold");
-      this.safeSetState({ loading: true });
+      // this.safeSetState({ loading: true }); // @remind
       new Promise((_, reject) => {
         let allSpritePromise: any[] = []
         this.itemsToBuy.forEach(item => {
@@ -197,25 +200,31 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
           }).catch(err => reject(err));
       }).catch(_ => {
         this.safeSetState({ loading: false }); // @note loading false for reject
-        alert("Processing Error", "Something went wrong");
+        alert("Processing Error", "Something went wrong", this.unlockButtons);
       });
     } else {
-      this.forceUpdate(); // @note to update state of checkbox in case of 1 item buy while others are checked
-      alert("Processing Error", "Something went wrong");
+      // this.forceUpdate(); // @note to update state of checkbox in case of 1 item buy while others are checked
+      this.safeSetState({ loading: false }); // @note hope to update state of checkbox in case of 1 item buy while others are checked
+      alert("Processing Error", "Something went wrong", this.unlockButtons);
     }
   }
 
   private tryBuy = (item: Item | 'marked') => {
+    if (this.lockButtons) return; this.lockButtons = true;
     if (this.network) {
       if (item !== "marked") {
         this.itemsToBuy = [];
         this.itemsToBuy.push(item);
       }
-      else if (!((item === 'marked') && this.itemsToBuy.length)) return alert("SELECT ITEM", "No items to sell");
+      else if (!((item === 'marked') && this.itemsToBuy.length)) return alert("SELECT ITEM", "No items to sell", this.unlockButtons);
+      this.safeSetState({ loading: true });
       Alert.alert("Hold on!", "Are you sure you want to buy?", [
         {
           text: "Cancel",
-          onPress: () => null,
+          onPress: () => {
+            this.unlockButtons();
+            this.safeSetState({ loading: false });
+          },
           style: "cancel"
         },
         { 
@@ -223,7 +232,7 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
         }
       ]);
     }
-    else alert("NO INTERNET", "Please make sure you have working connection")
+    else alert("NO INTERNET", "Please make sure you have working connection", this.unlockButtons)
   }
 
   private toggleMark = (item: Item, isChecked: boolean | undefined) => {
@@ -234,8 +243,9 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   private toggleCheckBox = (item?: Item) => {
-    if (!this.state.checkBox && item) this.toggleMark(item, true);
-    else if (this.state.checkBox) this.itemsToBuy = [];
+    this.itemsToBuy = [];
+    if (!this.state.checkBox && item) this.toggleMark(item, true); // first marked item
+    // else if (this.state.checkBox) this.itemsToBuy = []; // @remind
     this.safeSetState({ checkBox: !this.state.checkBox });
     console.log("== shop: (toggleCheckBox) items to sell length", this.itemsToBuy.length);
   }

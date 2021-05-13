@@ -99,16 +99,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
     if (this.noMoreButtons) return;
     this.noMoreButtons = true;
     const button = this.props.route.params?.button;
-
-    // Orientation.disableRotate(Dimensions.get('window')); // @remind
-    // (button === "resume")
-    //   ? this.props.navigation.goBack() // resume
-    //   : this.props.navigation.reset({ // restart
-    //     index: 0,
-    //     routes: [
-    //       { name: 'FlappyBall', params: { button: button, connection: this.connection } },
-    //     ],
-    //   });
     if (button === "resume") this.props.navigation.goBack();
     else {
       Orientation.disableRotate(Dimensions.get('window'));
@@ -150,7 +140,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       if (val.newScore) return { record: val.newScore, gold: val.gold }
       else return { gold: val.gold }
     })();
-
     console.log("== menu: checking network to record data", this.network);
     if (!this.network) {
       console.log("== menu: No internet, can't record data");
@@ -158,7 +147,6 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
       alert("NO INTERNET", "Connect to internet to save your data");
       return;
     };
-
     console.log("== menu: Connected to internet, recording data...")
     this.dbUser.update(update)
       .then(_ => {

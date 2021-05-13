@@ -78,6 +78,7 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   goldTemp!: number;
   prefetches: any = {};
   isAllChecked = false;
+  lockButtons = false;
 
   constructor(props: NavigationInjectedProps & Props) {
     super(props);
@@ -122,6 +123,8 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
   componentDidUpdate() {
     if (this.state.rendering) setTimeout(() => this.safeSetState({ rendering: false }), 0);
   }
+
+  private unlockButtons = () => this.lockButtons = false;
 
   private clearSelections = () => {
     if (this.state.checkBox) this.toggleCheckBox();
@@ -185,12 +188,13 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
       inventory: this.inventoryListTemp,
     });
     this.safeSetState({ items: invntTmp, gold: this.goldTemp, loading: false });
-    this.clearSelections(); 
+    this.clearSelections();
+    this.unlockButtons(); 
     console.log("== inventory: Success cache update after selling");
   }
 
   private sellItems = () => {
-    this.safeSetState({ loading: true });
+    // this.safeSetState({ loading: true }); // @remind
     new Promise((_, reject) => {
       console.log("== inventory: Trying to fetch firebase in selling...");
       this.dbRefs.inventory.once('value') // @note prefered to get fresh data
@@ -218,21 +222,27 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }).catch(err => reject(err));
     }).catch(_ => {
       this.safeSetState({ loading: false }); // @note reject loading false
-      alert("Processing Error", "Something went wrong");
+      alert("Processing Error", "Something went wrong", this.unlockButtons());
     });
   }
 
   private trySell = async (item: Item | 'marked') => {
+    if (this.lockButtons) return;
+    this.lockButtons = true;
     if (this.state.network) {
       if (item !== "marked") {
         this.itemsToSell = [];
         this.itemsToSell.push(item);
       }
-      else if (!((item === 'marked') && this.itemsToSell.length)) return alert("SELECT ITEM", "No items to sell");
+      else if (!((item === 'marked') && this.itemsToSell.length)) return alert("SELECT ITEM", "No items to sell", this.unlockButtons);
+      this.safeSetState({ loading: true });
       Alert.alert("Hold on!", "Are you sure you want to sell?", [
         {
           text: "Cancel",
-          onPress: () => null,
+          onPress: () => {
+            this.safeSetState({ loading: false });
+            this.unlockButtons();
+          },
           style: "cancel"
         },
         { 
@@ -240,12 +250,14 @@ class InventoryScreen extends React.PureComponent<NavigationInjectedProps & Prop
         }
       ]);
     }
-    else alert("NO INTERNET", "Please make sure you have working connection");
+    else alert("NO INTERNET", "Please make sure you have working connection", this.unlockButtons);
   }
 
   private toggleCheckBox = (item?: Item) => {
+    this.itemsToSell = [];
+    this.isAllChecked = false;
     if (!this.state.checkBox && item) this.toggleMark(item, true);
-    else if (this.state.checkBox) this.itemsToSell = [];
+    // else if (this.state.checkBox) this.itemsToSell = []; // @remind
     this.safeSetState({ checkBox: !this.state.checkBox });
     console.log("== inventory: (toggleCheckBox) items to sell length", this.itemsToSell.length);
   }

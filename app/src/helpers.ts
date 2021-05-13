@@ -24,24 +24,23 @@ function safeSetState(obj: any) {
   }
 }
 
-function alert (one: string, two: string) {
+function alert (one: string, two: string, ok: any = () => null) {
   Alert.alert(one, two, [
     { 
-      text: "OK", onPress: () => null
+      text: "OK", onPress: ok
     }
   ]);
 }
 
-function alertQuit (cb: any, lastWords: string, cancel: any = () => null) {
+function alertQuit (yes: any = () => null, lastWords: string, cancel: any = () => null) {
   Alert.alert("Hold on!", lastWords, [
     {
       text: "Cancel",
       onPress: cancel,
       style: "cancel"
     },
-    { text: "YES", onPress: () => {
-      cb();
-    }}
+    { text: "YES", onPress: yes
+    }
   ]);
 }
 
