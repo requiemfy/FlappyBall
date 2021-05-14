@@ -142,7 +142,7 @@ export default class HomeScreen extends React.PureComponent<HomeProps, HomeState
         }
         <View style={styles.container1}>
           <ImageBackground 
-            source={require('../assets/bg.png')}
+            source={require('../assets/bg.webp')}
             style={styles.bg}
             onLoadEnd={() => this.safeSetState({ loadingBG: false })}>
           </ImageBackground>

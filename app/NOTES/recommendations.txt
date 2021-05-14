@@ -112,6 +112,10 @@ fix orientation issues (DONE)
 
 -----------------------------------
 
+TODO
+ 
+~~~~~~~~~~~~~
+
 DONE 
   game screen put safeSetState
   safeSetState = () => null
@@ -129,17 +133,14 @@ DONE
       all sell / buy
     playoffline (DONE)
     sign up (DONE)
-
+  compress all assets
+  
 PASSED TESTS
   app background and orientation
   rough orientation / rotation
   orientate then home then play then orientate
 
-~~~~~~~~~~~~~
-TODO
-  
- 
-  
+
 
 ~~~~~~~~~~~~~
 PENDING TEST

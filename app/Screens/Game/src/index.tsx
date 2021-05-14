@@ -183,7 +183,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
             flexDirection: "row",
             backgroundColor: "black",
           }}>
-            <ImageBackground source={require('../assets/bg.jpeg')}
+            <ImageBackground source={require('../assets/bg.webp')}
               style={{
                 position: "absolute",
                 width: GameDimension.getWidth("now"),
