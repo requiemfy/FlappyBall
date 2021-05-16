@@ -114,6 +114,7 @@ export default class MenuScreen extends React.PureComponent<Props, State> {
   goHome = () => {
     if (this.noMoreButtons) return;
     this.noMoreButtons = true;
+    Orientation.unlockRotate();
     this.props.navigation.reset({
       index: 0,
       routes: [

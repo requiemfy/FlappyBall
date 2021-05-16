@@ -162,7 +162,10 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
     if (this.itemsToBuy.length && this.itemsToBuy[0].spriteUrl) {
       let totalPrice = 0;
       this.itemsToBuy.forEach(item => totalPrice += item.info.buy)
-      if (Cache.user.data?.gold! < totalPrice) return alert("NO GOLD", "Not enough gold");
+      if (Cache.user.data?.gold! < totalPrice) {
+        this.safeSetState({ loading: false });
+        return alert("NO GOLD", "Not enough gold", this.unlockButtons);
+      };
       new Promise((_, reject) => {
         let allSpritePromise: any[] = []
         this.itemsToBuy.forEach(item => {
@@ -208,13 +211,14 @@ class ShopScreen extends React.PureComponent<NavigationInjectedProps & Props, St
   }
 
   private tryBuy = (item: Item | 'marked') => {
+    console.log("== shop: Try buy")
     if (this.lockButtons) return; this.lockButtons = true;
     if (this.network) {
       if (item !== "marked") {
         this.itemsToBuy = [];
         this.itemsToBuy.push(item);
       }
-      else if (!((item === 'marked') && this.itemsToBuy.length)) return alert("SELECT ITEM", "No items to sell", this.unlockButtons);
+      else if (!((item === 'marked') && this.itemsToBuy.length)) return alert("SELECT ITEM", "No items to Buy", this.unlockButtons);
       this.safeSetState({ loading: true });
       Alert.alert("Hold on!", "Are you sure you want to buy?", [
         {

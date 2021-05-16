@@ -1,6 +1,7 @@
-if (!__DEV__) {
-  console.log = () => null;
-}
+// if (!__DEV__) {
+//   console.log = () => null;
+// }
+console.log = () => null;
 
 import * as React from 'react';
 import { firebase } from '../src/firebase';

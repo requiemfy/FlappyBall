@@ -46,10 +46,8 @@ function alertQuit (yes: any = () => null, lastWords: string, cancel: any = () =
 
 function getOrientation (window: any) {
   if (window.height > window.width) {
-    console.log("TEST orient portrait");
     return "portrait";
   } else {
-    console.log("TEST orient landscape");
     return "landscape";
   }
 }

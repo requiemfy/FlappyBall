@@ -47,9 +47,17 @@ export namespace Physics {
     }
   })();
 
+  export const clearGarbages = {wall: () => null}
+
   const wallRelativity = (() => { 
     let nextWall = 0;
     let possiblyFallingWall = false;
+
+    clearGarbages.wall = () => {
+      nextWall = 0;
+      possiblyFallingWall = false;
+      return null;
+    }
 
     return <Relativity>function (entities) {
       (function moveWalls() { 

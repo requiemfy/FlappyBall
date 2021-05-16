@@ -24,15 +24,20 @@ export namespace Orientation {
   let timeOutRotate: any;
 
   export const disableRotate = (window: {width: number, height: number}) => {
+    clearTimeout(timeOutRotate);
     dontRotate = true;
     window.width > window.height ? ScreenOrientation.lockAsync(5) : ScreenOrientation.lockAsync(2);
+  }
+
+  export const unlockRotate = () => {
+    dontRotate = false;
+    ScreenOrientation.lockAsync(0); // unlock
   }
 
   export const enableRotate = (game: FlappyBallGame) => {
     timeOutRotate = setTimeout(() => {
       if (!game.mounted) return;
-      dontRotate = false;
-      ScreenOrientation.lockAsync(0); // unlock
+      unlockRotate() 
       console.log("== orientation: enable rotate");
     }, 1000);
   }

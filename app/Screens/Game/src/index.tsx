@@ -66,6 +66,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   connection = this.props.route.params.connection;
   backHandler!: NativeEventSubscription;
   mounted = true;
+  lockButtons = false;
   safeSetState = safeSetState(this);
 
   constructor(props: Props) {
@@ -75,6 +76,7 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   componentDidMount() {
+    Physics.clearGarbages.wall();
     Physics.addCollisionListener(this);
     Orientation.addChangeListener(this);
     GameAppState.addChangeListener(this);
@@ -107,6 +109,8 @@ export default class FlappyBallGame extends React.PureComponent<Props, State> im
   }
 
   menu = () => {
+    if (this.lockButtons) return false; this.lockButtons = true;
+    setTimeout(() => this.lockButtons = false, 500);
     if (!this.over) {
       if (!this.paused) {
         this.engine.stop();
