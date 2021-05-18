@@ -113,7 +113,7 @@ fix orientation issues (DONE)
 -----------------------------------
 
 TODO
- 
+put firebase API key to .env
 ~~~~~~~~~~~~~
 
 DONE 

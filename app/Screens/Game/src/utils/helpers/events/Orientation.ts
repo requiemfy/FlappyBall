@@ -22,6 +22,7 @@ export namespace Orientation {
   let dontRotate = false;
   let prevHeight = 0;
   let timeOutRotate: any;
+  let deviceMotionSupp = false;
 
   export const disableRotate = (window: {width: number, height: number}) => {
     clearTimeout(timeOutRotate);
@@ -59,6 +60,7 @@ export namespace Orientation {
     // adding identation when Status bar is in the left side, because in actual devices some has something in the middle
     DeviceMotion.isAvailableAsync().then((supported) => {
       if (supported) {
+        deviceMotionSupp = true; 
         let prevOrient: number; // we are not sure what's first orientation
         DeviceMotion.addListener((current) => {
           if (dontRotate) return;
@@ -75,7 +77,7 @@ export namespace Orientation {
   export const removeChangeListener = () => {
     Dimensions.removeEventListener('change', orientationCallback!);
     clearTimeout(timeOutRotate);
-    DeviceMotion.removeAllListeners()
+    if (deviceMotionSupp) DeviceMotion.removeAllListeners();
     orientationCallback = null;
     timeOutRotate = null;
     prevHeight = 0;
