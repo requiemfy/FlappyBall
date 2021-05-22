@@ -1,0 +1,24 @@
+OBJECTIVE: Player passage to wall properly adjusted depending on game height
+EXPECTED:
+  Whatever the game height is, the player should fit between walls
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+======================================== Entities.ts ========================================
+OBJECT following
+  METHOD getWalls
+    FUNCTION randomHeight (param is N = 1 or 2 -> how many height) # depending on number of wall
+      IF 2 heights are required
+        (1) percentage of height ONE = random number between 0 and 1 (min 0.2, max 0.8);
+            percentage of height TWO = 1 - percentage of height ONE
+        ----- these percentages will pertain to game height (from top of roof to bottom of floor) -----
+        ----- to be clear, roof and floor are included in game height                             -----
+        ----- therefore, we need to subtract the percentage height of roof and floor to walls     -----
+        ----- then subtract the percentage height of player and some space                        -----
+        ----- such that, gameHeight = screenH - NAVBAR_HEIGHT;  
+        (2) percentage of height ONE - ((ROOF_HEIGHT / 2) + (FLOOR_HEIGHT / 2) + (PLAYER_SIZE / 2) + 0.02 space) 
+            percentage of height TWO - ((ROOF_HEIGHT / 2) + (FLOOR_HEIGHT / 2) + (PLAYER_SIZE / 2) + 0.02 space)
+        return the heights as array
+      
+      ELSE # 1 wall
+        return [ 1 - ROOF_HEIGHT - FLOOR_HEIGHT - PLAYER_SIZE - 0.04 ] as array
+      ----- yes, height is specific when 1 wall only, but 1 wall can be top or bottom             -----

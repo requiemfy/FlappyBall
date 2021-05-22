@@ -1,0 +1,145 @@
+OBJECTIVE: add score when wall (obstacle) is passed
+EXPECTED:
+  pair walls are counted as 1
+  solo wall is counted as 1
+
+LEGEND:
+  special var DEPENDENCY 
+    - variable that are only created for this specific purpose, but in outer scope of main function
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+======================================== Physics.ts ========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BUG FIXED ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+wallRelativity() {
+  let nextWall = 0,       # special var DEPENDENCY
+      recentWallid = null;  # special var DEPENDENCY
+
+  isWallPassedByPlayer() {  # ~~~~~>>>>> MAIN
+    IF player passed by wall {
+      update recentWallid;
+      IF wall is not pair {
+        add score;
+      }
+      nextWall++ expect incoming wall
+    }
+  } 
+
+  removeWall() {
+    IF wall is out of vision {
+      nextWall-- expect incoming wall
+    }
+  }
+
+}
+=============================================================================================
+
+PARENT FUNCTION wallRelativity
+
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  MAIN FUNCTION isWallPassedByPlayer
+
+    ************* check if wall is passed *************
+    IF current wall passing x is less than player x {
+      
+      recentWallId is equal to wall index [nextWall - 1]
+      ----- obviously, recent wall index is next wall - 1 LOL
+
+      [DEBUGGING: console.log("recentWallid " + recentWallid + " && " + "currentWallid " + currentWallid);]
+
+      ************* check if current wall passing has a pair *************
+
+        ************* NOT PAIR WALL CONDITIONS *************
+        IF recent wall id is null [meaning first wall is passing, no recent]
+        ----- EXPERIENCED BUG:                                                                          -----
+        ----- if (!recentWallId) bug: since recentWallId can be 0, it will be true even not null   -----
+        
+        OR if recent wall id IS NUMBER, and its wall OBJECT of id IS UNDEFINED [meaning wall object is unmounted]
+        ----- another condition can be added:                                                           -----
+        ----- ::: if current wall x - recent wall x is greater than wall distance [CODE 1]              -----
+        ----- but i don't think so if this will be useful since the wall will be unmounted before the   -----
+        ----- the next wall pass to the player, therefore distance between walls can't be calculate     -----
+        ----- UNLESS: the x of player is ADJUST to the point that first wall is not already unmounted   -----
+        ----- after the next wall passed the player, therefore distance between is calculated           -----
+        {
+          ************* add score *************
+          change recent wall id to the current wall id;
+          get entities' game property (reference to FlappyBallGame Class (this)) and set state the score;
+        
+          [DEBUGGING: console.log("WALL IS NOT PAIR");]
+        }
+        
+        ************* PAIR WALLS CONDITIONS *************
+        ELSE walls are PAIR {
+          don't add score / do nothing;
+
+          [DEBUGGING: console.log("WALL IS PAIR");]
+        }
+      
+      nextWall++ [expect the incoming wall]
+    }
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  DEPENDENCY FUNCTION removeWall
+    IF wall is out of vision {
+      nextWall--;
+      ----- we decrement because we will delete wall id in index 0                  -----
+      ----- that's why we have to adjust the expectation index in wall[]            -----
+      IF wall id in index 0 is equal to recentWallid {
+        recentWallid = null; [simply because the object of id is unmounted, no reason for id to exist]
+      } 
+    }
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+ADDITIONAL DEBUGGING:
+  Entities.ts
+
+    let NUM_OF_OBSTALCE = 0
+
+    getWall() {
+      NUM_OF_OBSTALCE++; # increment only once per batch creation (whether 1 or 2 walls)
+      console.log(NUM_OF_OBSTALCE)
+
+      while(numOfWall--) {} # we create 2 | 1 wall
+    }
+  
+
+
+
+
+CODES:
+
+  CODE 1
+    (function notWallPair(): boolean {
+      EXEC_FN = true;
+      const 
+        recentWallX = ent[recentWallid].body.position.x, // getting latest x of recently passed wall
+        gameWidth = GameDimension.getWidth("now"),
+        betweenDist = Math.abs(currentWallX - recentWallX),
+        percentDist = betweenDist / gameWidth;
+      console.log("currentWallX: " + currentWallX + ", recentWallX: " + recentWallX + "; percentDist: " + percentDist);
+      return percentDist >= WALL_DISTANCE; 
+    })()
+
+
+
+ALTERNATIVE SOLUTION:
+  add score after unmounting
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+======================================== Physics.ts ========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     NEW SOLUTION   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PARENT FUNCTION wallRelativity
+  ----- this function is called every ticks, meaning all nested function inside
+  ----- is also called.
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  MAIN FUNCTION isWallPassedByPlayer

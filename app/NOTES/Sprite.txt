@@ -1,0 +1,16 @@
+for e.g Falling sprite
+
+first sprite / animation execute:
+  fall sprite
+
+then when fall sprite finish
+if "finish" state is TRUE (meaning go continue to the next looping sprite), execute:
+  fall idle sprite (which loops endlessly until explicitly stopped)
+
+** then **
+
+if current sprite is stopped,
+
+"finish" state will be TRUE for next sprite sequence. 
+
+Then repeat cycle

@@ -1,0 +1,171 @@
+CODE REVIEW
+
+check listeners, if they are unsubscribed
+mounted false in unmount
+safeSetState
+
+========================================================================================
+========================================================================================
+
+try to use Symbol() key to skip non physical entity props in for
+
+edited matter js Body.js to add gravity scaling
+https://github.com/liabru/matter-js/issues/503
+
+IN PORTRAINT: 
+floor length is only the screen width, therefore
+if you want to extend WALL_DISTANCE, since there's is falling wall which means that
+wall is dynamic (affected by gravity), you have to extend the FLOOR, to catch it.
+
+SWAP:
+there are only 2 cases we use SWAP
+1) in orientation, we pass player, and wall properties
+2) in game restart, we don't pass any body properties, everything in creation should be fresh default
+
+START:
+1) play - automatic START
+2) resume or restart - manual start
+
+paused, over, willUnmount:
+  pause - for pausing and resuming
+  over - disable resume
+       - to show menu game over
+       - make 'willUnmount' true
+  willUnmount - component should be unmounted
+       - no more events or side effects should work
+
+
+
+       
+NOTE:
+i commented 'game.paused' in collision event
+
+node module edited:
+  SpriteSheet
+    - change to React.Component (orig is PureComponent)
+    - added shouldComponentUpdate
+
+----------------------------------------------------------
+expect sprite won't work on mobile because i'm focusing first on web
+
+edit sprite shit a lot: make loop work on web
+
+----------------------------------------------------------
+i remove all walls for now
+----------------------------------------------------------
+i'm trying to use Animated.parallel for grass
+idea: fixed stopping point for both grass, then switch at parallel callback
+----------------------------------------------------------
+i noticed that the floor height is NOT dependent on gameHeight RATIO, therefore changes are not proportion
+----------------------------------------------------------
+components are not unmounted in change orientation
+
+leaves images doesn't exactly maintain x, y proportion 
+(also height, width but there's a possibility that we can handle these) in orientation change, 
+since we are not the one handling its dimension change in orientation
+
+we can barely handle the grass orientation change because of the limitation
+
+we can't get animated value when useNativeDriver is true
+
+
+----------------------------------------------------------
+wallRelativity(entities);
+wall num in entities
+
+----------------------------------------------------------
+trying to add background image in the game and make it responsive
+
+added in Orientation.ts:
+      game.forceUpdate();
+
+----------------------------------------------------------
+bug experience:
+  wall distance vs floor length: 
+    floor may not catch to falling wall
+
+  grass doesn't adjust its width on orientation  
+    the problem is, if we adapt the grass width, its left will also be affected
+
+
+----------------------------------------------------------
+tying to optimize wall move by using interval
+i've already done that in Wall Class
+
+then disable the wall move method in physics
+
+-----------------------------------
+edited security rules of firebase, beware if it cause error
+
+-----------------------------------
+user data cache - especially gold (DONE)
+offline sprite vs online (DONE)
+test firebase offline vs online (DONE) - not useful
+check network on settings change pass (DONE)
+check if gold is enough when buying LOL (DONE)
+cache offline score and gold then update online (DONE)
+try to update invent or shop state when URLs are ready (DONE)
+use alert in helpers (DONE)
+sell/buy all selected (DONE)
+cache hall of fame (DONE)
+fix orientation issues (DONE)
+
+-----------------------------------
+
+TODO
+put firebase API key to .env
+~~~~~~~~~~~~~
+
+DONE 
+  game screen put safeSetState
+  safeSetState = () => null
+  settings change pass loading
+  over clicking buttons cause error - put return false
+    menu buttons (DONE)
+      resume / restart
+      home
+      quit
+    hof (DONE)
+    home (DONE)
+      play
+    shop / inventory (DONE)
+      specific buy / sell
+      all sell / buy
+    playoffline (DONE)
+    sign up (DONE)
+  compress all assets
+  
+PASSED TESTS
+  app background and orientation
+  rough orientation / rotation
+  orientate then home then play then orientate
+
+
+
+~~~~~~~~~~~~~
+PENDING TEST
+
+~~~~~~~~~~~~~
+REVIEWED
+  menu (DONE)
+  home (DONE)
+  hof #no need
+  game 
+    index (DONE)
+    world/
+      physics (DONE)
+      matter #no need
+      entities #no need
+    helpers/
+      coordinates #no need
+      events/
+        orientation (DONE)
+        gamestate #no need
+    components/
+      topbar #no need
+      roof (DONE)
+      player (DONE)
+      grass (DONE)
+      shapes/
+        circle #no need
+        box #no need

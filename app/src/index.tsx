@@ -1,140 +1,118 @@
-import * as React from 'react'
-import { AppState, Dimensions } from 'react-native'
-import { StatusBar, TouchableWithoutFeedback, View } from 'react-native';
-import { GameEngine, GameEngineProperties } from 'react-native-game-engine';
-import { GameAppState } from './utils/helpers/events/GameState';
-import { Orientation } from './utils/helpers/events/Orientation';
-import { COMPOSITE, NAVBAR_HEIGHT, world } from './utils/world/constants';
-import { Entities } from './utils/world/Entities';
-import { Matter } from './utils/world/Matter';
-import { Physics } from './utils/world/Physics';
+// if (!__DEV__) {
+//   console.log = () => null;
+// }
+console.log = () => null;
 
-interface EventType { type: string; }
-interface Game {
-  engine: GameEngine;
-  entities: Entities.Game;
-  paused: boolean;
-  over: boolean;
-  pauseOrResume(): boolean; // toggle true/false and pass to paused
-  onEvent(e: EventType): void;
+import * as React from 'react';
+import { firebase } from '../src/firebase';
+import AppLoading from 'expo-app-loading';
+import MainStackScreen from '../Navigation/src';
+import * as Cache from './cache';
+import { LogBox } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { alert, homeRef, inventoryRef, shopRef } from './helpers';
+
+LogBox.ignoreLogs(['Setting a timer']);
+
+export default function Game() {
+  const [route, setRoute] = React.useState("Login");
+  const [loadingAsset, setLoadingAsset] = React.useState(true);
+  const [loadingUser, setloadingUser] = React.useState(true);
+  const unsavedData = Cache.user.pending;
+  let network = {current: true, trigger: true};
+  let hasUser = false;
+
+  React.useEffect(() => {
+    console.log("App index: MOUNT");
+    const authListenerUnsub = firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
+      console.log("== app index: trying to check if there's current user");
+      if (user) {
+        hasUser = true;
+        setRoute("Home");
+        console.log("== app index: current user id", user.email);
+      } else {
+        hasUser = false
+        console.log("== app index: NO user", user);
+      }
+      setloadingUser(false);
+    });
+    const netInfoUnsub = NetInfo.addEventListener(state => {
+      network.current = Boolean(state.isConnected && state.isInternetReachable);
+      console.log("== app index: network status", network);
+      if (network.current && network.trigger) {
+        network.trigger = false
+        unsavedData.storage.getItem('unsaved').then(resolve => {
+          if (resolve) {
+            const users = JSON.parse(resolve);
+            let update = {};
+            console.log("== app index: Trying to save detected unsaved users data", users);
+            Object.keys(users).forEach(user => {
+              let allPath = {
+                [user + "/gold"]: users[user].gold,
+              }
+              if (users[user].record) allPath[user + "/record"] = users[user].record;
+              update = {...update, ...allPath};
+            })
+            console.log("== app index: All data path for update", update)
+            firebase.database().ref('/users').update(update)
+              .then(_ => {
+                console.log("== app index: Success saving unsaved data, outdated cache cleared");
+                unsavedData.storage.setItem('unsaved', '', 1);
+                unsavedData.storage.clear();
+                if (!hasUser) return console.log("== app index: NO user, no need to update state")
+                updateUserState();
+              })
+              .catch(_ => console.log("== app index: Failed unsaved data"));
+          } else {
+            console.log("== app index: No detected unsaved data")
+          }
+        });
+      } else if (!network.current) {
+        network.trigger = true;
+      }
+    });
+    return () => {
+      // i know this is nonsense
+      console.log("== app index: UN-MOUNT");
+      authListenerUnsub();
+      netInfoUnsub();
+    }
+  }, []);
+
+  if (loadingAsset || loadingUser) {
+    return (
+      <AppLoading 
+        startAsync={() => Cache.loadAssetsAsync()}
+        onFinish={() => {
+          setLoadingAsset(false);
+          console.log("== app index: finished loading asset");
+        }}
+        onError={console.log}
+      />
+    )
+  }
+
+  console.log("== app index: initial route", route)
+  return <MainStackScreen initRoute={route}/>
 }
 
-export default class FlappyBallGame extends React.PureComponent implements Game{
-  playerCoords = [50, 200]; // temporary testing
-
-  engine: any;
-  entities: Entities.Game; // all entities (player, floor)
-  paused: boolean; // used in pause button
-  over: boolean; // used in pause button
-
-  constructor(props: object) {
-    super(props);
-    this.paused = false; 
-    this.over = false;
-    this.entities = Entities.get(Matter.get([...this.playerCoords]));
-    this.pauseOrResume = this.pauseOrResume.bind(this);
-    this.onEvent = this.onEvent.bind(this);
-
-    // getWall(this, this.entities.nWall);
-    // this.entities.nWall++;
-  }
-
-  // all side effects here
-  componentDidMount() {
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
-    console.log("componentDidMount!!");
-    Physics.collision(this); // game over
-    Orientation.addChangeListener(this); 
-    GameAppState.addChangeListener(this); // run|stop game engine
-    console.log("--------------------------\n")
-    ////////////////////////////////////////////////////////////
-  }
-
-  componentWillUnmount() {
-    console.log("componentWillUnmount!!")
-    GameAppState.removeChangeListener();
-    Orientation.removeChangeListener();
-  }
-
-  // used in pause button,
-  pauseOrResume() { 
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
-    if (!this.over) {
-      if (!this.paused) {
-        console.log("=======>>>>>>>>>>>>>>>PAUSED<<<<<<<<<<<<<<<<=======")
-        this.engine.stop();
-      } else {
-        console.log("=======>>>>>>>>>>>>>>>RESUME<<<<<<<<<<<<<<<<=======")
-        this.engine.start();
-      }
-    } else {
-      console.log("GAME OVER")
-    }
-    const 
-      lastPlayerX = this.entities.player.body.position.x,
-      lastPlayerY = this.entities.player.body.position.y;
-    console.log("this.over: " + this.over);
-    console.log("this.paused: " + this.paused);
-    console.log("lastPlayer x,y: " + lastPlayerX + ", " + lastPlayerY );
-    console.log("--------------------------");
-    ////////////////////////////////////////////////////////////
-    return false;
-  }
-
-  onEvent(e: EventType) {
-    if (e.type === "stopped") {
-      this.paused = true;
-    } else if (e.type === "started") {
-      this.paused = false;
-    }
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:\n--------------------------");
-    console.log(e);
-    console.log("this.paused " + this.paused);
-    console.log("--------------------------");
-    ////////////////////////////////////////////////////////////
-  }
-
-  render() {
-    ////////////////////////////////////////////////////////////
-    console.log("\nindex.tsx:")
-    console.log("--------------------------");
-    console.log("RENDER()...");
-    console.log("--------------------------\n");
-    ////////////////////////////////////////////////////////////
-    return (
-      <View style={{ flex: 1, }}>
-        
-        <TouchableWithoutFeedback onPress={this.pauseOrResume}>
-          <View style={{ 
-            backgroundColor:"yellow",
-            width: "100%",
-            height: NAVBAR_HEIGHT,
-            top: 0,
-            }}></View>
-        </TouchableWithoutFeedback>
-
-        {/* ------------------------------------------------------------ */}
-        <TouchableWithoutFeedback
-          onPressIn={() => {this.entities.gravity = -0.5;}}
-          onPressOut={() => {this.entities.gravity = 0.5;}}>
-           {/* this view is necessary, because GameEngine return many components
-          and TouchableWithoutFeedback only works with 1 component */}
-          <View style={{ flex: 1 }}> 
-            <GameEngine
-              ref={ (ref) => { this.engine = ref; } }
-              onEvent={ this.onEvent }
-              style={{ flex: 1 }}
-              systems={ [Physics.system] }
-              entities={ this.entities } />
-            <StatusBar hidden />
-          </View>
-        </TouchableWithoutFeedback>
-        {/* ------------------------------------------------------------ */}
-
-      </View>
-    );
-  }
+function updateUserState() {
+  console.log("== app index: Trying to fetch updated user state data");
+  Cache.user.clear();
+  new Promise((resolve, reject) => Cache.user.fetch(resolve, reject))
+    .then(res => {
+      if (!res) return console.log("== app index: Resolve is not valid");
+      else console.log("== app index: Updated data resolve", res)
+      const user = res as any;
+      homeRef()?.safeSetState({ user: {
+        ...homeRef()?.state.user,
+        codeName: user.codeName,
+        record: user.record,
+      }});
+      inventoryRef()?.safeSetState({gold: user.gold});
+      shopRef()?.safeSetState({gold: user.gold});
+      alert("DATA UPDATED", "Offline data was saved");
+      console.log("== app index: Success to fetch updated user data");
+    })
+    .catch(err => console.log("== app index: Error fetching updated user data", err));
 }
